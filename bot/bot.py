@@ -42,8 +42,8 @@ async def send_welcome(message: types.Message, state: FSMContext):
     image_path = os.path.join(os.path.dirname(__file__), "images", 'welcome_image.jpg')
 
     language_buttons = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="English", callback_data="lang_en")],
-        [InlineKeyboardButton(text="Русский", callback_data="lang_ru")]
+        [InlineKeyboardButton(text="English", callback_data="lang_en"),
+            InlineKeyboardButton(text="Русский", callback_data="lang_ru")]
     ])
     if os.path.exists(image_path):
         photo = FSInputFile(image_path)
@@ -57,8 +57,8 @@ async def send_welcome(message: types.Message, state: FSMContext):
 @dp.message(F.text == "/change_lang")
 async def change_language(message: types.Message, state: FSMContext):
     language_buttons = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="English", callback_data="lang_en")],
-        [InlineKeyboardButton(text="Русский", callback_data="lang_ru")],
+        [InlineKeyboardButton(text="English", callback_data="lang_en"),
+            InlineKeyboardButton(text="Русский", callback_data="lang_ru")],
     ])
     await message.answer("Выберите язык / Choose your language:", reply_markup=language_buttons)
     await state.set_state(Form.choosing_language)
@@ -84,21 +84,21 @@ async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
         await bot.send_photo(user_id, photo=photo)
 
     buttons_en = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Riding Extreme 3D", callback_data="riding_extreme_3d")],
-        [InlineKeyboardButton(text="Chain Cube 2048", callback_data="chain_cube_2048")],
-        [InlineKeyboardButton(text="My Clone Army", callback_data="my_clone_army")],
-        [InlineKeyboardButton(text="Train Miner", callback_data="train_miner")],
-        [InlineKeyboardButton(text="Merge Away", callback_data="merge_away")],
-        [InlineKeyboardButton(text="Twerk Race 3D", callback_data="twerk_race_3d")],
+        [InlineKeyboardButton(text="Riding Extreme 3D", callback_data="riding_extreme_3d"),
+            InlineKeyboardButton(text="Chain Cube 2048", callback_data="chain_cube_2048")],
+        [InlineKeyboardButton(text="My Clone Army", callback_data="my_clone_army"),
+           InlineKeyboardButton(text="Train Miner", callback_data="train_miner")],
+        [InlineKeyboardButton(text="Merge Away", callback_data="merge_away"),
+            InlineKeyboardButton(text="Twerk Race 3D", callback_data="twerk_race_3d")],
     ])
 
     buttons_ru = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Riding Extreme 3D", callback_data="riding_extreme_3d")],
-        [InlineKeyboardButton(text="Chain Cube", callback_data="chain_cube_2048")],
-        [InlineKeyboardButton(text="My Clone Army", callback_data="my_clone_army")],
-        [InlineKeyboardButton(text="Train Miner", callback_data="train_miner")],
-        [InlineKeyboardButton(text="Merge Away", callback_data="merge_away")],
-        [InlineKeyboardButton(text="Twerk Race 3D", callback_data="twerk_race_3d")],
+        [InlineKeyboardButton(text="Riding Extreme 3D", callback_data="riding_extreme_3d"),
+            InlineKeyboardButton(text="Chain Cube", callback_data="chain_cube_2048")],
+        [InlineKeyboardButton(text="My Clone Army", callback_data="my_clone_army"),
+            InlineKeyboardButton(text="Train Miner", callback_data="train_miner")],
+        [InlineKeyboardButton(text="Merge Away", callback_data="merge_away"),
+            InlineKeyboardButton(text="Twerk Race 3D", callback_data="twerk_race_3d")],
     ])
 
     buttons = buttons_en if user_language[user_id] == "en" else buttons_ru
