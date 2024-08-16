@@ -172,3 +172,6 @@ proxies.txt
 
 # BackUP
 *.sql
+
+# Images (Temporarily)
+images/
