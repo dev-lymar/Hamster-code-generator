@@ -24,10 +24,12 @@ dp = Dispatcher(storage=storage)
 user_language = {}
 
 
+# Bot states
 class Form(StatesGroup):
     choosing_language = State()
 
 
+# Setting bot commands
 async def set_commands(bot: Bot):
     commands = [
         BotCommand(command="/change_lang", description="Change language / Сменить язык")
@@ -58,12 +60,15 @@ async def change_language(message: types.Message, state: FSMContext):
         [InlineKeyboardButton(text="English", callback_data="lang_en")],
         [InlineKeyboardButton(text="Русский", callback_data="lang_ru")],
     ])
+    await message.answer("Выберите язык / Choose your language:", reply_markup=language_buttons)
+    await state.set_state(Form.choosing_language)
 
 
 # Language selection processing
 @dp.callback_query(F.data.in_({"lang_en", "lang_ru"}))
 async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
     user_id = callback_query.from_user.id
+    image_path = os.path.join(os.path.dirname(__file__), "images", 'start_image.jpg')
 
     await bot.delete_message(chat_id=user_id, message_id=callback_query.message.message_id)
 
@@ -74,19 +79,31 @@ async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
         user_language[user_id] = "ru"
         await bot.send_message(user_id, "Вы выбрали русский язык.")
 
+    if os.path.exists(image_path):
+        photo = FSInputFile(image_path)
+        await bot.send_photo(user_id, photo=photo)
+
     buttons_en = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Button 1", callback_data="button1")],
-        [InlineKeyboardButton(text="Button 2", callback_data="button2")],
+        [InlineKeyboardButton(text="Riding Extreme 3D", callback_data="riding_extreme_3d")],
+        [InlineKeyboardButton(text="Chain Cube 2048", callback_data="chain_cube_2048")],
+        [InlineKeyboardButton(text="My Clone Army", callback_data="my_clone_army")],
+        [InlineKeyboardButton(text="Train Miner", callback_data="train_miner")],
+        [InlineKeyboardButton(text="Merge Away", callback_data="merge_away")],
+        [InlineKeyboardButton(text="Twerk Race 3D", callback_data="twerk_race_3d")],
     ])
 
     buttons_ru = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Кнопка 1", callback_data="button1")],
-        [InlineKeyboardButton(text="Кнопка 2", callback_data="button2")],
+        [InlineKeyboardButton(text="Riding Extreme 3D", callback_data="riding_extreme_3d")],
+        [InlineKeyboardButton(text="Chain Cube", callback_data="chain_cube_2048")],
+        [InlineKeyboardButton(text="My Clone Army", callback_data="my_clone_army")],
+        [InlineKeyboardButton(text="Train Miner", callback_data="train_miner")],
+        [InlineKeyboardButton(text="Merge Away", callback_data="merge_away")],
+        [InlineKeyboardButton(text="Twerk Race 3D", callback_data="twerk_race_3d")],
     ])
 
     buttons = buttons_en if user_language[user_id] == "en" else buttons_ru
-    await bot.send_message(user_id, "Select one of the options below:" if user_language[
-                                                                              user_id] == "en" else "Выберите одну из опций ниже:",
+    await bot.send_message(user_id, "Choose a game:" if user_language[
+                                                                              user_id] == "en" else "Выберите игру:",
                            reply_markup=buttons)
 
     await state.clear()
