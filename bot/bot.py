@@ -44,6 +44,15 @@ async def send_welcome(message: types.Message, state: FSMContext):
     await state.set_state(Form.choosing_language)
 
 
+# Change language button
+@dp.message(F.text == "/change_lang")
+async def change_language(message: types.Message, state: FSMContext):
+    language_buttons = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="English", callback_data="lang_en")],
+        [InlineKeyboardButton(text="Русский", callback_data="lang_ru")],
+    ])
+
+
 # Language selection processing
 @dp.callback_query(F.data.in_({"lang_en", "lang_ru"}))
 async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
