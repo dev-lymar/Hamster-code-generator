@@ -28,6 +28,13 @@ class Form(StatesGroup):
     choosing_language = State()
 
 
+async def set_commands(bot: Bot):
+    commands = [
+        BotCommand(command="/change_lang", description="Change language / Сменить язык")
+    ]
+    await bot.set_my_commands(commands)
+
+
 @dp.message(F.text == "/start")
 async def send_welcome(message: types.Message, state: FSMContext):
     image_path = os.path.join(os.path.dirname(__file__), "images", 'welcome_image.jpg')
@@ -87,6 +94,7 @@ async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
 
 async def main():
     await dp.start_polling(bot)
+    await set_commands(bot)
 
 
 if __name__ == '__main__':
