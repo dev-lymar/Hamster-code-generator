@@ -17,7 +17,7 @@ async def safe_gen(game):
         except Exception as error:
             print(f"Ошибка в игре {game['name']}: {error}")
             print(f"Перезапуск задачи для игры {game['name']}...")
-            await asyncio.sleep(5)  # Delay before restarting
+            await asyncio.sleep(1)  # Delay before restarting
 
 
 def start_game_process(game):
