@@ -6,7 +6,8 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from dotenv import load_dotenv
-from database import create_database_connection, create_table_users, add_user, update_user_language
+from database import (create_database_connection, create_table_users, create_table_logs, add_user, update_user_language,
+                      log_user_action, reset_daily_keys_if_needed)
 
 load_dotenv()
 
@@ -18,9 +19,10 @@ bot = Bot(token=API_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 
-# Connect to the database and create the table if it does not exist
+# Connect to the database and create the tables if they do not exist
 conn = create_database_connection()
 create_table_users(conn)
+create_table_logs(conn)
 
 # Storing the selected language
 user_language = {}
@@ -49,6 +51,12 @@ async def send_welcome(message: types.Message, state: FSMContext):
     username = user.username
     language_code = user.language_code
 
+    # Reset daily keys if needed
+    reset_daily_keys_if_needed(conn, user_id)
+
+    # Log user action
+    log_user_action(conn, user_id, "/start command used")
+
     # Language selection based on the user's language
     if language_code in ["ru", "uk"]:
         selected_language = "ru"
@@ -64,7 +72,7 @@ async def send_welcome(message: types.Message, state: FSMContext):
     await show_game_selection(message, selected_language)
 
 
-# Language selection processing
+# Game selection processing
 async def show_game_selection(message: types.Message, selected_language: str):
     chat_id = message.chat.id
     image_path = os.path.join(os.path.dirname(__file__), "images", 'start_image.jpg')
@@ -88,9 +96,14 @@ async def show_game_selection(message: types.Message, selected_language: str):
     )
 
 
-# Change language button
+# Change language command
 @dp.message(F.text == "/change_lang")
 async def change_language(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+
+    # Log user action
+    log_user_action(conn, user_id, "/change_lang command used")
+
     language_buttons = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="English", callback_data="en"),
          InlineKeyboardButton(text="Русский", callback_data="ru")],
@@ -120,6 +133,9 @@ async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
         chat_id,
         "You have selected English." if selected_language == "en" else "Вы выбрали русский язык."
     )
+
+    # Log user action
+    log_user_action(conn, user_id, f"Language changed to {selected_language}")
 
     # Switching to game selection
     await show_game_selection(callback_query.message, selected_language)

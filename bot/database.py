@@ -1,4 +1,5 @@
 import os
+from datetime import date
 import psycopg2
 
 from dotenv import load_dotenv
@@ -37,6 +38,10 @@ def create_table_users(conn):
             last_name VARCHAR(100),
             username VARCHAR(100),
             language_code VARCHAR(10),
+            is_banned BOOLEAN DEFAULT FALSE,
+            user_status VARCHAR(20) DEFAULT 'free',
+            daily_keys_generated INTEGER DEFAULT 0,
+            last_reset_date DATE DEFAULT CURRENT_DATE,
             last_generated_data TIMESTAMPTZ DEFAULT NOW(),
             total_keys_generated INTEGER DEFAULT 0
         )
@@ -63,5 +68,49 @@ def update_user_language(conn, user_id, language_code):
     cursor.execute('''
         UPDATE users SET language_code = %s WHERE user_id = %s
     ''', (language_code, user_id))
+    conn.commit()
+    cursor.close()
+
+
+# Reset daily keys if needed
+def reset_daily_keys_if_needed(conn, user_id):
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT last_reset_date FROM users WHERE user_id = %s
+    ''', (user_id, ))
+    last_reset_date = cursor.fetchone()[0]
+
+    if last_reset_date != date.today():
+        cursor.execute('''
+            UPDATE users
+            SET daily_keys_generated = 0, last_reset_date = CURRENT_DATE
+            WHERE user_id = %s
+        ''', (user_id,))
+        conn.commit()
+    cursor.close()
+
+
+# Creates the user_logs table if it does not exist.
+def create_table_logs(conn):
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS user_logs (
+            id SERIAL PRIMARY KEY,
+            user_id BIGINT NOT NULL,
+            action TEXT,
+            timestamp TIMESTAMPTZ DEFAULT NOW()
+        )
+    ''')
+    conn.commit()
+    cursor.close()
+
+
+# Log user action
+def log_user_action(conn, user_id, action):
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO user_logs (user_id, action)
+        VALUES (%s, %s)
+    ''', (user_id, action))
     conn.commit()
     cursor.close()
