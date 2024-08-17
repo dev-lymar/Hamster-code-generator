@@ -103,8 +103,15 @@ def reset_daily_keys_if_needed(conn, user_id):
     cursor = conn.cursor()
     cursor.execute('''
         SELECT last_reset_date FROM users WHERE user_id = %s
-    ''', (user_id, ))
-    last_reset_date = cursor.fetchone()[0]
+    ''', (user_id,))
+    result = cursor.fetchone()
+
+    if result is None:
+        # Если пользователь не найден, просто пропускаем (либо можно обработать это как ошибку)
+        cursor.close()
+        return
+
+    last_reset_date = result[0]
 
     if last_reset_date != date.today():
         cursor.execute('''

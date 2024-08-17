@@ -30,13 +30,10 @@ translations_path = os.path.join(os.path.dirname(__file__), 'translations.json')
 with open(translations_path, 'r') as f:
     translations = json.load(f)
 
-# Storing the selected language
-user_language = {}
-
 
 # Get translations
 def get_translation(user_id, key):
-    user_lang = get_user_language(conn, user_id)
+    user_lang = get_user_language(conn, user_id)  # Getting the current language from the database
     return translations.get(user_lang, {}).get(key, key)
 
 
@@ -53,31 +50,7 @@ async def set_commands(bot: Bot):
     await bot.set_my_commands(commands)
 
 
-# Handles all text messages (including checking if the user is banned)
-@dp.message(F.text)
-async def handle_message(message: types.Message, state: FSMContext):
-    user_id = message.from_user.id
-    chat_id = message.chat.id
-
-    # Check if the user is banned
-    if is_user_banned(conn, user_id):
-        # Log user action
-        log_user_action(conn, user_id, "Attempted interaction while banned")
-        # Delete all chat messages
-        await bot.delete_message(chat_id, message.message_id)
-        # Send banned notification
-        image_path = os.path.join(os.path.dirname(__file__), "images", 'banned_image.jpg')
-        if os.path.exists(image_path):
-            photo = FSInputFile(image_path)
-            await bot.send_photo(chat_id, photo=photo, caption=get_translation(conn, user_id, "ban_message"))
-        else:
-            await bot.send_message(chat_id, get_translation(conn, user_id, "ban_message"))
-        return
-
-    # Log user message
-    log_user_action(conn, user_id, f"User message: {message.text}")
-
-
+# Command handler /start
 @dp.message(F.text == "/start")
 async def send_welcome(message: types.Message, state: FSMContext):
     user = message.from_user
@@ -95,22 +68,16 @@ async def send_welcome(message: types.Message, state: FSMContext):
     log_user_action(conn, user_id, "/start command used")
 
     # Language selection based on the user's language
-    if language_code in ["ru", "uk"]:
-        selected_language = "ru"
-    else:
-        selected_language = "en"
+    selected_language = "ru" if language_code in ["ru", "uk"] else "en"
 
     # Save user in DB
     add_user(conn, chat_id, user_id, first_name, last_name, username, selected_language)
 
-    # Set the selected language
-    user_language[user_id] = selected_language
-
-    await show_game_selection(message, selected_language)
+    await display_action_menu(message)
 
 
-# Game selection processing
-async def show_game_selection(message: types.Message, selected_language: str):
+# Displaying the action menu
+async def display_action_menu(message: types.Message):
     user_id = message.from_user.id
     chat_id = message.chat.id
     image_path = os.path.join(os.path.dirname(__file__), "images", 'start_image.jpg')
@@ -119,13 +86,13 @@ async def show_game_selection(message: types.Message, selected_language: str):
         await bot.send_photo(chat_id, photo=photo)
 
     buttons = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=get_translation(conn, user_id, "get_keys"), callback_data="get_keys"),
-         InlineKeyboardButton(text=get_translation(conn, user_id, "check_status"), callback_data="check_status")],
+        [InlineKeyboardButton(text=get_translation(user_id, "get_keys"), callback_data="get_keys"),
+         InlineKeyboardButton(text=get_translation(user_id, "check_status"), callback_data="check_status")],
     ])
 
     await bot.send_message(
         chat_id,
-        get_translation(conn, user_id, "chose_action"),
+        get_translation(user_id, "chose_action"),
         reply_markup=buttons
     )
 
@@ -138,41 +105,77 @@ async def change_language(message: types.Message, state: FSMContext):
     # Log user action
     log_user_action(conn, user_id, "/change_lang command used")
 
+    # Check for a ban before performing any actions
+    if is_user_banned(conn, user_id):
+        await handle_banned_user(message)
+        return
+
     language_buttons = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="English", callback_data="en"),
          InlineKeyboardButton(text="Русский", callback_data="ru")],
     ])
-    await message.answer(get_translation(conn, user_id, "choose_language"), reply_markup=language_buttons)
+    await message.answer(get_translation(user_id, "choose_language"), reply_markup=language_buttons)
     await state.set_state(Form.choosing_language)
 
 
 # Language selection processing
 @dp.callback_query(F.data.in_({"en", "ru"}))
 async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
-    chat_id = callback_query.message.chat.id
     user_id = callback_query.from_user.id
     selected_language = callback_query.data
 
     # Updating the language in the database
     update_user_language(conn, user_id, selected_language)
 
-    # Updating the language in memory
-    user_language[user_id] = selected_language
-
     # Deleting a language selection message
-    await bot.delete_message(chat_id=chat_id, message_id=callback_query.message.message_id)
+    await bot.delete_message(chat_id=callback_query.message.chat.id, message_id=callback_query.message.message_id)
 
     # Sending confirmation and proceeding to game selection
     await bot.send_message(
-        chat_id,
-        get_translation(conn, user_id, "language_selected")
+        callback_query.message.chat.id,
+        get_translation(user_id, "language_selected")
     )
 
     # Log user action
     log_user_action(conn, user_id, f"Language changed to {selected_language}")
 
-    # Switching to game selection
-    await show_game_selection(callback_query.message, selected_language)
+    # Switching to the action menu with updated language
+    await display_action_menu(callback_query.message)
+
+
+# Handler of other messages (including ban check)
+@dp.message(F.text)
+async def handle_message(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    chat_id = message.chat.id
+
+    # Ban check
+    if is_user_banned(conn, user_id):
+        await handle_banned_user(message)
+        return
+
+    # Logging a user's message
+    log_user_action(conn, user_id, f"User message: {message.text}")
+
+    # Response to user post
+    await message.answer(get_translation(user_id, "default_response"))
+
+
+# Handling banned users
+async def handle_banned_user(message: types.Message):
+    user_id = message.from_user.id
+    chat_id = message.chat.id
+
+    # User action logging
+    log_user_action(conn, user_id, "Attempted interaction while banned")
+
+    # Sending a ban notification
+    image_path = os.path.join(os.path.dirname(__file__), "images", 'banned_image.jpg')
+    if os.path.exists(image_path):
+        photo = FSInputFile(image_path)
+        await bot.send_photo(chat_id, photo=photo, caption=get_translation(user_id, "ban_message"))
+    else:
+        await bot.send_message(chat_id, get_translation(user_id, "ban_message"))
 
 
 async def main():

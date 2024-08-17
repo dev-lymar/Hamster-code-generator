@@ -1,20 +1,22 @@
 {
   "en": {
     "welcome_message": "Welcome to the bot!",
-    "ban_message": "You are banned from using this bot!",
-    "chose_action": "Choice of action",
+    "ban_message": "You are banned from using this bot. Contact the administrator!",
+    "chose_action": "Choose an action:",
     "get_keys": "Get Keys",
     "check_status": "Check Status",
     "language_selected": "You have selected English.",
-    "choose_language": "Choose your language"
+    "choose_language": "Choose your language:",
+    "default_response": "Your message has been received."
   },
   "ru": {
     "welcome_message": "Добро пожаловать в бот!",
-    "ban_message": "Вы заблокированы. Дальнейшие действия невозможнны. Свяжитесь с администратором!",
-    "chose_action": "Выберите действие",
+    "ban_message": "Вы заблокированы. Дальнейшие действия невозможны. Свяжитесь с администратором!",
+    "chose_action": "Выберите действие:",
     "get_keys": "Получить ключи",
     "check_status": "Проверить статус",
     "language_selected": "Вы выбрали русский язык.",
-    "choose_language": "Выберите язык"
+    "choose_language": "Выберите язык:",
+    "default_response": "Ваше сообщение получено."
   }
 }
