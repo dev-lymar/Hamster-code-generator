@@ -50,7 +50,22 @@ def create_table_users(conn):
     cursor.close()
 
 
-# Added new user to the database
+# Creates the user_logs table if it does not exist.
+def create_table_logs(conn):
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS user_logs (
+            id SERIAL PRIMARY KEY,
+            user_id BIGINT NOT NULL,
+            action TEXT,
+            timestamp TIMESTAMPTZ DEFAULT NOW()
+        )
+    ''')
+    conn.commit()
+    cursor.close()
+
+
+# Adds new user to the database
 def add_user(conn, chat_id, user_id, first_name, last_name, username, language_code):
     cursor = conn.cursor()
     cursor.execute('''
@@ -62,7 +77,7 @@ def add_user(conn, chat_id, user_id, first_name, last_name, username, language_c
     cursor.close()
 
 
-# Update user language in the database
+# Updates user language in the database
 def update_user_language(conn, user_id, language_code):
     cursor = conn.cursor()
     cursor.execute('''
@@ -72,7 +87,7 @@ def update_user_language(conn, user_id, language_code):
     cursor.close()
 
 
-# Reset daily keys if needed
+# Resets daily keys if needed
 def reset_daily_keys_if_needed(conn, user_id):
     cursor = conn.cursor()
     cursor.execute('''
@@ -90,22 +105,18 @@ def reset_daily_keys_if_needed(conn, user_id):
     cursor.close()
 
 
-# Creates the user_logs table if it does not exist.
-def create_table_logs(conn):
+# Checks if the user is banned
+def is_user_banned(conn, user_id):
     cursor = conn.cursor()
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS user_logs (
-            id SERIAL PRIMARY KEY,
-            user_id BIGINT NOT NULL,
-            action TEXT,
-            timestamp TIMESTAMPTZ DEFAULT NOW()
-        )
-    ''')
-    conn.commit()
+        SELECT is_banned FROM users WHERE user_id = %s
+    ''', (user_id,))
+    result = cursor.fetchone()
     cursor.close()
+    return result[0] if result else False
 
 
-# Log user action
+# Logs user action
 def log_user_action(conn, user_id, action):
     cursor = conn.cursor()
     cursor.execute('''

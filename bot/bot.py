@@ -7,7 +7,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from dotenv import load_dotenv
 from database import (create_database_connection, create_table_users, create_table_logs, add_user, update_user_language,
-                      log_user_action, reset_daily_keys_if_needed)
+                      log_user_action, reset_daily_keys_if_needed, is_user_banned)
 
 load_dotenv()
 
@@ -19,7 +19,7 @@ bot = Bot(token=API_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 
-# Connect to the database and create the tables if they do not exist
+# Connect to the databases and create the tables if it does not exist
 conn = create_database_connection()
 create_table_users(conn)
 create_table_logs(conn)
@@ -39,6 +39,31 @@ async def set_commands(bot: Bot):
         BotCommand(command="/change_lang", description="Change language / Сменить язык")
     ]
     await bot.set_my_commands(commands)
+
+
+# Handles all text messages (including checking if the user is banned)
+@dp.message(F.text)
+async def handle_message(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    chat_id = message.chat.id
+
+    # Check if the user is banned
+    if is_user_banned(conn, user_id):
+        # Log user action
+        log_user_action(conn, user_id, "Attempted interaction while banned")
+        # Delete all chat messages
+        await bot.delete_message(chat_id, message.message_id)
+        # Send banned notification
+        image_path = os.path.join(os.path.dirname(__file__), "images", 'banned_image.jpg')
+        if os.path.exists(image_path):
+            photo = FSInputFile(image_path)
+            await bot.send_photo(chat_id, photo=photo, caption="You are banned from using this bot.")
+        else:
+            await bot.send_message(chat_id, "You are banned from using this bot.")
+        return
+
+    # Log user message
+    log_user_action(conn, user_id, f"User message: {message.text}")
 
 
 @dp.message(F.text == "/start")
@@ -81,12 +106,8 @@ async def show_game_selection(message: types.Message, selected_language: str):
         await bot.send_photo(chat_id, photo=photo)
 
     buttons = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Riding Extreme 3D", callback_data="riding_extreme_3d"),
-         InlineKeyboardButton(text="Chain Cube 2048", callback_data="chain_cube_2048")],
-        [InlineKeyboardButton(text="My Clone Army", callback_data="my_clone_army"),
-         InlineKeyboardButton(text="Train Miner", callback_data="train_miner")],
-        [InlineKeyboardButton(text="Merge Away", callback_data="merge_away"),
-         InlineKeyboardButton(text="Twerk Race 3D", callback_data="twerk_race_3d")],
+        [InlineKeyboardButton(text="Получить ключи", callback_data="get_keys"),
+         InlineKeyboardButton(text="Проверить статус", callback_data="check_status")],
     ])
 
     await bot.send_message(
