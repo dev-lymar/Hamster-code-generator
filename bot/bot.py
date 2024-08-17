@@ -134,7 +134,13 @@ async def change_language(message: types.Message, state: FSMContext):
         [InlineKeyboardButton(text="English", callback_data="en"),
          InlineKeyboardButton(text="Русский", callback_data="ru")],
     ])
-    await message.answer(get_translation(user_id, "choose_language"), reply_markup=language_buttons)
+
+    # Send the message and store its ID in the state
+    lang_message = await message.answer(get_translation(user_id, "choose_language"), reply_markup=language_buttons)
+
+    # Save the IDs of the language message and user's command message
+    await state.update_data(lang_message_id=lang_message.message_id, user_command_message_id=message.message_id)
+
     await state.set_state(Form.choosing_language)
 
 
@@ -154,6 +160,13 @@ async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
     # Log user action
     log_user_action(conn, user_id, f"Language changed to {selected_language}")
 
+    # Deleting the language selection message and the user's command message
+    data = await state.get_data()
+    if "lang_message_id" in data:
+        await bot.delete_message(chat_id=callback_query.message.chat.id, message_id=data["lang_message_id"])
+    if "user_command_message_id" in data:
+        await bot.delete_message(chat_id=callback_query.message.chat.id, message_id=data["user_command_message_id"])
+
     # Sending confirmation and proceeding to game selection
     await bot.send_message(
         callback_query.message.chat.id,
@@ -161,7 +174,6 @@ async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
     )
 
     # Deleting the old action menu (if exists)
-    data = await state.get_data()
     if "last_menu_message_id" in data:
         await bot.delete_message(chat_id=callback_query.message.chat.id, message_id=data["last_menu_message_id"])
 
