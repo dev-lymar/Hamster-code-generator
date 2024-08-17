@@ -15,6 +15,7 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
 API_TOKEN = os.getenv('BOT_TOKEN')
+BOT_ID = int(API_TOKEN.split(':')[0])
 
 bot = Bot(token=API_TOKEN)
 storage = MemoryStorage()
@@ -25,15 +26,27 @@ conn = create_database_connection()
 create_table_users(conn)
 create_table_logs(conn)
 
+
 # Load translations from json
-translations_path = os.path.join(os.path.dirname(__file__), 'translations.json')
-with open(translations_path, 'r') as f:
-    translations = json.load(f)
+def load_translations():
+    translations_path = os.path.join(os.path.dirname(__file__), 'translations.json')
+    if os.path.exists(translations_path):
+        try:
+            with open(translations_path, 'r') as f:
+                return json.load(f)
+        except Exception as e:
+            logging.error(f"Error loading translations: {e}")
+    else:
+        logging.warning("Translations file not found. Using default empty translations.")
+    return {}
+
+
+translations = load_translations()
 
 
 # Get translations
 def get_translation(user_id, key):
-    user_lang = get_user_language(conn, user_id)  # Getting the current language from the database
+    user_lang = get_user_language(conn, user_id)
     return translations.get(user_lang, {}).get(key, key)
 
 
@@ -54,7 +67,7 @@ async def set_commands(bot: Bot):
 @dp.message(F.text == "/start")
 async def send_welcome(message: types.Message, state: FSMContext):
     user = message.from_user
-    user_id = user.id
+    user_id = user.id if user.id != BOT_ID else message.chat.id
     chat_id = message.chat.id
     first_name = user.first_name
     last_name = user.last_name
@@ -73,34 +86,41 @@ async def send_welcome(message: types.Message, state: FSMContext):
     # Save user in DB
     add_user(conn, chat_id, user_id, first_name, last_name, username, selected_language)
 
-    await display_action_menu(message)
+    await display_action_menu(message, state)
 
 
 # Displaying the action menu
-async def display_action_menu(message: types.Message):
-    user_id = message.from_user.id
+async def display_action_menu(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
     chat_id = message.chat.id
+
+    # Obtaining an updated user language
+    user_lang = get_user_language(conn, user_id)
+
     image_path = os.path.join(os.path.dirname(__file__), "images", 'start_image.jpg')
     if os.path.exists(image_path):
         photo = FSInputFile(image_path)
-        await bot.send_photo(chat_id, photo=photo)
+        sent_message = await bot.send_photo(chat_id, photo=photo)
 
     buttons = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=get_translation(user_id, "get_keys"), callback_data="get_keys"),
          InlineKeyboardButton(text=get_translation(user_id, "check_status"), callback_data="check_status")],
     ])
 
-    await bot.send_message(
+    sent_message = await bot.send_message(
         chat_id,
         get_translation(user_id, "chose_action"),
         reply_markup=buttons
     )
 
+    # Save the ID of the last menu message to delete it later
+    await state.update_data(last_menu_message_id=sent_message.message_id)
+
 
 # Change language command
 @dp.message(F.text == "/change_lang")
 async def change_language(message: types.Message, state: FSMContext):
-    user_id = message.from_user.id
+    user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
 
     # Log user action
     log_user_action(conn, user_id, "/change_lang command used")
@@ -121,14 +141,18 @@ async def change_language(message: types.Message, state: FSMContext):
 # Language selection processing
 @dp.callback_query(F.data.in_({"en", "ru"}))
 async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
-    user_id = callback_query.from_user.id
+    user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
     selected_language = callback_query.data
 
     # Updating the language in the database
     update_user_language(conn, user_id, selected_language)
 
-    # Deleting a language selection message
-    await bot.delete_message(chat_id=callback_query.message.chat.id, message_id=callback_query.message.message_id)
+    # Forcibly query the language from the database again
+    new_language = get_user_language(conn, user_id)
+    logging.info(f"Language after update for user {user_id}: {new_language}")
+
+    # Log user action
+    log_user_action(conn, user_id, f"Language changed to {selected_language}")
 
     # Sending confirmation and proceeding to game selection
     await bot.send_message(
@@ -136,18 +160,22 @@ async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
         get_translation(user_id, "language_selected")
     )
 
-    # Log user action
-    log_user_action(conn, user_id, f"Language changed to {selected_language}")
+    # Deleting the old action menu (if exists)
+    data = await state.get_data()
+    if "last_menu_message_id" in data:
+        await bot.delete_message(chat_id=callback_query.message.chat.id, message_id=data["last_menu_message_id"])
 
-    # Switching to the action menu with updated language
-    await display_action_menu(callback_query.message)
+    # Displaying the updated action menu
+    await display_action_menu(callback_query.message, state)
+
+    # Resetting the state
+    await state.clear()
 
 
 # Handler of other messages (including ban check)
 @dp.message(F.text)
 async def handle_message(message: types.Message, state: FSMContext):
-    user_id = message.from_user.id
-    chat_id = message.chat.id
+    user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
 
     # Ban check
     if is_user_banned(conn, user_id):
@@ -163,7 +191,7 @@ async def handle_message(message: types.Message, state: FSMContext):
 
 # Handling banned users
 async def handle_banned_user(message: types.Message):
-    user_id = message.from_user.id
+    user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
     chat_id = message.chat.id
 
     # User action logging
