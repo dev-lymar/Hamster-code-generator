@@ -77,6 +77,17 @@ def add_user(conn, chat_id, user_id, first_name, last_name, username, language_c
     cursor.close()
 
 
+# Get user language
+def get_user_language(conn, user_id):
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT language_code FROM users WHERE user_id = %s
+    ''', (user_id,))
+    result = cursor.fetchone()
+    cursor.close()
+    return result[0] if result else "ru"
+
+
 # Updates user language in the database
 def update_user_language(conn, user_id, language_code):
     cursor = conn.cursor()
