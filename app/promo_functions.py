@@ -46,7 +46,7 @@ class GamePromo:
     def __init__(self, game):
         self.game = game
         self.token = None
-        self.session = aiohttp.ClientSession()  # Create a session once
+        self.session = aiohttp.ClientSession() # Create a session once
 
     async def close_session(self):
         await self.session.close()
@@ -77,9 +77,9 @@ class GamePromo:
             ) as response:
                 data = await response.json()
                 self.token = data['clientToken']
-                print(f"- Токен для игры {self.game['name']} сформирован")
+                print(f"- Токен для игры {self.game['name']} с прокси {proxy['url']} сформирован")
         except Exception as error:
-            print(f"Ошибка при входе клиента для игры {self.game['name']}: {error}")
+            print(f"Ошибка при входе клиента для игры {self.game['name']} с прокси {proxy['url']}: {error}")
             await asyncio.sleep(self.game['base_delay'] * (random.random() / 3 + 1) + 5)
             await self.login_client()
 
@@ -110,9 +110,9 @@ class GamePromo:
                     else:
                         await asyncio.sleep(self.game['base_delay'] * (random.random() / 3 + 1) + 5)
             except Exception as error:
-                print(f"Ошибка при регистрации события для игры {self.game['name']}: {error}")
+                print(f"Ошибка при регистрации события для игры {self.game['name']} с прокси {proxy['url']}: {error}")
                 await asyncio.sleep(5)
-        print(f"- Не удалось зарегистрировать событие для {self.game['name']}, перезапуск")
+        print(f"- Не удалось зарегистрировать событие для {self.game['name']} с прокси {proxy['url']}, перезапуск")
         return False
 
     async def create_code(self):
@@ -133,7 +133,7 @@ class GamePromo:
                 ) as resp:
                     response = await resp.json()
             except Exception as error:
-                print(f"Ошибка при создании кода для игры {self.game['name']}: {error}")
+                print(f"Ошибка при создании кода для игры {self.game['name']} с прокси {proxy['url']}: {error}")
                 await asyncio.sleep(1)
         return response['promoCode']
 
@@ -161,11 +161,11 @@ async def gen(game):
                 conn.commit()
                 print(f"- Промокод {code_data} сгенерирован и сохранен в таблицу {table_name}")
             except Exception as e:
-                print(f"Ошибка при сохранении промокода для игры {game['name']}: {e}")
+                print(f"Ошибка при сохранении промокода для игры {game['name']} с прокси {game['proxy']['url']}: {e}")
             finally:
                 cursor.close()
                 conn.close()
-
-        await asyncio.sleep(1)  # Add a short pause before next generation
+        # Add a short pause before next generation
+        await asyncio.sleep(1)
 
     await promo.close_session()
