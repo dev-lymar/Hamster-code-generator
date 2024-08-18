@@ -8,7 +8,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from dotenv import load_dotenv
 from database import (create_database_connection, create_table_users, create_table_logs, add_user, update_user_language,
-                      log_user_action, reset_daily_keys_if_needed, is_user_banned, get_user_language)
+                      log_user_action, reset_daily_keys_if_needed, is_user_banned, get_user_language, get_oldest_keys)
 
 load_dotenv()
 
@@ -16,7 +16,14 @@ logging.basicConfig(level=logging.INFO)
 
 API_TOKEN = os.getenv('BOT_TOKEN')
 BOT_ID = int(API_TOKEN.split(':')[0])
-
+games = [
+    'Riding Extreme 3D',
+    'Chain Cube 2048',
+    'My Clone Army',
+    'Train Miner',
+    'Merge Away',
+    'Twerk Race 3D'
+]
 bot = Bot(token=API_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
@@ -180,6 +187,28 @@ async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
     await state.clear()
 
 
+# Handling of "get_keys" button pressing
+@dp.callback_query(F.data == "get_keys")
+async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
+    for game in games:
+        keys = get_oldest_keys(conn, game)
+        if keys:
+            response_text = f"Промокоды для *{game}*:\n"
+            for key in keys:
+                response_text += f"`{key[0]}`\n"
+            await bot.send_message(
+                chat_id=callback_query.message.chat.id,
+                text=response_text,
+                parse_mode="MarkdownV2"
+            )
+        else:
+            response_text = f"Для игры *{game}* нет доступных промокодов 😢"
+            await bot.send_message(chat_id=callback_query.message.chat.id, text=response_text, parse_mode="MarkdownV2")
+
+    await callback_query.answer()
+    await display_action_menu(callback_query.message, state)
+
+
 # Handler of other messages (including ban check)
 @dp.message(F.text)
 async def handle_message(message: types.Message, state: FSMContext):
@@ -218,6 +247,8 @@ async def main():
     await dp.start_polling(bot)
     await set_commands(bot)
 
+
 if __name__ == '__main__':
     import asyncio
+
     asyncio.run(main())

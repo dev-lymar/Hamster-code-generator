@@ -1,7 +1,7 @@
 import os
 from datetime import date
 import psycopg2
-from psycopg2 import DatabaseError
+from psycopg2 import DatabaseError, sql
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -137,3 +137,12 @@ def log_user_action(conn, user_id, action):
         VALUES (%s, %s)
     '''
     execute_query(conn, query, (user_id, action))
+
+
+# Getting oldest promocodes for the game
+def get_oldest_keys(conn, game_name, limit=4):
+    table_name = game_name.replace(" ", "_").lower()
+    query = sql.SQL("SELECT promo_code FROM {} ORDER BY created_at ASC LIMIT %s").format(sql.Identifier(table_name))
+    with conn.cursor() as cursor:
+        cursor.execute(query, (limit, ))
+        return cursor.fetchall()
