@@ -146,3 +146,16 @@ def get_oldest_keys(conn, game_name, limit=4):
     with conn.cursor() as cursor:
         cursor.execute(query, (limit, ))
         return cursor.fetchall()
+
+
+# Update key count and time of the last request
+def update_keys_generated(conn, user_id, keys_generated):
+    query = '''
+        UPDATE users
+        SET total_keys_generated = total_keys_generated + %s,
+            daily_keys_generated = daily_keys_generated + %s,
+            last_generated_data = NOW(),
+            last_reset_date = CURRENT_DATE
+        WHERE user_id = %s
+    '''
+    execute_query(conn, query, (keys_generated, keys_generated, user_id))

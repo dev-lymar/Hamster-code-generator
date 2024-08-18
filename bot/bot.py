@@ -8,7 +8,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from dotenv import load_dotenv
 from database import (create_database_connection, create_table_users, create_table_logs, add_user, update_user_language,
-                      log_user_action, reset_daily_keys_if_needed, is_user_banned, get_user_language, get_oldest_keys)
+                      log_user_action, reset_daily_keys_if_needed, is_user_banned, get_user_language, get_oldest_keys,
+                      update_keys_generated)
 
 load_dotenv()
 
@@ -110,8 +111,8 @@ async def display_action_menu(message: types.Message, state: FSMContext):
         sent_message = await bot.send_photo(chat_id, photo=photo)
 
     buttons = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=get_translation(user_id, "get_keys"), callback_data="get_keys"),
-         InlineKeyboardButton(text=get_translation(user_id, "change_status"), callback_data="change_status")],
+        [InlineKeyboardButton(text=get_translation(user_id, "get_keys"), callback_data="get_keys"), ],
+        # InlineKeyboardButton(text=get_translation(user_id, "change_status"), callback_data="change_status")],
     ])
 
     sent_message = await bot.send_message(
@@ -190,10 +191,15 @@ async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
 # Handling of "get_keys" button pressing
 @dp.callback_query(F.data == "get_keys")
 async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
+    user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+
+    total_keys_in_request = 0
+
     for game in games:
         keys = get_oldest_keys(conn, game)
         if keys:
-            response_text = f"Промокоды для *{game}*:\n"
+            total_keys_in_request += len(keys)
+            response_text = f"Ключи для *{game}*:\n"
             for key in keys:
                 response_text += f"`{key[0]}`\n"
             await bot.send_message(
@@ -204,6 +210,9 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
         else:
             response_text = f"Для игры *{game}* нет доступных промокодов 😢"
             await bot.send_message(chat_id=callback_query.message.chat.id, text=response_text, parse_mode="MarkdownV2")
+
+    if total_keys_in_request > 0:
+        update_keys_generated(conn, user_id, total_keys_in_request)
 
     await callback_query.answer()
     await display_action_menu(callback_query.message, state)
