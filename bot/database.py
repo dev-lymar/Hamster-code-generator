@@ -48,13 +48,20 @@ def create_table_users(conn):
             first_name VARCHAR(100),
             last_name VARCHAR(100),
             username VARCHAR(100),
+            registration_date TIMESTAMPTZ DEFAULT NOW(),
             language_code VARCHAR(10),
+            preferred_currency VARCHAR(3),
             is_banned BOOLEAN DEFAULT FALSE,
             user_status VARCHAR(20) DEFAULT 'free',
+            user_role VARCHAR(20) DEFAULT 'user',
+            referral_code VARCHAR(50),
+            referred_by VARCHAR(50),
+            is_subscribed BOOLEAN DEFAULT TRUE,
             daily_keys_generated INTEGER DEFAULT 0,
             last_reset_date DATE DEFAULT CURRENT_DATE,
             last_generated_data TIMESTAMPTZ DEFAULT NOW(),
-            total_keys_generated INTEGER DEFAULT 0
+            total_keys_generated INTEGER DEFAULT 0,
+            notes TEXT
         )
     '''
     execute_query(conn, query)
