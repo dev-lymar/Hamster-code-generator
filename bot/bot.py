@@ -199,7 +199,7 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
         keys = get_oldest_keys(conn, game)
         if keys:
             total_keys_in_request += len(keys)
-            response_text = f"Ключи для *{game}*:\n"
+            response_text = f"{get_translation(user_id, 'keys_for')} *{game}*:\n"
             for key in keys:
                 response_text += f"`{key[0]}`\n"
             await bot.send_message(
@@ -208,7 +208,8 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
                 parse_mode="MarkdownV2"
             )
         else:
-            response_text = f"Для игры *{game}* нет доступных промокодов 😢"
+            response_text = (f"{get_translation(user_id, 'no_keys_for')} *{game}* "
+                             f"{get_translation(user_id, 'no_keys_available')} 😢")
             await bot.send_message(chat_id=callback_query.message.chat.id, text=response_text, parse_mode="MarkdownV2")
 
     if total_keys_in_request > 0:
