@@ -164,8 +164,8 @@ cython_debug/
 # MacOS
 .DS_Store
 
-# File posies
-proxies.txt
+# File poxies
+proxies.py
 
 # DB
 *.db

@@ -1,7 +1,7 @@
 import asyncio
 import multiprocessing
 from promo_functions import create_table_for_game, gen, create_database
-from config import games
+from games import games
 
 
 async def safe_gen(game):
@@ -12,7 +12,7 @@ async def safe_gen(game):
 
     while True:
         try:
-            await gen(game, game['proxy_url'], game['proxy_user'], game['proxy_pass'])
+            await gen(game)
             await asyncio.sleep(1)  # Waiting before the next start
         except Exception as error:
             print(f"Ошибка в игре {game['name']}: {error}")
@@ -21,6 +21,7 @@ async def safe_gen(game):
 
 
 def start_game_process(game):
+    print(f"Запуск процесса для игры {game['name']}")
     asyncio.run(safe_gen(game))
 
 
