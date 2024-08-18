@@ -146,13 +146,22 @@ def log_user_action(conn, user_id, action):
     execute_query(conn, query, (user_id, action))
 
 
-# Getting oldest promocodes for the game
+# Getting oldest keys for the game
 def get_oldest_keys(conn, game_name, limit=4):
     table_name = game_name.replace(" ", "_").lower()
     query = sql.SQL("SELECT promo_code FROM {} ORDER BY created_at ASC LIMIT %s").format(sql.Identifier(table_name))
     with conn.cursor() as cursor:
         cursor.execute(query, (limit, ))
         return cursor.fetchall()
+
+
+# Deleting used keys
+def delete_keys(conn, game_name, keys):
+    table_name = game_name.replace(" ", "_").lower()
+    query = sql.SQL("DELETE FROM {} WHERE promo_code = ANY(%s)").format(sql.Identifier(table_name))
+    with conn.cursor() as cursor:
+        cursor.execute(query, (keys,))
+        conn.commit()
 
 
 # Update key count and time of the last request

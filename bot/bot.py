@@ -10,7 +10,7 @@ from aiogram.fsm.state import StatesGroup, State
 from dotenv import load_dotenv
 from database import (create_database_connection, create_table_users, create_table_logs, add_user, update_user_language,
                       log_user_action, reset_daily_keys_if_needed, is_user_banned, get_user_language, get_oldest_keys,
-                      update_keys_generated)
+                      update_keys_generated, delete_keys)
 
 load_dotenv()
 
@@ -209,9 +209,12 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
         if keys:
             total_keys_in_request += len(keys)
             response_text += f"*{escape_markdown(game)}*:\n"
+            keys_to_delete = []
             for key in keys:
                 response_text += f"`{escape_markdown(key[0])}`\n"
+                keys_to_delete.append(key[0])
             response_text += "\n"
+            delete_keys(conn, game, keys_to_delete)
         else:
             response_text += (f"{escape_markdown(get_translation(user_id, 'no_keys_for'))} *{escape_markdown(game)}* "
                               f"{escape_markdown(get_translation(user_id, 'no_keys_available'))} 😢\n\n")
