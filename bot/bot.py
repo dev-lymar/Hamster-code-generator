@@ -104,7 +104,7 @@ async def display_action_menu(message: types.Message, state: FSMContext):
 
     buttons = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=get_translation(user_id, "get_keys"), callback_data="get_keys"),
-         InlineKeyboardButton(text=get_translation(user_id, "check_status"), callback_data="check_status")],
+         InlineKeyboardButton(text=get_translation(user_id, "change_status"), callback_data="change_status")],
     ])
 
     sent_message = await bot.send_message(
@@ -172,10 +172,6 @@ async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
         callback_query.message.chat.id,
         get_translation(user_id, "language_selected")
     )
-
-    # Deleting the old action menu (if exists)
-    if "last_menu_message_id" in data:
-        await bot.delete_message(chat_id=callback_query.message.chat.id, message_id=data["last_menu_message_id"])
 
     # Displaying the updated action menu
     await display_action_menu(callback_query.message, state)

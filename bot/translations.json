@@ -4,7 +4,7 @@
     "ban_message": "You are banned from using this bot. Contact the administrator!",
     "chose_action": "Choose an action:",
     "get_keys": "Get Keys",
-    "check_status": "Check Status",
+    "change_status": "Change Status",
     "language_selected": "You have selected English.",
     "choose_language": "Choose your language:",
     "default_response": "Your message has been received."
@@ -14,7 +14,7 @@
     "ban_message": "Вы заблокированы. Дальнейшие действия невозможны. Свяжитесь с администратором!",
     "chose_action": "Выберите действие:",
     "get_keys": "Получить ключи",
-    "check_status": "Проверить статус",
+    "change_status": "Изменить статус",
     "language_selected": "Вы выбрали русский язык.",
     "choose_language": "Выберите язык:",
     "default_response": "Ваше сообщение получено."
