@@ -1,5 +1,5 @@
 import asyncio
-from promo_functions import create_table_for_game, gen, create_database
+from game_promo_manager import create_table_for_game, gen, create_database
 from games import games
 
 
