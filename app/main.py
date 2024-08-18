@@ -13,7 +13,6 @@ async def safe_gen(game):
     while True:
         try:
             await gen(game)
-            await asyncio.sleep(1)  # Waiting before the next start
         except Exception as error:
             print(f"Ошибка в игре {game['name']}: {error}")
             print(f"Перезапуск задачи для игры {game['name']}...")

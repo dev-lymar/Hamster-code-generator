@@ -18,7 +18,6 @@ DATABASE_HOST = os.getenv("DATABASE_HOST")
 DATABASE_PORT = os.getenv("DATABASE_PORT")
 
 
-# Connecting to PostgreSQL database
 def create_database():
     conn = psycopg2.connect(
         dbname=DATABASE_NAME,
@@ -30,7 +29,6 @@ def create_database():
     return conn
 
 
-# Creating a table for the game
 def create_table_for_game(conn, game_name):
     table_name = game_name.replace(" ", "_").lower()
     cursor = conn.cursor()
@@ -44,25 +42,30 @@ def create_table_for_game(conn, game_name):
     conn.commit()
 
 
-# Generation of unique client_id
-async def generate_client_id():
-    timestamp = int(time.time() * 1000)
-    random_numbers = ''.join(str(random.randint(0, 9)) for _ in range(19))
-    return f"{timestamp}-{random_numbers}"
+class GamePromo:
+    def __init__(self, game):
+        self.game = game
+        self.token = None
+        self.session = aiohttp.ClientSession()  # Create a session once
 
+    async def close_session(self):
+        await self.session.close()
 
-# Login client
-async def login_client(game):
-    client_id = await generate_client_id()
-    proxy = game['proxy']
+    async def generate_client_id(self):
+        timestamp = int(time.time() * 1000)
+        random_numbers = ''.join(str(random.randint(0, 9)) for _ in range(19))
+        return f"{timestamp}-{random_numbers}"
 
-    async with aiohttp.ClientSession() as session:
+    async def login_client(self):
+        client_id = await self.generate_client_id()
+        proxy = self.game['proxy']
+
         try:
             auth = aiohttp.BasicAuth(proxy['user'], proxy['pass']) if proxy['user'] and proxy['pass'] else None
-            async with session.post(
+            async with self.session.post(
                 'https://api.gamepromo.io/promo/login-client',
                 json={
-                    'appToken': game['app_token'],
+                    'appToken': self.game['app_token'],
                     'clientId': client_id,
                     'clientOrigin': 'deviceid'
                 },
@@ -73,34 +76,31 @@ async def login_client(game):
                 }
             ) as response:
                 data = await response.json()
-                print(f"- Токен для игры {game['name']} сформирован")
-                return data['clientToken']
+                self.token = data['clientToken']
+                print(f"- Токен для игры {self.game['name']} сформирован")
         except Exception as error:
-            print(f"Ошибка при входе клиента для игры {game['name']}: {error}")
-            await asyncio.sleep(game['base_delay'] * (random.random() / 3 + 1) + 5)
-            return await login_client(game)
+            print(f"Ошибка при входе клиента для игры {self.game['name']}: {error}")
+            await asyncio.sleep(self.game['base_delay'] * (random.random() / 3 + 1) + 5)
+            await self.login_client()
 
+    async def register_event(self):
+        event_id = str(uuid.uuid4())
+        proxy = self.game['proxy']
 
-# Event registration
-async def register_event(game, token):
-    event_id = str(uuid.uuid4())
-    proxy = game['proxy']
-
-    async with aiohttp.ClientSession() as session:
-        for attempt in range(game['attempts']):  # Используем количество попыток из game
+        for attempt in range(self.game['attempts']):
             try:
                 auth = aiohttp.BasicAuth(proxy['user'], proxy['pass']) if proxy['user'] and proxy['pass'] else None
-                async with session.post(
+                async with self.session.post(
                     'https://api.gamepromo.io/promo/register-event',
                     json={
-                        'promoId': game['promo_id'],
+                        'promoId': self.game['promo_id'],
                         'eventId': event_id,
                         'eventOrigin': 'undefined'
                     },
                     proxy=proxy['url'],
                     proxy_auth=auth,
                     headers={
-                        'Authorization': f'Bearer {token}',
+                        'Authorization': f'Bearer {self.token}',
                         'Content-Type': 'application/json; charset=utf-8',
                     }
                 ) as response:
@@ -108,52 +108,51 @@ async def register_event(game, token):
                     if data.get('hasCode', False):
                         return True
                     else:
-                        await asyncio.sleep(game['base_delay'] * (random.random() / 3 + 1) + 5)
+                        await asyncio.sleep(self.game['base_delay'] * (random.random() / 3 + 1) + 5)
             except Exception as error:
-                print(f"Ошибка при регистрации события для игры {game['name']}: {error}")
+                print(f"Ошибка при регистрации события для игры {self.game['name']}: {error}")
                 await asyncio.sleep(5)
-        print(f"- Не удалось зарегистрировать событие для {game['name']}, перезапуск")
+        print(f"- Не удалось зарегистрировать событие для {self.game['name']}, перезапуск")
         return False
 
-
-# Creating a promo code
-async def create_code(game, token):
-    proxy = game['proxy']
-
-    async with aiohttp.ClientSession() as session:
+    async def create_code(self):
+        proxy = self.game['proxy']
         response = None
         auth = aiohttp.BasicAuth(proxy['user'], proxy['pass']) if proxy['user'] and proxy['pass'] else None
         while not response or not response.get('promoCode'):
             try:
-                async with session.post(
+                async with self.session.post(
                     'https://api.gamepromo.io/promo/create-code',
-                    json={
-                        'promoId': game['promo_id']
-                    },
+                    json={'promoId': self.game['promo_id']},
                     proxy=proxy['url'],
                     proxy_auth=auth,
                     headers={
-                        'Authorization': f'Bearer {token}',
+                        'Authorization': f'Bearer {self.token}',
                         'Content-Type': 'application/json; charset=utf-8',
                     }
                 ) as resp:
                     response = await resp.json()
             except Exception as error:
-                print(f"Ошибка при создании кода для игры {game['name']}: {error}")
+                print(f"Ошибка при создании кода для игры {self.game['name']}: {error}")
                 await asyncio.sleep(1)
         return response['promoCode']
 
+    async def gen_promo_code(self):
+        await self.login_client()
 
-# Generating and saving a promo code
+        if await self.register_event():
+            return await self.create_code()
+        return None
+
+
 async def gen(game):
     table_name = game['name'].replace(" ", "_").lower()
+    promo = GamePromo(game)
+
     while True:
-        token = await login_client(game)
+        code_data = await promo.gen_promo_code()
 
-        if await register_event(game, token):
-            code_data = await create_code(game, token)
-
-            # Open a new database connection
+        if code_data:
             conn = create_database()
             try:
                 cursor = conn.cursor()
@@ -161,11 +160,12 @@ async def gen(game):
                                (code_data,))
                 conn.commit()
                 print(f"- Промокод {code_data} сгенерирован и сохранен в таблицу {table_name}")
-                break
             except Exception as e:
                 print(f"Ошибка при сохранении промокода для игры {game['name']}: {e}")
             finally:
                 cursor.close()
                 conn.close()
-        else:
-            continue
+
+        await asyncio.sleep(1)  # Add a short pause before next generation
+
+    await promo.close_session()
