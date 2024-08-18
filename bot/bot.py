@@ -1,6 +1,7 @@
 import logging
 import os
 import json
+import re
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile, BotCommand
 from aiogram.fsm.storage.memory import MemoryStorage
@@ -118,11 +119,13 @@ async def display_action_menu(message: types.Message, state: FSMContext):
     sent_message = await bot.send_message(
         chat_id,
         get_translation(user_id, "chose_action"),
-        reply_markup=buttons
+        reply_markup=buttons,
+        parse_mode="MarkdownV2"
     )
 
     # Save the ID of the last menu message to delete it later
-    await state.update_data(last_menu_message_id=sent_message.message_id)
+    await state.update_data(
+        last_menu_message_id=sent_message.message_id)
 
 
 # Change language command
@@ -188,29 +191,36 @@ async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
     await state.clear()
 
 
+# Shields special characters in text for MarkdownV2.
+def escape_markdown(text):
+    return re.sub(r'([_*\[\]()~`>#+\-=|{}.!\\])', r'\\\1', text)
+
+
 # Handling of "get_keys" button pressing
 @dp.callback_query(F.data == "get_keys")
 async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
     user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
 
+    response_text = f"{escape_markdown(get_translation(user_id, 'keys_generated_ok'))}\n\n"
     total_keys_in_request = 0
 
     for game in games:
         keys = get_oldest_keys(conn, game)
         if keys:
             total_keys_in_request += len(keys)
-            response_text = f"{get_translation(user_id, 'keys_for')} *{game}*:\n"
+            response_text += f"*{escape_markdown(game)}*:\n"
             for key in keys:
-                response_text += f"`{key[0]}`\n"
-            await bot.send_message(
-                chat_id=callback_query.message.chat.id,
-                text=response_text,
-                parse_mode="MarkdownV2"
-            )
+                response_text += f"`{escape_markdown(key[0])}`\n"
+            response_text += "\n"
         else:
-            response_text = (f"{get_translation(user_id, 'no_keys_for')} *{game}* "
-                             f"{get_translation(user_id, 'no_keys_available')} 😢")
-            await bot.send_message(chat_id=callback_query.message.chat.id, text=response_text, parse_mode="MarkdownV2")
+            response_text += (f"{escape_markdown(get_translation(user_id, 'no_keys_for'))} *{escape_markdown(game)}* "
+                              f"{escape_markdown(get_translation(user_id, 'no_keys_available'))} 😢\n\n")
+
+    await bot.send_message(
+        chat_id=callback_query.message.chat.id,
+        text=response_text.strip(),
+        parse_mode="MarkdownV2"
+    )
 
     if total_keys_in_request > 0:
         update_keys_generated(conn, user_id, total_keys_in_request)

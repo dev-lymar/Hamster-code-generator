@@ -7,7 +7,10 @@
     "change_status": "Change Status",
     "language_selected": "You have selected English.",
     "choose_language": "Choose your language:",
-    "default_response": "Your message has been received."
+    "default_response": "Your message has been received.",
+    "keys_generated_ok": "Keys have been successfully generated (click on the code to copy):",
+    "no_keys_for": "For the game",
+    "no_keys_available": "no available keys"
   },
   "ru": {
     "welcome_message": "Добро пожаловать в бот!",
@@ -17,6 +20,9 @@
     "change_status": "Изменить статус",
     "language_selected": "Вы выбрали русский язык.",
     "choose_language": "Выберите язык:",
-    "default_response": "Ваше сообщение получено."
+    "default_response": "Ваше сообщение получено.",
+    "keys_generated_ok": "Ключи успешно сгенерированы (нажмите на код, чтобы скопировать):",
+    "no_keys_for": "Для игры",
+    "no_keys_available": "нет доступный ключей"
   }
 }
