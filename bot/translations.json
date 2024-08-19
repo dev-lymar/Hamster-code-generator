@@ -10,7 +10,8 @@
     "default_response": "Your message has been received.",
     "keys_generated_ok": "Keys have been successfully generated (click on the code to copy):",
     "no_keys_for": "For the game",
-    "no_keys_available": "no available keys"
+    "no_keys_available": "no available keys",
+    "daily_limit_reached": "⏱ You have reached the daily limit for key requests. Please try again tomorrow. ⏱"
   },
   "ru": {
     "welcome_message": "Добро пожаловать в бот!",
@@ -23,6 +24,7 @@
     "default_response": "Ваше сообщение получено.",
     "keys_generated_ok": "Ключи успешно сгенерированы (нажмите на код, чтобы скопировать):",
     "no_keys_for": "Для игры",
-    "no_keys_available": "нет доступный ключей"
+    "no_keys_available": "нет доступный ключей",
+    "daily_limit_reached": "⏱ Вы достигли дневного лимита запросов ключей. Испытайте удачу завтра. ⏱"
   }
 }

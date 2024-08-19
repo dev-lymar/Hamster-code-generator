@@ -10,7 +10,7 @@ from aiogram.fsm.state import StatesGroup, State
 from dotenv import load_dotenv
 from database import (create_database_connection, create_table_users, create_table_logs, add_user, update_user_language,
                       log_user_action, reset_daily_keys_if_needed, is_user_banned, get_user_language, get_oldest_keys,
-                      update_keys_generated, delete_keys)
+                      update_keys_generated, delete_keys, check_user_limits)
 
 load_dotenv()
 
@@ -26,6 +26,11 @@ games = [
     'Merge Away',
     'Twerk Race 3D'
 ]
+status_limits = {
+    'free': {'daily_limit': 2, 'interval_minutes': 60},
+    'friend': {'daily_limit': 5, 'interval_minutes': 0},
+    'premium': {'daily_limit': 25, 'interval_minutes': 30}
+}
 bot = Bot(token=API_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
@@ -201,6 +206,29 @@ def escape_markdown(text):
 async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
     user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
 
+    # Checking if the limit has been reached
+    if not check_user_limits(conn, user_id, status_limits):
+        # If the limit is reached, send a picture
+        image_path = os.path.join(os.path.dirname(__file__), "images", 'wait_image.jpg')
+        if os.path.exists(image_path):
+            photo = FSInputFile(image_path)
+            await bot.send_photo(
+                chat_id=callback_query.message.chat.id,
+                photo=photo,
+                caption=get_translation(user_id, "daily_limit_reached")
+            )
+        else:
+            await bot.send_message(
+                chat_id=callback_query.message.chat.id,
+                text=get_translation(user_id, "daily_limit_reached")
+            )
+
+        # Displaying the action menu
+        await display_action_menu(callback_query.message, state)
+        await callback_query.answer()
+        return
+
+    # If the limit is not reached, continue processing
     response_text = f"{escape_markdown(get_translation(user_id, 'keys_generated_ok'))}\n\n"
     total_keys_in_request = 0
 

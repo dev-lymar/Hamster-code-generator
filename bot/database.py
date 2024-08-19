@@ -1,5 +1,5 @@
 import os
-from datetime import date
+from datetime import datetime, timezone
 import psycopg2
 from psycopg2 import DatabaseError, sql
 from dotenv import load_dotenv
@@ -57,9 +57,9 @@ def create_table_users(conn):
             referral_code VARCHAR(50),
             referred_by VARCHAR(50),
             is_subscribed BOOLEAN DEFAULT TRUE,
-            daily_keys_generated INTEGER DEFAULT 0,
+            daily_requests_count INTEGER DEFAULT 0,
             last_reset_date DATE DEFAULT CURRENT_DATE,
-            last_generated_data TIMESTAMPTZ DEFAULT NOW(),
+            last_request_time TIMESTAMPTZ NULL,
             total_keys_generated INTEGER DEFAULT 0,
             notes TEXT
         )
@@ -118,14 +118,16 @@ def reset_daily_keys_if_needed(conn, user_id):
         return
 
     last_reset_date = result[0]
+    current_date = datetime.now(timezone.utc).date()
 
-    if last_reset_date != date.today():
+    if last_reset_date != current_date:
+        # Update the reset date and reset the key counter
         update_query = '''
             UPDATE users
-            SET daily_keys_generated = 0, last_reset_date = CURRENT_DATE
+            SET daily_requests_count = 0, last_reset_date = %s
             WHERE user_id = %s
         '''
-        execute_query(conn, update_query, (user_id,))
+        execute_query(conn, update_query, (current_date, user_id))
 
 
 # Checks if the user is banned
@@ -147,7 +149,7 @@ def log_user_action(conn, user_id, action):
 
 
 # Getting oldest keys for the game
-def get_oldest_keys(conn, game_name, limit=4):
+def get_oldest_keys(conn, game_name, limit=1):
     table_name = game_name.replace(" ", "_").lower()
     query = sql.SQL("SELECT promo_code FROM {} ORDER BY created_at ASC LIMIT %s").format(sql.Identifier(table_name))
     with conn.cursor() as cursor:
@@ -166,12 +168,37 @@ def delete_keys(conn, game_name, keys):
 
 # Update key count and time of the last request
 def update_keys_generated(conn, user_id, keys_generated):
+    current_date = datetime.now(timezone.utc).date()
     query = '''
         UPDATE users
         SET total_keys_generated = total_keys_generated + %s,
-            daily_keys_generated = daily_keys_generated + %s,
-            last_generated_data = NOW(),
-            last_reset_date = CURRENT_DATE
+            daily_requests_count = daily_requests_count + 1,
+            last_request_time = NOW(),
+            last_reset_date = %s
         WHERE user_id = %s
     '''
-    execute_query(conn, query, (keys_generated, keys_generated, user_id))
+    execute_query(conn, query, (keys_generated, current_date, user_id))
+
+
+def check_user_limits(conn, user_id, status_limits):
+    query = '''
+        SELECT user_status, daily_requests_count, last_reset_date
+        FROM users WHERE user_id = %s
+    '''
+    result = execute_query(conn, query, (user_id,), fetch_one=True)
+
+    if result:
+        user_status, daily_requests_count, last_reset_date = result
+        current_date = datetime.now(timezone.utc).date()
+
+        # Update data if a new day has passed
+        if last_reset_date != current_date:
+            reset_daily_keys_if_needed(conn, user_id)
+            daily_requests_count = 0
+
+        # Checking limits by user status
+        limit = status_limits[user_status]['daily_limit']
+        if daily_requests_count >= limit:
+            return False  # The limit has been reached
+    return True  # The limit has not been reached
+
