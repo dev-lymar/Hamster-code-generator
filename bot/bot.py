@@ -77,6 +77,13 @@ async def set_commands(bot: Bot):
     await bot.set_my_commands(commands)
 
 
+# Function that returns the button bar
+def get_action_buttons(user_id):
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=get_translation(user_id, "get_keys"), callback_data="get_keys")],
+    ])
+
+
 # Command handler /start
 @dp.message(F.text == "/start")
 async def send_welcome(message: types.Message, state: FSMContext):
@@ -116,10 +123,8 @@ async def display_action_menu(message: types.Message, state: FSMContext):
         photo = FSInputFile(image_path)
         sent_message = await bot.send_photo(chat_id, photo=photo)
 
-    buttons = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=get_translation(user_id, "get_keys"), callback_data="get_keys"), ],
-        # InlineKeyboardButton(text=get_translation(user_id, "change_status"), callback_data="change_status")],
-    ])
+    # Use the function to get the buttons
+    buttons = get_action_buttons(user_id)
 
     sent_message = await bot.send_message(
         chat_id,
@@ -215,16 +220,17 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
             await bot.send_photo(
                 chat_id=callback_query.message.chat.id,
                 photo=photo,
-                caption=get_translation(user_id, "daily_limit_reached")
+                caption=get_translation(user_id, "daily_limit_reached"),
+                reply_markup=get_action_buttons(user_id)
             )
         else:
             await bot.send_message(
                 chat_id=callback_query.message.chat.id,
-                text=get_translation(user_id, "daily_limit_reached")
+                text=get_translation(user_id, "daily_limit_reached"),
+                reply_markup=get_action_buttons(user_id)
             )
 
         # Displaying the action menu
-        await display_action_menu(callback_query.message, state)
         await callback_query.answer()
         return
 
