@@ -95,9 +95,6 @@ async def send_welcome(message: types.Message, state: FSMContext):
     username = user.username
     language_code = user.language_code
 
-    # Reset daily keys if needed
-    reset_daily_keys_if_needed(conn, user_id)
-
     # Log user action
     log_user_action(conn, user_id, "/start command used")
 
@@ -270,6 +267,9 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
 @dp.message(F.text)
 async def handle_message(message: types.Message, state: FSMContext):
     user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
+
+    # Reset daily keys if needed
+    reset_daily_keys_if_needed(conn, user_id)
 
     # Ban check
     if is_user_banned(conn, user_id):
