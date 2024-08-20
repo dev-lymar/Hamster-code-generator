@@ -114,32 +114,21 @@ async def send_welcome(message: types.Message, state: FSMContext):
         await bot.send_message(chat_id, text=welcome_text, reply_markup=get_action_buttons(user_id))
 
 
-# Displaying the action menu
-async def display_action_menu(message: types.Message, state: FSMContext):
+# Function to send keys menu after generating keys
+async def send_keys_menu(message: types.Message, state: FSMContext):
     user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
     chat_id = message.chat.id
-
-    # Obtaining an updated user language
-    user_lang = get_user_language(conn, user_id)
-
-    image_path = os.path.join(os.path.dirname(__file__), "images", 'start_image.jpg')
-    if os.path.exists(image_path):
-        photo = FSInputFile(image_path)
-        sent_message = await bot.send_photo(chat_id, photo=photo)
 
     # Use the function to get the buttons
     buttons = get_action_buttons(user_id)
 
-    sent_message = await bot.send_message(
-        chat_id,
-        get_translation(user_id, "chose_action"),
-        reply_markup=buttons,
-        parse_mode="MarkdownV2"
-    )
-
-    # Save the ID of the last menu message to delete it later
-    await state.update_data(
-        last_menu_message_id=sent_message.message_id)
+    # Send the key generated image and message
+    image_path = os.path.join(os.path.dirname(__file__), "images", 'key_generated_image.jpg')
+    if os.path.exists(image_path):
+        photo = FSInputFile(image_path)
+        await bot.send_photo(chat_id, photo=photo, caption=get_translation(user_id, "chose_action"), reply_markup=buttons)
+    else:
+        await bot.send_message(chat_id, get_translation(user_id, "chose_action"), reply_markup=buttons)
 
 
 # Change language command
@@ -199,7 +188,7 @@ async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
     )
 
     # Displaying the updated action menu
-    await display_action_menu(callback_query.message, state)
+    await send_keys_menu(callback_query.message, state)
 
     # Resetting the state
     await state.clear()
@@ -234,7 +223,6 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
                 reply_markup=get_action_buttons(user_id)
             )
 
-        # Displaying the action menu
         await callback_query.answer()
         return
 
@@ -267,7 +255,7 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
         update_keys_generated(conn, user_id, total_keys_in_request)
 
     await callback_query.answer()
-    await display_action_menu(callback_query.message, state)
+    await send_keys_menu(callback_query.message, state)
 
 
 # Handler of other messages (including ban check)
