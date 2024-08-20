@@ -3,7 +3,7 @@ import aiohttp
 import time
 import random
 import uuid
-import logging
+import logging.handlers
 import psycopg2
 from psycopg2 import sql
 from dotenv import load_dotenv
@@ -12,12 +12,20 @@ import os
 load_dotenv()
 
 # Configuring logging
+log_directory = "logs"
+if not os.path.exists(log_directory):
+    os.makedirs(log_directory)
+
+log_file = os.path.join(log_directory, 'game_promo.log')
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler("game_promo.log"),
-        logging.StreamHandler()
+        logging.StreamHandler(),
+        logging.handlers.RotatingFileHandler(
+            log_file, maxBytes=10*1024*1024, backupCount=10
+        )
     ]
 )
 
