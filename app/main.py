@@ -1,5 +1,5 @@
 import asyncio
-from game_promo_manager import create_table_for_game, gen, create_database
+from game_promo_manager import create_table_for_game, gen, create_database, logger
 from games import games
 
 
@@ -12,8 +12,8 @@ async def safe_gen(game):
         try:
             await gen(game)
         except Exception as error:
-            print(f"Ошибка в игре {game['name']} с прокси {game['proxy']['url']}: {error}")
-            print(f"Перезапуск задачи для игры {game['name']} с прокси {game['proxy']['url']}...")
+            logger.error(f"Ошибка в игре {game['name']} с прокси {game['proxy']['url']}: {error}")
+            logger.info(f"Перезапуск задачи для игры {game['name']} с прокси {game['proxy']['url']}...")
             await asyncio.sleep(1)
 
 

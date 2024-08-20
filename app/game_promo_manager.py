@@ -3,12 +3,25 @@ import aiohttp
 import time
 import random
 import uuid
+import logging
 import psycopg2
 from psycopg2 import sql
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
+
+# Configuring logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler("game_promo.log"),
+        logging.StreamHandler()
+    ]
+)
+
+logger = logging.getLogger(__name__)
 
 # DB
 DATABASE_NAME = os.getenv("DATABASE_NAME")
@@ -46,7 +59,7 @@ class GamePromo:
     def __init__(self, game):
         self.game = game
         self.token = None
-        self.session = aiohttp.ClientSession() # Create a session once
+        self.session = aiohttp.ClientSession()  # Create a session once
 
     async def close_session(self):
         await self.session.close()
@@ -77,9 +90,9 @@ class GamePromo:
             ) as response:
                 data = await response.json()
                 self.token = data['clientToken']
-                print(f"- Токен для игры {self.game['name']} с прокси {proxy['url']} сформирован")
+                logger.info(f"Токен для игры {self.game['name']} с прокси {proxy['url']} сформирован")
         except Exception as error:
-            print(f"Ошибка при входе клиента для игры {self.game['name']} с прокси {proxy['url']}: {error}")
+            logger.error(f"Ошибка при входе клиента для игры {self.game['name']} с прокси {proxy['url']}: {error}")
             await asyncio.sleep(self.game['base_delay'] * (random.random() / 3 + 1) + 5)
             await self.login_client()
 
@@ -91,29 +104,28 @@ class GamePromo:
             try:
                 auth = aiohttp.BasicAuth(proxy['user'], proxy['pass']) if proxy['user'] and proxy['pass'] else None
                 async with self.session.post(
-                        'https://api.gamepromo.io/promo/register-event',
-                        json={
-                            'promoId': self.game['promo_id'],
-                            'eventId': event_id,
-                            'eventOrigin': 'undefined'
-                        },
-                        proxy=proxy['url'],
-                        proxy_auth=auth,
-                        headers={
-                            'Authorization': f'Bearer {self.token}',
-                            'Content-Type': 'application/json; charset=utf-8',
-                        }
+                    'https://api.gamepromo.io/promo/register-event',
+                    json={
+                        'promoId': self.game['promo_id'],
+                        'eventId': event_id,
+                        'eventOrigin': 'undefined'
+                    },
+                    proxy=proxy['url'],
+                    proxy_auth=auth,
+                    headers={
+                        'Authorization': f'Bearer {self.token}',
+                        'Content-Type': 'application/json; charset=utf-8',
+                    }
                 ) as response:
                     if response.status != 200:
                         error_text = await response.text()
-                        print(
+                        logger.error(
                             f"Ошибка сервера: {response.status} при регистрации события для игры {self.game['name']} с прокси {proxy['url']}")
-                        print(f"Тело ответа: {error_text}")
+                        logger.error(f"Тело ответа: {error_text}")
 
                         if response.status == 400 and "TooManyRegister" in error_text:
-                            # Increased waiting time
-                            delay_time = random.uniform(5, 25)  # Increase the wait to 5-25 seconds
-                            print(
+                            delay_time = random.uniform(5, 25)
+                            logger.warning(
                                 f"Слишком много регистраций для игры {self.game['name']} с прокси {proxy['url']}. Ожидание {delay_time:.2f} секунд перед повторной попыткой.")
                             await asyncio.sleep(delay_time)
                             continue
@@ -124,16 +136,17 @@ class GamePromo:
                     if 'application/json' in response.headers.get('Content-Type'):
                         data = await response.json()
                         if data.get('hasCode', False):
+                            logger.info(f"Событие для игры {self.game['name']} с прокси {proxy['url']} успешно зарегистрировано")
                             return True
                     else:
-                        print(f"Непредвиденный ответ от сервера: {await response.text()}")
+                        logger.warning(f"Непредвиденный ответ от сервера: {await response.text()}")
                         await asyncio.sleep(5)
                         continue
 
             except Exception as error:
-                print(f"Ошибка при регистрации события для игры {self.game['name']} с прокси {proxy['url']}: {error}")
+                logger.error(f"Ошибка при регистрации события для игры {self.game['name']} с прокси {proxy['url']}: {error}")
                 await asyncio.sleep(5)
-        print(f"- Не удалось зарегистрировать событие для {self.game['name']} с прокси {proxy['url']}, перезапуск")
+        logger.error(f"Не удалось зарегистрировать событие для {self.game['name']} с прокси {proxy['url']}, перезапуск")
         return False
 
     async def create_code(self):
@@ -154,8 +167,9 @@ class GamePromo:
                 ) as resp:
                     response = await resp.json()
             except Exception as error:
-                print(f"Ошибка при создании кода для игры {self.game['name']} с прокси {proxy['url']}: {error}")
+                logger.error(f"Ошибка при создании кода для игры {self.game['name']} с прокси {proxy['url']}: {error}")
                 await asyncio.sleep(1)
+        logger.info(f"Промокод для игры {self.game['name']} успешно создан")
         return response['promoCode']
 
     async def gen_promo_code(self):
@@ -180,9 +194,9 @@ async def gen(game):
                 cursor.execute(sql.SQL("INSERT INTO {} (promo_code) VALUES (%s)").format(sql.Identifier(table_name)),
                                (code_data,))
                 conn.commit()
-                print(f"- Промокод {code_data} сгенерирован и сохранен в таблицу {table_name}")
+                logger.info(f"Промокод {code_data} сгенерирован и сохранен в таблицу {table_name}")
             except Exception as e:
-                print(f"Ошибка при сохранении промокода для игры {game['name']} с прокси {game['proxy']['url']}: {e}")
+                logger.error(f"Ошибка при сохранении промокода для игры {game['name']} с прокси {game['proxy']['url']}: {e}")
             finally:
                 cursor.close()
                 conn.close()
