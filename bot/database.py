@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import psycopg2
 from psycopg2 import DatabaseError, sql
 from dotenv import load_dotenv
@@ -202,3 +202,27 @@ def check_user_limits(conn, user_id, status_limits):
             return False  # The limit has been reached
     return True  # The limit has not been reached
 
+
+# Getting the time of the last request and user status
+def get_last_request_time(conn, user_id):
+    query = '''
+        SELECT last_request_time, user_status 
+        FROM users 
+        WHERE user_id = %s
+    '''
+    return execute_query(conn, query, (user_id,), fetch_one=True)
+
+
+# Calculation of the remaining time until the next request
+def get_remaining_time(last_request_time, interval_minutes):
+    if last_request_time is None:
+        return 0, 0  # If no requests have been made yet, return 0
+
+    now = datetime.now(timezone.utc)
+    elapsed_time = now - last_request_time
+    remaining_time = timedelta(minutes=interval_minutes) - elapsed_time
+
+    if remaining_time.total_seconds() > 0:
+        minutes, seconds = divmod(int(remaining_time.total_seconds()), 60)
+        return minutes, seconds
+    return 0, 0  # If the waiting time has elapsed, return 0

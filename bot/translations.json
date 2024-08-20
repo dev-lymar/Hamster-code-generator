@@ -2,7 +2,7 @@
   "en": {
     "welcome_message": "Hello, {first_name}!\nChoose an action to get started",
     "ban_message": "You are banned from using this bot. Contact the administrator!",
-    "chose_action": "Choose an action:",
+    "chose_action": "Choose your next step to continue:",
     "get_keys": "Get Keys",
     "change_status": "Change Status",
     "language_selected": "You have selected English.",
@@ -11,12 +11,13 @@
     "keys_generated_ok": "Keys have been successfully generated (click on the code to copy):",
     "no_keys_for": "For the game",
     "no_keys_available": "no available keys",
+    "wait_time_message": "⏱ Please wait {minutes} minutes {sec} seconds before the next key request.",
     "daily_limit_reached": "⏱ You have reached the daily limit for key requests. Please try again tomorrow. ⏱"
   },
   "ru": {
     "welcome_message": "Привет, {first_name}!\nВыберите действие для начала работы:",
     "ban_message": "Вы заблокированы. Дальнейшие действия невозможны. Свяжитесь с администратором!",
-    "chose_action": "Выберите действие:",
+    "chose_action": "Выберите следующее действие, чтобы продолжить:",
     "get_keys": "Получить ключи",
     "change_status": "Изменить статус",
     "language_selected": "Вы выбрали русский язык.",
@@ -25,6 +26,7 @@
     "keys_generated_ok": "Ключи успешно сгенерированы (нажмите на код, чтобы скопировать):",
     "no_keys_for": "Для игры",
     "no_keys_available": "нет доступный ключей",
+    "wait_time_message": "⏱ Подождите ещё: {minutes} минут {sec} секунд перед следующим запросом ключей.",
     "daily_limit_reached": "⏱ Вы достигли дневного лимита запросов ключей. Испытайте удачу завтра. ⏱"
   }
 }

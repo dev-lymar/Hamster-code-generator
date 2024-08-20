@@ -10,7 +10,7 @@ from aiogram.fsm.state import StatesGroup, State
 from dotenv import load_dotenv
 from database import (create_database_connection, create_table_users, create_table_logs, add_user, update_user_language,
                       log_user_action, reset_daily_keys_if_needed, is_user_banned, get_user_language, get_oldest_keys,
-                      update_keys_generated, delete_keys, check_user_limits)
+                      update_keys_generated, delete_keys, check_user_limits, get_last_request_time, get_remaining_time)
 
 load_dotenv()
 
@@ -204,26 +204,20 @@ def escape_markdown(text):
 async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
     user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
 
-    # Checking if the limit has been reached
+    # Check for reaching the limit of keys per day
     if not check_user_limits(conn, user_id, status_limits):
-        # If the limit is reached, send a picture
-        image_path = os.path.join(os.path.dirname(__file__), "images", 'wait_image.jpg')
-        if os.path.exists(image_path):
-            photo = FSInputFile(image_path)
-            await bot.send_photo(
-                chat_id=callback_query.message.chat.id,
-                photo=photo,
-                caption=get_translation(user_id, "daily_limit_reached"),
-                reply_markup=get_action_buttons(user_id)
-            )
-        else:
-            await bot.send_message(
-                chat_id=callback_query.message.chat.id,
-                text=get_translation(user_id, "daily_limit_reached"),
-                reply_markup=get_action_buttons(user_id)
-            )
+        await send_limit_reached_message(callback_query, user_id)
+        return
 
-        await callback_query.answer()
+    # Checking the time of the last request
+    last_request_time, user_status = get_last_request_time(conn, user_id)
+    interval_minutes = status_limits[user_status]['interval_minutes']
+
+    # Calculation of remaining time
+    minutes, seconds = get_remaining_time(last_request_time, interval_minutes)
+    if minutes > 0 or seconds > 0:
+        wait_message = get_translation(user_id, "wait_time_message").format(minutes=minutes, sec=seconds)
+        await send_wait_time_message(callback_query, user_id, wait_message)
         return
 
     # If the limit is not reached, continue processing
@@ -256,6 +250,44 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
 
     await callback_query.answer()
     await send_keys_menu(callback_query.message, state)
+
+
+# Function for sending a message when the daily limit is reached
+async def send_limit_reached_message(callback_query: types.CallbackQuery, user_id: int):
+    image_path = os.path.join(os.path.dirname(__file__), "images", 'wait_image.jpg')
+    if os.path.exists(image_path):
+        photo = FSInputFile(image_path)
+        await bot.send_photo(
+            chat_id=callback_query.message.chat.id,
+            photo=photo,
+            caption=get_translation(user_id, "daily_limit_reached"),
+            reply_markup=get_action_buttons(user_id)
+        )
+    else:
+        await bot.send_message(
+            chat_id=callback_query.message.chat.id,
+            text=get_translation(user_id, "daily_limit_reached"),
+            reply_markup=get_action_buttons(user_id)
+        )
+
+
+# Function for sending a message to tell you to wait
+async def send_wait_time_message(callback_query: types.CallbackQuery, user_id: int, wait_message: str):
+    image_path = os.path.join(os.path.dirname(__file__), "images", 'wait_image.jpg')
+    if os.path.exists(image_path):
+        photo = FSInputFile(image_path)
+        await bot.send_photo(
+            chat_id=callback_query.message.chat.id,
+            photo=photo,
+            caption=wait_message,
+            reply_markup=get_action_buttons(user_id)
+        )
+    else:
+        await bot.send_message(
+            chat_id=callback_query.message.chat.id,
+            text=wait_message,
+            reply_markup=get_action_buttons(user_id)
+        )
 
 
 # Handler of other messages (including ban check)
