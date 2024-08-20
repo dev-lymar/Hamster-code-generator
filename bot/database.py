@@ -1,7 +1,6 @@
 import os
 from datetime import datetime, timezone, timedelta
-import psycopg2
-from psycopg2 import DatabaseError, sql
+import asyncpg
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -15,31 +14,33 @@ DATABASE_PORT = os.getenv("DATABASE_PORT")
 
 
 # Creates and returns a database connection.
-def create_database_connection():
+async def create_database_connection():
     try:
-        return psycopg2.connect(
-            dbname=DATABASE_NAME,
+        return await asyncpg.connect(
+            database=DATABASE_NAME,
             user=DATABASE_USER,
             password=DATABASE_PASSWORD,
             host=DATABASE_HOST,
             port=DATABASE_PORT
         )
-    except DatabaseError as e:
+    except Exception as e:
         print(f"Error connecting to database: {e}")
         raise
 
 
 # Centralized query execution function
-def execute_query(conn, query, params=None, fetch_one=False):
-    with conn.cursor() as cursor:
-        cursor.execute(query, params)
-        conn.commit()
+async def execute_query(conn, query, params=None, fetch_one=False):
+    async with conn.transaction():
+        if params is None:
+            params = []
         if fetch_one:
-            return cursor.fetchone()
+            return await conn.fetchrow(query, *params)
+        else:
+            return await conn.execute(query, *params)
 
 
 # Creates the users table if it does not exist.
-def create_table_users(conn):
+async def create_table_users(conn):
     query = '''
         CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
@@ -64,11 +65,11 @@ def create_table_users(conn):
             notes TEXT
         )
     '''
-    execute_query(conn, query)
+    await execute_query(conn, query)
 
 
 # Creates the user_logs table if it does not exist.
-def create_table_logs(conn):
+async def create_table_logs(conn):
     query = '''
         CREATE TABLE IF NOT EXISTS user_logs (
             id SERIAL PRIMARY KEY,
@@ -77,123 +78,123 @@ def create_table_logs(conn):
             timestamp TIMESTAMPTZ DEFAULT NOW()
         )
     '''
-    execute_query(conn, query)
+    await execute_query(conn, query)
 
 
 # Adds new user to the database
-def add_user(conn, chat_id, user_id, first_name, last_name, username, language_code):
+async def add_user(conn, chat_id, user_id, first_name, last_name, username, language_code):
     query = '''
         INSERT INTO users (chat_id, user_id, first_name, last_name, username, language_code)
-        VALUES (%s, %s, %s, %s, %s, %s)
+        VALUES ($1, $2, $3, $4, $5, $6)
         ON CONFLICT (user_id) DO NOTHING
     '''
-    execute_query(conn, query, (chat_id, user_id, first_name, last_name, username, language_code))
+    await execute_query(conn, query, (chat_id, user_id, first_name, last_name, username, language_code))
 
 
 # Get user language
-def get_user_language(conn, user_id):
+async def get_user_language(conn, user_id):
     query = '''
-        SELECT language_code FROM users WHERE user_id = %s
+        SELECT language_code FROM users WHERE user_id = $1
     '''
-    result = execute_query(conn, query, (user_id,), fetch_one=True)
-    return result[0] if result else "en"
+    result = await execute_query(conn, query, (user_id,), fetch_one=True)
+    return result['language_code'] if result else "en"
 
 
 # Updates user language in the database
-def update_user_language(conn, user_id, language_code):
+async def update_user_language(conn, user_id, language_code):
     query = '''
-        UPDATE users SET language_code = %s WHERE user_id = %s
+        UPDATE users SET language_code = $1 WHERE user_id = $2
     '''
-    execute_query(conn, query, (language_code, user_id))
+    await execute_query(conn, query, (language_code, user_id))
 
 
 # Resets daily keys if needed
-def reset_daily_keys_if_needed(conn, user_id):
+async def reset_daily_keys_if_needed(conn, user_id):
     query = '''
-        SELECT last_reset_date FROM users WHERE user_id = %s
+        SELECT last_reset_date FROM users WHERE user_id = $1
     '''
-    result = execute_query(conn, query, (user_id,), fetch_one=True)
+    result = await execute_query(conn, query, (user_id,), fetch_one=True)
 
     if result is None:
         return
 
-    last_reset_date = result[0]
+    last_reset_date = result['last_reset_date']
     current_date = datetime.now(timezone.utc).date()
 
     if last_reset_date != current_date:
         # Update the reset date and reset the key counter
         update_query = '''
             UPDATE users
-            SET daily_requests_count = 0, last_reset_date = %s
-            WHERE user_id = %s
+            SET daily_requests_count = 0, last_reset_date = $1
+            WHERE user_id = $2
         '''
-        execute_query(conn, update_query, (current_date, user_id))
+        await execute_query(conn, update_query, (current_date, user_id))
 
 
 # Checks if the user is banned
-def is_user_banned(conn, user_id):
+async def is_user_banned(conn, user_id):
     query = '''
-        SELECT is_banned FROM users WHERE user_id = %s
+        SELECT is_banned FROM users WHERE user_id = $1
     '''
-    result = execute_query(conn, query, (user_id,), fetch_one=True)
-    return result[0] if result else False
+    result = await execute_query(conn, query, (user_id,), fetch_one=True)
+    return result['is_banned'] if result else False
 
 
 # Logs user action
-def log_user_action(conn, user_id, action):
+async def log_user_action(conn, user_id, action):
     query = '''
         INSERT INTO user_logs (user_id, action)
-        VALUES (%s, %s)
+        VALUES ($1, $2)
     '''
-    execute_query(conn, query, (user_id, action))
+    await execute_query(conn, query, (user_id, action))
 
 
 # Getting oldest keys for the game
-def get_oldest_keys(conn, game_name, limit=1):
+async def get_oldest_keys(conn, game_name, limit=1):
     table_name = game_name.replace(" ", "_").lower()
-    query = sql.SQL("SELECT promo_code FROM {} ORDER BY created_at ASC LIMIT %s").format(sql.Identifier(table_name))
-    with conn.cursor() as cursor:
-        cursor.execute(query, (limit, ))
-        return cursor.fetchall()
+    query = f"SELECT promo_code FROM {table_name} ORDER BY created_at ASC LIMIT $1"
+    result = await conn.fetch(query, limit)
+    return result
 
 
 # Deleting used keys
-def delete_keys(conn, game_name, keys):
+async def delete_keys(conn, game_name, keys):
     table_name = game_name.replace(" ", "_").lower()
-    query = sql.SQL("DELETE FROM {} WHERE promo_code = ANY(%s)").format(sql.Identifier(table_name))
-    with conn.cursor() as cursor:
-        cursor.execute(query, (keys,))
-        conn.commit()
+    query = f"DELETE FROM {table_name} WHERE promo_code = ANY($1)"
+    await conn.execute(query, keys)
 
 
 # Update key count and time of the last request
-def update_keys_generated(conn, user_id, keys_generated):
+async def update_keys_generated(conn, user_id, keys_generated):
     current_date = datetime.now(timezone.utc).date()
     query = '''
         UPDATE users
-        SET total_keys_generated = total_keys_generated + %s,
+        SET total_keys_generated = total_keys_generated + $1,
             daily_requests_count = daily_requests_count + 1,
             last_request_time = NOW(),
-            last_reset_date = %s
-        WHERE user_id = %s
+            last_reset_date = $2
+        WHERE user_id = $3
     '''
-    execute_query(conn, query, (keys_generated, current_date, user_id))
+    await execute_query(conn, query, (keys_generated, current_date, user_id))
 
 
-def check_user_limits(conn, user_id, status_limits):
+# Check user limits
+async def check_user_limits(conn, user_id, status_limits):
     query = '''
         SELECT user_status, daily_requests_count, last_reset_date
-        FROM users WHERE user_id = %s
+        FROM users WHERE user_id = $1
     '''
-    result = execute_query(conn, query, (user_id,), fetch_one=True)
+    result = await execute_query(conn, query, (user_id,), fetch_one=True)
 
     if result:
-        user_status, daily_requests_count, last_reset_date = result
+        user_status = result['user_status']
+        daily_requests_count = result['daily_requests_count']
+        last_reset_date = result['last_reset_date']
         current_date = datetime.now(timezone.utc).date()
 
         # Update data if a new day has passed
         if last_reset_date != current_date:
-            reset_daily_keys_if_needed(conn, user_id)
+            await reset_daily_keys_if_needed(conn, user_id)
             daily_requests_count = 0
 
         # Checking limits by user status
@@ -204,13 +205,13 @@ def check_user_limits(conn, user_id, status_limits):
 
 
 # Getting the time of the last request and user status
-def get_last_request_time(conn, user_id):
+async def get_last_request_time(conn, user_id):
     query = '''
         SELECT last_request_time, user_status 
         FROM users 
-        WHERE user_id = %s
+        WHERE user_id = $1
     '''
-    return execute_query(conn, query, (user_id,), fetch_one=True)
+    return await execute_query(conn, query, (user_id,), fetch_one=True)
 
 
 # Calculation of the remaining time until the next request
