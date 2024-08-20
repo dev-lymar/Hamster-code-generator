@@ -91,24 +91,45 @@ class GamePromo:
             try:
                 auth = aiohttp.BasicAuth(proxy['user'], proxy['pass']) if proxy['user'] and proxy['pass'] else None
                 async with self.session.post(
-                    'https://api.gamepromo.io/promo/register-event',
-                    json={
-                        'promoId': self.game['promo_id'],
-                        'eventId': event_id,
-                        'eventOrigin': 'undefined'
-                    },
-                    proxy=proxy['url'],
-                    proxy_auth=auth,
-                    headers={
-                        'Authorization': f'Bearer {self.token}',
-                        'Content-Type': 'application/json; charset=utf-8',
-                    }
+                        'https://api.gamepromo.io/promo/register-event',
+                        json={
+                            'promoId': self.game['promo_id'],
+                            'eventId': event_id,
+                            'eventOrigin': 'undefined'
+                        },
+                        proxy=proxy['url'],
+                        proxy_auth=auth,
+                        headers={
+                            'Authorization': f'Bearer {self.token}',
+                            'Content-Type': 'application/json; charset=utf-8',
+                        }
                 ) as response:
-                    data = await response.json()
-                    if data.get('hasCode', False):
-                        return True
+                    if response.status != 200:
+                        error_text = await response.text()
+                        print(
+                            f"Ошибка сервера: {response.status} при регистрации события для игры {self.game['name']} с прокси {proxy['url']}")
+                        print(f"Тело ответа: {error_text}")
+
+                        if response.status == 400 and "TooManyRegister" in error_text:
+                            # Increased waiting time
+                            delay_time = random.uniform(5, 25)  # Increase the wait to 5-25 seconds
+                            print(
+                                f"Слишком много регистраций для игры {self.game['name']} с прокси {proxy['url']}. Ожидание {delay_time:.2f} секунд перед повторной попыткой.")
+                            await asyncio.sleep(delay_time)
+                            continue
+
+                        await asyncio.sleep(5)
+                        continue
+
+                    if 'application/json' in response.headers.get('Content-Type'):
+                        data = await response.json()
+                        if data.get('hasCode', False):
+                            return True
                     else:
-                        await asyncio.sleep(self.game['base_delay'] * (random.random() / 3 + 1) + 5)
+                        print(f"Непредвиденный ответ от сервера: {await response.text()}")
+                        await asyncio.sleep(5)
+                        continue
+
             except Exception as error:
                 print(f"Ошибка при регистрации события для игры {self.game['name']} с прокси {proxy['url']}: {error}")
                 await asyncio.sleep(5)
