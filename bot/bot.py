@@ -1,6 +1,7 @@
 import logging
 import os
 import json
+import random
 import re
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile, BotCommand
@@ -112,13 +113,25 @@ async def send_welcome(message: types.Message, state: FSMContext):
         # Forming the greeting text
         welcome_text = translation.format(first_name=first_name)
 
-        image_path = os.path.join(os.path.dirname(__file__), "images", 'welcome_image.jpg')
-        if os.path.exists(image_path):
-            photo = FSInputFile(image_path)
-            await bot.send_photo(chat_id, photo=photo, caption=welcome_text,
-                                 reply_markup=await get_action_buttons(conn, user_id))
-        else:
-            await bot.send_message(chat_id, text=welcome_text, reply_markup=await get_action_buttons(conn, user_id))
+        # Check if the directory exists and contains files
+        image_dir = os.path.join(os.path.dirname(__file__), "images", "welcome")
+        if os.path.exists(image_dir) and os.path.isdir(image_dir):
+            image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
+            if image_files:
+                random_image = random.choice(image_files)
+                image_path = os.path.join(image_dir, random_image)
+
+                photo = FSInputFile(image_path)
+                await bot.send_photo(
+                    chat_id,
+                    photo=photo,
+                    caption=welcome_text,
+                    reply_markup=await get_action_buttons(conn, user_id)
+                )
+                return
+
+        # If no valid image is found or the directory doesn't exist, send a message without photo
+        await bot.send_message(chat_id, text=welcome_text, reply_markup=await get_action_buttons(conn, user_id))
     finally:
         await conn.close()
 
