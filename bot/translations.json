@@ -1,6 +1,6 @@
 {
   "en": {
-    "welcome_message": "Welcome to the bot!",
+    "welcome_message": "Hello, {first_name}!\nChoose an action to get started",
     "ban_message": "You are banned from using this bot. Contact the administrator!",
     "chose_action": "Choose an action:",
     "get_keys": "Get Keys",
@@ -14,7 +14,7 @@
     "daily_limit_reached": "⏱ You have reached the daily limit for key requests. Please try again tomorrow. ⏱"
   },
   "ru": {
-    "welcome_message": "Добро пожаловать в бот!",
+    "welcome_message": "Привет, {first_name}!\nВыберите действие для начала работы:",
     "ban_message": "Вы заблокированы. Дальнейшие действия невозможны. Свяжитесь с администратором!",
     "chose_action": "Выберите действие:",
     "get_keys": "Получить ключи",

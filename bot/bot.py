@@ -104,7 +104,14 @@ async def send_welcome(message: types.Message, state: FSMContext):
     # Save user in DB
     add_user(conn, chat_id, user_id, first_name, last_name, username, selected_language)
 
-    await display_action_menu(message, state)
+    # Sending welcome message
+    welcome_text = get_translation(user_id, "welcome_message").format(first_name=first_name)
+    image_path = os.path.join(os.path.dirname(__file__), "images", 'welcome_image.jpg')
+    if os.path.exists(image_path):
+        photo = FSInputFile(image_path)
+        await bot.send_photo(chat_id, photo=photo, caption=welcome_text, reply_markup=get_action_buttons(user_id))
+    else:
+        await bot.send_message(chat_id, text=welcome_text, reply_markup=get_action_buttons(user_id))
 
 
 # Displaying the action menu
