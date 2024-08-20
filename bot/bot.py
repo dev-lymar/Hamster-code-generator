@@ -146,18 +146,22 @@ async def send_keys_menu(message: types.Message, state: FSMContext):
         # Use the function to get the buttons
         buttons = await get_action_buttons(conn, user_id)
 
-        # Send the key generated image and message
-        image_path = os.path.join(os.path.dirname(__file__), "images", 'key_generated_image.jpg')
-        if os.path.exists(image_path):
-            photo = FSInputFile(image_path)
-            await bot.send_photo(
-                chat_id,
-                photo=photo,
-                caption=await get_translation(conn, user_id, "chose_action"),
-                reply_markup=buttons
-            )
-        else:
-            await bot.send_message(chat_id, await get_translation(conn, user_id, "chose_action"), reply_markup=buttons)
+        # Check if the directory exists and contains files
+        image_dir = os.path.join(os.path.dirname(__file__), "images", "key_generated")
+        if os.path.exists(image_dir) and os.path.isdir(image_dir):
+            image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
+            if image_files:
+                random_image = random.choice(image_files)
+                image_path = os.path.join(image_dir, random_image)
+                photo = FSInputFile(image_path)
+                await bot.send_photo(
+                    chat_id,
+                    photo=photo,
+                    caption=await get_translation(conn, user_id, "chose_action"),
+                    reply_markup=buttons
+                )
+                return
+        await bot.send_message(chat_id, await get_translation(conn, user_id, "chose_action"), reply_markup=buttons)
     finally:
         await conn.close()
 
@@ -319,21 +323,26 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
 async def send_limit_reached_message(callback_query: types.CallbackQuery, user_id: int):
     conn = await create_database_connection()
     try:
-        image_path = os.path.join(os.path.dirname(__file__), "images", 'wait_image.jpg')
-        if os.path.exists(image_path):
-            photo = FSInputFile(image_path)
-            await bot.send_photo(
-                chat_id=callback_query.message.chat.id,
-                photo=photo,
-                caption=await get_translation(conn, user_id, "daily_limit_reached"),
-                reply_markup=await get_action_buttons(conn, user_id)
-            )
-        else:
-            await bot.send_message(
-                chat_id=callback_query.message.chat.id,
-                text=await get_translation(conn, user_id, "daily_limit_reached"),
-                reply_markup=await get_action_buttons(conn, user_id)
-            )
+        image_dir = os.path.join(os.path.dirname(__file__), "images", "wait")
+        if os.path.exists(image_dir) and os.path.isdir(image_dir):
+            image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
+            if image_files:
+                random_image = random.choice(image_files)
+                image_path = os.path.join(image_dir, random_image)
+
+                photo = FSInputFile(image_path)
+                await bot.send_photo(
+                    chat_id=callback_query.message.chat.id,
+                    photo=photo,
+                    caption=await get_translation(conn, user_id, "daily_limit_reached"),
+                    reply_markup=await get_action_buttons(conn, user_id)
+                )
+                return
+        await bot.send_message(
+            chat_id=callback_query.message.chat.id,
+            text=await get_translation(conn, user_id, "daily_limit_reached"),
+            reply_markup=await get_action_buttons(conn, user_id)
+        )
     finally:
         await conn.close()
 
@@ -342,21 +351,26 @@ async def send_limit_reached_message(callback_query: types.CallbackQuery, user_i
 async def send_wait_time_message(callback_query: types.CallbackQuery, user_id: int, wait_message: str):
     conn = await create_database_connection()
     try:
-        image_path = os.path.join(os.path.dirname(__file__), "images", 'wait_image.jpg')
-        if os.path.exists(image_path):
-            photo = FSInputFile(image_path)
-            await bot.send_photo(
-                chat_id=callback_query.message.chat.id,
-                photo=photo,
-                caption=wait_message,
-                reply_markup=await get_action_buttons(conn, user_id)
-            )
-        else:
-            await bot.send_message(
-                chat_id=callback_query.message.chat.id,
-                text=wait_message,
-                reply_markup=await get_action_buttons(conn, user_id)
-            )
+        image_dir = os.path.join(os.path.dirname(__file__), "images", "welcome")
+        if os.path.exists(image_dir) and os.path.isdir(image_dir):
+            image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
+            if image_files:
+                random_image = random.choice(image_files)
+                image_path = os.path.join(image_dir, random_image)
+
+                photo = FSInputFile(image_path)
+                await bot.send_photo(
+                    chat_id=callback_query.message.chat.id,
+                    photo=photo,
+                    caption=wait_message,
+                    reply_markup=await get_action_buttons(conn, user_id)
+                )
+                return
+        await bot.send_message(
+            chat_id=callback_query.message.chat.id,
+            text=wait_message,
+            reply_markup=await get_action_buttons(conn, user_id)
+        )
     finally:
         await conn.close()
 
@@ -401,12 +415,21 @@ async def handle_banned_user(message: types.Message):
         await log_user_action(conn, user_id, "Attempted interaction while banned")
 
         # Sending a ban notification
-        image_path = os.path.join(os.path.dirname(__file__), "images", 'banned_image.jpg')
-        if os.path.exists(image_path):
-            photo = FSInputFile(image_path)
-            await bot.send_photo(chat_id, photo=photo, caption=await get_translation(conn, user_id, "ban_message"))
-        else:
-            await bot.send_message(chat_id, await get_translation(conn, user_id, "ban_message"))
+        image_dir = os.path.join(os.path.dirname(__file__), "images", "welcome")
+        if os.path.exists(image_dir) and os.path.isdir(image_dir):
+            image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
+            if image_files:
+                random_image = random.choice(image_files)
+                image_path = os.path.join(image_dir, random_image)
+
+                photo = FSInputFile(image_path)
+                await bot.send_photo(
+                    chat_id,
+                    photo=photo,
+                    caption=await get_translation(conn, user_id, "ban_message")
+                )
+                return
+        await bot.send_message(chat_id, await get_translation(conn, user_id, "ban_message"))
     finally:
         await conn.close()
 
