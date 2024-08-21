@@ -20,7 +20,7 @@ logging.basicConfig(level=logging.INFO)
 API_TOKEN = os.getenv('BOT_TOKEN')
 BOT_ID = int(API_TOKEN.split(':')[0])
 games = [
-    'Riding Extreme 3D',
+    'Bike Ride 3D',
     'Chain Cube 2048',
     'My Clone Army',
     'Train Miner',
@@ -29,8 +29,8 @@ games = [
     'Polysphere'
 ]
 status_limits = {
-    'free': {'daily_limit': 4, 'interval_minutes': 30},
-    'friend': {'daily_limit': 8, 'interval_minutes': 20},
+    'free': {'daily_limit': 5, 'interval_minutes': 30},
+    'friend': {'daily_limit': 10, 'interval_minutes': 20},
     'premium': {'daily_limit': 25, 'interval_minutes': 10}
 }
 bot = Bot(token=API_TOKEN)

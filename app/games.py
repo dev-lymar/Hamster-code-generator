@@ -3,7 +3,7 @@ from proxies import proxies
 # Basic configuration of games and proxies
 game_configs = [
     {
-        'name': 'Riding Extreme 3D',
+        'name': 'Bike Ride 3D',
         'app_token': 'd28721be-fd2d-4b45-869e-9f253b554e50',
         'promo_id': '43e35910-c168-4634-ad4f-52fd764a843f',
         'base_delay': 20,
