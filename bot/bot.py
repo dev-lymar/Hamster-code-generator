@@ -25,12 +25,13 @@ games = [
     'My Clone Army',
     'Train Miner',
     'Merge Away',
-    'Twerk Race 3D'
+    'Twerk Race 3D',
+    'Polysphere'
 ]
 status_limits = {
-    'free': {'daily_limit': 2, 'interval_minutes': 60},
-    'friend': {'daily_limit': 5, 'interval_minutes': 0},
-    'premium': {'daily_limit': 25, 'interval_minutes': 30}
+    'free': {'daily_limit': 4, 'interval_minutes': 30},
+    'friend': {'daily_limit': 8, 'interval_minutes': 20},
+    'premium': {'daily_limit': 25, 'interval_minutes': 10}
 }
 bot = Bot(token=API_TOKEN)
 storage = MemoryStorage()

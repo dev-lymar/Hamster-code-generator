@@ -150,7 +150,7 @@ async def log_user_action(conn, user_id, action):
 
 
 # Getting oldest keys for the game
-async def get_oldest_keys(conn, game_name, limit=1):
+async def get_oldest_keys(conn, game_name, limit=4):
     table_name = game_name.replace(" ", "_").lower()
     query = f"SELECT promo_code FROM {table_name} ORDER BY created_at ASC LIMIT $1"
     result = await conn.fetch(query, limit)
