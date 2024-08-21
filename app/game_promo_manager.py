@@ -101,7 +101,7 @@ class GamePromo:
                 logger.info(f"Токен для игры {self.game['name']} с прокси {proxy['url']} сформирован")
         except Exception as error:
             logger.error(f"Ошибка при входе клиента для игры {self.game['name']} с прокси {proxy['url']}: {error}")
-            await asyncio.sleep(self.game['base_delay'] * (random.random() / 3 + 1) + 5)
+            await asyncio.sleep(self.game['base_delay'] + random.uniform(0.1, 3) + 5)
             await self.login_client()
 
     async def register_event(self):
@@ -132,13 +132,13 @@ class GamePromo:
                         logger.error(f"Тело ответа: {error_text}")
 
                         if response.status == 400 and "TooManyRegister" in error_text:
-                            delay_time = random.uniform(5, 25)
+                            delay_time = self.game['base_delay'] + random.uniform(5, 25) + random.uniform(1, 3)
                             logger.warning(
                                 f"Слишком много регистраций для игры {self.game['name']} с прокси {proxy['url']}. Ожидание {delay_time:.2f} секунд перед повторной попыткой.")
                             await asyncio.sleep(delay_time)
                             continue
 
-                        await asyncio.sleep(5)
+                        await asyncio.sleep(random.uniform(3, 6))
                         continue
 
                     if 'application/json' in response.headers.get('Content-Type'):
@@ -176,7 +176,7 @@ class GamePromo:
                     response = await resp.json()
             except Exception as error:
                 logger.error(f"Ошибка при создании кода для игры {self.game['name']} с прокси {proxy['url']}: {error}")
-                await asyncio.sleep(1)
+                await asyncio.sleep(random.uniform(1, 3.5))
         logger.info(f"Промокод для игры {self.game['name']} успешно создан")
         return response['promoCode']
 
