@@ -8,6 +8,7 @@ import psycopg2
 from psycopg2 import sql
 from dotenv import load_dotenv
 import os
+from urllib.parse import urlparse
 
 load_dotenv()
 
@@ -24,7 +25,7 @@ logging.basicConfig(
     handlers=[
         logging.StreamHandler(),
         logging.handlers.RotatingFileHandler(
-            log_file, maxBytes=10*1024*1024, backupCount=10
+            log_file, maxBytes=10*1024*1024, backupCount=5
         )
     ]
 )
@@ -81,26 +82,31 @@ class GamePromo:
         client_id = await self.generate_client_id()
         proxy = self.game['proxy']
 
+        # Parsing URL to extract the login and password
+        parsed_url = urlparse(proxy)
+        username = parsed_url.username
+        password = parsed_url.password
+
         try:
-            auth = aiohttp.BasicAuth(proxy['user'], proxy['pass']) if proxy['user'] and proxy['pass'] else None
+            auth = aiohttp.BasicAuth(username, password) if username and password else None
             async with self.session.post(
-                'https://api.gamepromo.io/promo/login-client',
-                json={
-                    'appToken': self.game['app_token'],
-                    'clientId': client_id,
-                    'clientOrigin': 'deviceid'
-                },
-                proxy=proxy['url'],
-                proxy_auth=auth,
-                headers={
-                    'Content-Type': 'application/json; charset=utf-8',
-                }
+                    'https://api.gamepromo.io/promo/login-client',
+                    json={
+                        'appToken': self.game['app_token'],
+                        'clientId': client_id,
+                        'clientOrigin': 'deviceid'
+                    },
+                    proxy=proxy,
+                    proxy_auth=auth,
+                    headers={
+                        'Content-Type': 'application/json; charset=utf-8',
+                    }
             ) as response:
                 data = await response.json()
                 self.token = data['clientToken']
-                logger.info(f"Токен для игры {self.game['name']} с прокси {proxy['url']} сформирован")
+                logger.info(f"Token: {self.game['name']} proxy: {proxy} generated")
         except Exception as error:
-            logger.error(f"Ошибка при входе клиента для игры {self.game['name']} с прокси {proxy['url']}: {error}")
+            logger.error(f"Client login error {self.game['name']} proxy: {proxy}: {error}")
             await asyncio.sleep(self.game['base_delay'] + random.uniform(0.1, 3) + 5)
             await self.login_client()
 
@@ -110,31 +116,45 @@ class GamePromo:
 
         for attempt in range(self.game['attempts']):
             try:
-                auth = aiohttp.BasicAuth(proxy['user'], proxy['pass']) if proxy['user'] and proxy['pass'] else None
+                parsed_url = urlparse(proxy)
+                username = parsed_url.username
+                password = parsed_url.password
+                ip = parsed_url.hostname
+                port = parsed_url.port
+                auth = aiohttp.BasicAuth(username, password) if username and password else None
                 async with self.session.post(
-                    'https://api.gamepromo.io/promo/register-event',
-                    json={
-                        'promoId': self.game['promo_id'],
-                        'eventId': event_id,
-                        'eventOrigin': 'undefined'
-                    },
-                    proxy=proxy['url'],
-                    proxy_auth=auth,
-                    headers={
-                        'Authorization': f'Bearer {self.token}',
-                        'Content-Type': 'application/json; charset=utf-8',
-                    }
+                        'https://api.gamepromo.io/promo/register-event',
+                        json={
+                            'promoId': self.game['promo_id'],
+                            'eventId': event_id,
+                            'eventOrigin': 'undefined'
+                        },
+                        proxy=proxy,
+                        proxy_auth=auth,
+                        headers={
+                            'Authorization': f'Bearer {self.token}',
+                            'Content-Type': 'application/json; charset=utf-8',
+                        }
                 ) as response:
+                    # Check if the response is HTML
+                    if 'text/html' in response.headers.get('Content-Type', ''):
+                        error_text = await response.text()
+                        logger.error(
+                            f"Server Error: {response.status} - {self.game['name']} proxy IP: {ip}, Port: {port} - Unexpected HTML response")
+                        logger.error(
+                            f"HTML Response: {error_text[:500]}...")
+                        continue  # Let's move on to the next attempt
+
                     if response.status != 200:
                         error_text = await response.text()
                         logger.error(
-                            f"Ошибка сервера: {response.status} при регистрации события для игры {self.game['name']} с прокси {proxy['url']}")
-                        logger.error(f"Тело ответа: {error_text}")
+                            f"Server Error: {response.status} - {self.game['name']} proxy IP: {ip}, Port: {port}")
+                        logger.error(f"Response body: {error_text}")
 
                         if response.status == 400 and "TooManyRegister" in error_text:
                             delay_time = self.game['base_delay'] + random.uniform(5, 25) + random.uniform(1, 3)
                             logger.warning(
-                                f"Слишком много регистраций для игры {self.game['name']} с прокси {proxy['url']}. Ожидание {delay_time:.2f} секунд перед повторной попыткой.")
+                                f"New delay time {delay_time:.2f} sec.")
                             await asyncio.sleep(delay_time)
                             continue
 
@@ -144,40 +164,44 @@ class GamePromo:
                     if 'application/json' in response.headers.get('Content-Type'):
                         data = await response.json()
                         if data.get('hasCode', False):
-                            logger.info(f"Событие для игры {self.game['name']} с прокси {proxy['url']} успешно зарегистрировано")
+                            logger.info(
+                                f"Event {self.game['name']} proxy: {proxy} successfully registered")
                             return True
                     else:
-                        logger.warning(f"Непредвиденный ответ от сервера: {await response.text()}")
+                        logger.warning(f"Unexpected response from the server: {await response.text()}")
                         await asyncio.sleep(5)
                         continue
 
             except Exception as error:
-                logger.error(f"Ошибка при регистрации события для игры {self.game['name']} с прокси {proxy['url']}: {error}")
+                logger.error(
+                    f"Error in event registration {self.game['name']} proxy: {proxy}: {error}")
                 await asyncio.sleep(5)
-        logger.error(f"Не удалось зарегистрировать событие для {self.game['name']} с прокси {proxy['url']}, перезапуск")
+        logger.error(f"Failed to register an event for {self.game['name']} proxy: {proxy}, restart!")
         return False
 
     async def create_code(self):
         proxy = self.game['proxy']
         response = None
-        auth = aiohttp.BasicAuth(proxy['user'], proxy['pass']) if proxy['user'] and proxy['pass'] else None
+        parsed_url = urlparse(proxy)
+        username = parsed_url.username
+        password = parsed_url.password
+        auth = aiohttp.BasicAuth(username, password) if username and password else None
         while not response or not response.get('promoCode'):
             try:
                 async with self.session.post(
-                    'https://api.gamepromo.io/promo/create-code',
-                    json={'promoId': self.game['promo_id']},
-                    proxy=proxy['url'],
-                    proxy_auth=auth,
-                    headers={
-                        'Authorization': f'Bearer {self.token}',
-                        'Content-Type': 'application/json; charset=utf-8',
-                    }
+                        'https://api.gamepromo.io/promo/create-code',
+                        json={'promoId': self.game['promo_id']},
+                        proxy=proxy,
+                        proxy_auth=auth,
+                        headers={
+                            'Authorization': f'Bearer {self.token}',
+                            'Content-Type': 'application/json; charset=utf-8',
+                        }
                 ) as resp:
                     response = await resp.json()
             except Exception as error:
-                logger.error(f"Ошибка при создании кода для игры {self.game['name']} с прокси {proxy['url']}: {error}")
+                logger.error(f"Error creating code {self.game['name']} proxy: {proxy}: {error}")
                 await asyncio.sleep(random.uniform(1, 3.5))
-        logger.info(f"Промокод для игры {self.game['name']} успешно создан")
         return response['promoCode']
 
     async def gen_promo_code(self):
@@ -202,9 +226,12 @@ async def gen(game):
                 cursor.execute(sql.SQL("INSERT INTO {} (promo_code) VALUES (%s)").format(sql.Identifier(table_name)),
                                (code_data,))
                 conn.commit()
-                logger.info(f"Промокод {code_data} сгенерирован и сохранен в таблицу {table_name}")
+                logger.info(f"--KEY-- {code_data} generated and stored in a table {table_name}")
             except Exception as e:
-                logger.error(f"Ошибка при сохранении промокода для игры {game['name']} с прокси {game['proxy']['url']}: {e}")
+                parsed_url = urlparse(f"http://{game['proxy']}")
+                ip = parsed_url.hostname
+                port = parsed_url.port
+                logger.error(f"Error saving key: {game['name']} proxy: {ip}:{port} - {e}")
             finally:
                 cursor.close()
                 conn.close()
