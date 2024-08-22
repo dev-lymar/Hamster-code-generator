@@ -1,4 +1,4 @@
-import logging
+import logging.handlers
 import os
 import json
 import random
@@ -15,7 +15,23 @@ from database import (create_database_connection, create_table_users, create_tab
 
 load_dotenv()
 
-logging.basicConfig(level=logging.INFO)
+# Set up logging configuration
+log_directory = os.path.join(os.path.dirname(__file__), 'logs')
+os.makedirs(log_directory, exist_ok=True)
+log_file = os.path.join(log_directory, 'game_promo.log')
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.handlers.RotatingFileHandler(
+            log_file, maxBytes=10*1024*1024, backupCount=5
+        )
+    ]
+)
+
+logger = logging.getLogger(__name__)
 
 API_TOKEN = os.getenv('BOT_TOKEN')
 BOT_ID = int(API_TOKEN.split(':')[0])
