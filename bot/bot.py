@@ -114,7 +114,12 @@ async def send_welcome(message: types.Message, state: FSMContext):
         await log_user_action(conn, user_id, "/start command used")
 
         # Language selection based on the user's language
-        selected_language = "ru" if language_code in ["ru", "uk"] else "en"
+        if language_code in translations:
+            selected_language = language_code
+        elif language_code in ["ru", "uk"]:
+            selected_language = "ru"
+        else:
+            selected_language = "en"
 
         # Save user in DB
         await add_user(conn, chat_id, user_id, first_name, last_name, username, selected_language)

@@ -28,5 +28,20 @@
     "no_keys_available": "сейчас недоступны.",
     "wait_time_message": "⏳ Подождите {minutes} мин {sec} сек перед следующей попыткой.",
     "daily_limit_reached": "🚧 Ого, притормозите! Вы достигли лимита на сегодня. Возвращайтесь завтра за новыми впечатлениями. 😎"
+  },
+    "sk": {
+    "welcome_message": "Ahoj, {first_name}! 👋 Pripravený na začiatok? Vyber si možnosť nižšie:",
+    "ban_message": "🚫 Ups! Vyzerá to, že si bol zablokovaný. Kontaktuj podporu, ak potrebuješ pomoc.",
+    "chose_action": "Čo ďalej? 🤔 Vyber si možnosť, aby si pokračoval:",
+    "get_keys": "🔑 Získať kľúče",
+    "change_status": "🔄 Zmeniť stav",
+    "language_selected": "🌍 Slovenčina vybraná. Všetko je pripravené!",
+    "choose_language": "🌐 Vyber si jazyk:",
+    "default_response": "✅ Rozumieme! Tvoja správa bola prijatá.",
+    "keys_generated_ok": "🎉 Všetko pripravené! Tu sú tvoje kľúče (klikni na kľúč pre kopírovanie):",
+    "no_keys_for": "🚫 Momentálne nemáme kľúče pre hru",
+    "no_keys_available": "v tomto momente.",
+    "wait_time_message": "⏳ Ešte chvíľu! Musíš počkať {minutes} minút {sec} sekúnd pred ďalším pokusom.",
+    "daily_limit_reached": "🚧 Wow, spomaľ! Dosiahol si dnešný limit. Vráť sa zajtra pre viac zábavy. 😎"
   }
 }
