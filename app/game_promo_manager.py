@@ -83,7 +83,7 @@ class GamePromo:
         proxy = self.game['proxy']
 
         # Parsing URL to extract the login and password
-        parsed_url = urlparse(proxy)
+        parsed_url = urlparse(f"http://{proxy}")
         username = parsed_url.username
         password = parsed_url.password
 
@@ -96,7 +96,7 @@ class GamePromo:
                         'clientId': client_id,
                         'clientOrigin': 'deviceid'
                     },
-                    proxy=proxy,
+                    proxy=f"http://{proxy}",
                     proxy_auth=auth,
                     headers={
                         'Content-Type': 'application/json; charset=utf-8',
@@ -116,7 +116,7 @@ class GamePromo:
 
         for attempt in range(self.game['attempts']):
             try:
-                parsed_url = urlparse(proxy)
+                parsed_url = urlparse(f"http://{proxy}")
                 username = parsed_url.username
                 password = parsed_url.password
                 ip = parsed_url.hostname
@@ -129,7 +129,7 @@ class GamePromo:
                             'eventId': event_id,
                             'eventOrigin': 'undefined'
                         },
-                        proxy=proxy,
+                        proxy=f"http://{proxy}",
                         proxy_auth=auth,
                         headers={
                             'Authorization': f'Bearer {self.token}',
@@ -182,7 +182,7 @@ class GamePromo:
     async def create_code(self):
         proxy = self.game['proxy']
         response = None
-        parsed_url = urlparse(proxy)
+        parsed_url = urlparse(f"http://{proxy}")
         username = parsed_url.username
         password = parsed_url.password
         auth = aiohttp.BasicAuth(username, password) if username and password else None
@@ -191,7 +191,7 @@ class GamePromo:
                 async with self.session.post(
                         'https://api.gamepromo.io/promo/create-code',
                         json={'promoId': self.game['promo_id']},
-                        proxy=proxy,
+                        proxy=f"http://{proxy}",
                         proxy_auth=auth,
                         headers={
                             'Authorization': f'Bearer {self.token}',

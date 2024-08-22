@@ -1,4 +1,14 @@
-from proxies import proxies
+def load_proxies_from_file(file_path):
+    proxies = []
+    with open(file_path, 'r') as file:
+        for line in file:
+            proxy = line.strip()
+            if proxy:
+                proxies.append(proxy)
+    return proxies
+
+
+proxies = load_proxies_from_file('proxies.txt')
 
 # Basic configuration of games and proxies
 game_configs = [
@@ -60,8 +70,8 @@ game_configs = [
     }
 ]
 
-# Convert the dictionary keys to a list to iterate over them
-proxy_keys = list(proxies.keys())
+# Convert the list of proxies to a list
+proxy_keys = list(proxies)
 
 # Check if there are enough proxies
 total_proxies_needed = sum(config['copies'] for config in game_configs)
@@ -71,23 +81,22 @@ if len(proxy_keys) < total_proxies_needed:
 # Variable to track the current proxy index
 proxy_index = 0
 
-# Proxy allocation by game
-for config in game_configs:
-    num_proxies = config['copies']
-    config['proxies'] = proxy_keys[proxy_index:proxy_index + num_proxies]
-    proxy_index += num_proxies
-
-# Generation a list of games based on the number of copies and proxies
+# Generate a list of games based on the number of copies and proxies
 games = []
 
 for config in game_configs:
     for i in range(config['copies']):
+        if proxy_index >= len(proxies):
+            raise ValueError(
+                f"Not enough proxies for game copies: {config['name']} needs {config['copies']} copies, but only {len(proxies)} proxies are available.")
+
         game_copy = {
             'name': config['name'],
             'app_token': config['app_token'],
             'promo_id': config['promo_id'],
-            'proxy': proxies[config['proxies'][i % len(config['proxies'])]]['url'],
+            'proxy': proxies[proxy_index],
             'base_delay': config['base_delay'],
             'attempts': config['attempts'],
         }
         games.append(game_copy)
+        proxy_index += 1
