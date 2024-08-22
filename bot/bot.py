@@ -175,10 +175,16 @@ async def send_keys_menu(message: types.Message, state: FSMContext):
                     chat_id,
                     photo=photo,
                     caption=await get_translation(conn, user_id, "chose_action"),
-                    reply_markup=buttons
+                    reply_markup=buttons,
+                    parse_mode="HTML",
                 )
                 return
-        await bot.send_message(chat_id, await get_translation(conn, user_id, "chose_action"), reply_markup=buttons)
+        await bot.send_message(
+            chat_id,
+            await get_translation(conn, user_id, "chose_action"),
+            parse_mode="HTML",
+            reply_markup=buttons
+        )
     finally:
         await conn.close()
 
