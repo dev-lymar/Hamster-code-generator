@@ -4,13 +4,14 @@ import logging
 from aiogram import types, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
-from bot_setup import bot, dp, BOT_ID, games, status_limits
-from database import (create_database_connection, add_user, update_user_language, log_user_action,
-                      reset_daily_keys_if_needed, is_user_banned, get_user_language,
-                      get_oldest_keys, update_keys_generated, delete_keys, check_user_limits,
-                      get_last_request_time)
-from utils import load_translations, get_translation, get_action_buttons, escape_markdown, get_remaining_time
-from states import Form
+from config import bot, dp, BOT_ID, games, status_limits
+from database.database import (create_database_connection, add_user, update_user_language, log_user_action,
+                               reset_daily_keys_if_needed, is_user_banned, get_user_language,
+                               get_oldest_keys, update_keys_generated, delete_keys, check_user_limits,
+                               get_last_request_time)
+from keyboards.inline import get_action_buttons
+from utils.helpers import load_translations, get_translation, escape_markdown, get_remaining_time
+from states.form import Form
 
 translations = load_translations()
 
@@ -54,7 +55,7 @@ async def send_welcome(message: types.Message, state: FSMContext):
         welcome_text = translation.format(first_name=first_name)
 
         # Check if the directory exists and contains files
-        image_dir = os.path.join(os.path.dirname(__file__), "images", "welcome")
+        image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "welcome")
         if os.path.exists(image_dir) and os.path.isdir(image_dir):
             image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
             if image_files:
@@ -87,7 +88,7 @@ async def send_keys_menu(message: types.Message, state: FSMContext):
         buttons = await get_action_buttons(conn, user_id)
 
         # Check if the directory exists and contains files
-        image_dir = os.path.join(os.path.dirname(__file__), "images", "key_generated")
+        image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "key_generated")
         if os.path.exists(image_dir) and os.path.isdir(image_dir):
             image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
             if image_files:
@@ -263,7 +264,7 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
 async def send_limit_reached_message(callback_query: types.CallbackQuery, user_id: int):
     conn = await create_database_connection()
     try:
-        image_dir = os.path.join(os.path.dirname(__file__), "images", "wait")
+        image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "wait")
         if os.path.exists(image_dir) and os.path.isdir(image_dir):
             image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
             if image_files:
@@ -287,30 +288,47 @@ async def send_limit_reached_message(callback_query: types.CallbackQuery, user_i
         await conn.close()
 
 
-# Function for sending a message to tell you to wait
+# Function for sending a message to tell you to wait and updating the image
 async def send_wait_time_message(callback_query: types.CallbackQuery, user_id: int, wait_message: str):
     conn = await create_database_connection()
     try:
-        image_dir = os.path.join(os.path.dirname(__file__), "images", "welcome")
+        chat_id = callback_query.message.chat.id
+        message_id = callback_query.message.message_id
+        image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "wait")
+
         if os.path.exists(image_dir) and os.path.isdir(image_dir):
             image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
             if image_files:
                 random_image = random.choice(image_files)
                 image_path = os.path.join(image_dir, random_image)
 
+                # Create a new image object
                 photo = FSInputFile(image_path)
-                await bot.send_photo(
-                    chat_id=callback_query.message.chat.id,
-                    photo=photo,
-                    caption=wait_message,
+                new_media = types.InputMediaPhoto(media=photo, caption=wait_message)
+
+                # Updating the image and signature in a post
+                await bot.edit_message_media(
+                    chat_id=chat_id,
+                    message_id=message_id,
+                    media=new_media,
                     reply_markup=await get_action_buttons(conn, user_id)
                 )
                 return
-        await bot.send_message(
-            chat_id=callback_query.message.chat.id,
-            text=wait_message,
-            reply_markup=await get_action_buttons(conn, user_id)
-        )
+
+        # If image directory is missing or empty, update text or send a new text message
+        if callback_query.message.text:
+            await bot.edit_message_text(
+                chat_id=chat_id,
+                message_id=message_id,
+                text=wait_message,
+                reply_markup=await get_action_buttons(conn, user_id)
+            )
+        else:
+            await bot.send_message(
+                chat_id=chat_id,
+                text=wait_message,
+                reply_markup=await get_action_buttons(conn, user_id)
+            )
     finally:
         await conn.close()
 
@@ -355,7 +373,7 @@ async def handle_banned_user(message: types.Message):
         await log_user_action(conn, user_id, "Attempted interaction while banned")
 
         # Sending a ban notification
-        image_dir = os.path.join(os.path.dirname(__file__), "images", "welcome")
+        image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "banned")
         if os.path.exists(image_dir) and os.path.isdir(image_dir):
             image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
             if image_files:

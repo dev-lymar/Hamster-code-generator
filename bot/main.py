@@ -1,9 +1,9 @@
 import asyncio
 import logging.handlers
 import os
-from bot_setup import bot, set_commands, dp
-from database import create_database_connection, create_table_users, create_table_logs
-import handlers
+from config import bot, set_commands, dp
+from database.database import create_database_connection, create_table_users, create_table_logs
+import handlers.handlers
 
 # Set up logging configuration
 log_directory = os.path.join(os.path.dirname(__file__), 'logs')

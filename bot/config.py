@@ -25,9 +25,9 @@ games = [
 ]
 
 status_limits = {
-    'free': {'daily_limit': 5, 'interval_minutes': 30},
-    'friend': {'daily_limit': 10, 'interval_minutes': 20},
-    'premium': {'daily_limit': 25, 'interval_minutes': 10}
+    'free': {'daily_limit': 10, 'interval_minutes': 10},
+    'friend': {'daily_limit': 25, 'interval_minutes': 10},
+    'premium': {'daily_limit': 50, 'interval_minutes': 10}
 }
 
 
