@@ -202,7 +202,7 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
     conn = await create_database_connection()
     try:
         user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
-
+        await callback_query.answer()
         # Ban check
         if await is_user_banned(conn, user_id):
             await handle_banned_user(callback_query.message)
@@ -254,7 +254,6 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
         if total_keys_in_request > 0:
             await update_keys_generated(conn, user_id, total_keys_in_request)
 
-        await callback_query.answer()
         await send_keys_menu(callback_query.message, state)
     finally:
         await conn.close()
