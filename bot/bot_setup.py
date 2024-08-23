@@ -19,7 +19,9 @@ games = [
     'My Clone Army',
     'Merge Away',
     'Twerk Race 3D',
-    'Polysphere'
+    'Polysphere',
+    'Mud Racing',
+    'Mow and Trim'
 ]
 
 status_limits = {

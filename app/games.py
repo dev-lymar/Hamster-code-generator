@@ -65,7 +65,23 @@ game_configs = [
         'app_token': '2aaf5aee-2cbc-47ec-8a3f-0962cc14bc71',
         'promo_id': '2aaf5aee-2cbc-47ec-8a3f-0962cc14bc71',
         'base_delay': 20,
-        'attempts': 50,
+        'attempts': 25,
+        'copies': 22,
+    },
+    {
+        'name': 'Mow and Trim',
+        'app_token': 'ef319a80-949a-492e-8ee0-424fb5fc20a6',
+        'promo_id': 'ef319a80-949a-492e-8ee0-424fb5fc20a6',
+        'base_delay': 20,
+        'attempts': 20,
+        'copies': 10,
+    },
+    {
+        'name': 'Mud Racing',
+        'app_token': '8814a785-97fb-4177-9193-ca4180ff9da8',
+        'promo_id': '8814a785-97fb-4177-9193-ca4180ff9da8',
+        'base_delay': 20,
+        'attempts': 25,
         'copies': 22,
     }
 ]
