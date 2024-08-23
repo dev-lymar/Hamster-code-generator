@@ -1,100 +1,18 @@
-import logging.handlers
 import os
-import json
 import random
-import re
-from aiogram import Bot, Dispatcher, types, F
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile, BotCommand
-from aiogram.fsm.storage.memory import MemoryStorage
+import logging
+from aiogram import types, F
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import StatesGroup, State
-from dotenv import load_dotenv
-from database import (create_database_connection, create_table_users, create_table_logs, add_user, update_user_language,
-                      log_user_action, reset_daily_keys_if_needed, is_user_banned, get_user_language, get_oldest_keys,
-                      update_keys_generated, delete_keys, check_user_limits, get_last_request_time, get_remaining_time)
-
-load_dotenv()
-
-# Set up logging configuration
-log_directory = os.path.join(os.path.dirname(__file__), 'logs')
-os.makedirs(log_directory, exist_ok=True)
-log_file = os.path.join(log_directory, 'game_promo.log')
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-        logging.handlers.RotatingFileHandler(
-            log_file, maxBytes=10*1024*1024, backupCount=5
-        )
-    ]
-)
-
-logger = logging.getLogger(__name__)
-
-API_TOKEN = os.getenv('BOT_TOKEN')
-BOT_ID = int(API_TOKEN.split(':')[0])
-games = [
-    'Bike Ride 3D',
-    'Chain Cube 2048',
-    'My Clone Army',
-    'Train Miner',
-    'Merge Away',
-    'Twerk Race 3D',
-    'Polysphere'
-]
-status_limits = {
-    'free': {'daily_limit': 5, 'interval_minutes': 30},
-    'friend': {'daily_limit': 10, 'interval_minutes': 20},
-    'premium': {'daily_limit': 25, 'interval_minutes': 10}
-}
-bot = Bot(token=API_TOKEN)
-storage = MemoryStorage()
-dp = Dispatcher(storage=storage)
-
-
-# Load translations from json
-def load_translations():
-    translations_path = os.path.join(os.path.dirname(__file__), 'translations.json')
-    if os.path.exists(translations_path):
-        try:
-            with open(translations_path, 'r') as f:
-                return json.load(f)
-        except Exception as e:
-            logging.error(f"Error loading translations: {e}")
-    else:
-        logging.warning("Translations file not found. Using default empty translations.")
-    return {}
-
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
+from bot_setup import bot, dp, BOT_ID, games, status_limits
+from database import (create_database_connection, add_user, update_user_language, log_user_action,
+                      reset_daily_keys_if_needed, is_user_banned, get_user_language,
+                      get_oldest_keys, update_keys_generated, delete_keys, check_user_limits,
+                      get_last_request_time)
+from utils import load_translations, get_translation, get_action_buttons, escape_markdown, get_remaining_time
+from states import Form
 
 translations = load_translations()
-
-
-# Get translations
-async def get_translation(conn, user_id, key):
-    user_lang = await get_user_language(conn, user_id)
-    return translations.get(user_lang, {}).get(key, key)
-
-
-# Bot states
-class Form(StatesGroup):
-    choosing_language = State()
-
-
-# Setting bot commands
-async def set_commands(bot: Bot):
-    commands = [
-        BotCommand(command="/change_lang", description="Change language / Сменить язык")
-    ]
-    await bot.set_my_commands(commands)
-
-
-# Function that returns the button bar
-async def get_action_buttons(conn, user_id):
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=await get_translation(conn, user_id, "get_keys"), callback_data="get_keys")],
-    ])
 
 
 # Command handler /start
@@ -278,11 +196,6 @@ async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
         await conn.close()
 
 
-# Shields special characters in text for MarkdownV2.
-def escape_markdown(text):
-    return re.sub(r'([_*\[\]()~`>#+\-=|{}.!\\])', r'\\\1', text)
-
-
 # Handling of "get_keys" button pressing
 @dp.callback_query(F.data == "get_keys")
 async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
@@ -460,19 +373,3 @@ async def handle_banned_user(message: types.Message):
         await bot.send_message(chat_id, await get_translation(conn, user_id, "ban_message"))
     finally:
         await conn.close()
-
-
-async def main():
-    conn = await create_database_connection()
-    try:
-        await create_table_users(conn)
-        await create_table_logs(conn)
-    finally:
-        await conn.close()
-
-    await set_commands(bot)
-    await dp.start_polling(bot)
-
-if __name__ == '__main__':
-    import asyncio
-    asyncio.run(main())
