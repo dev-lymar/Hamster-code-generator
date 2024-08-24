@@ -1,3 +1,4 @@
+import asyncio
 import os
 import random
 import logging
@@ -223,12 +224,14 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
             reply_markup=None
         )
 
+        tasks = [get_oldest_keys(session, game) for game in games]
+        keys_list = await asyncio.gather(*tasks)
+
         # If the limit is not reached, continue processing
         response_text = f"{escape_markdown(await get_translation(user_id, 'keys_generated_ok'))}\n\n"
         total_keys_in_request = 0
 
-        for game in games:
-            keys = await get_oldest_keys(session, game)
+        for game, keys in zip(games, keys_list):
             if keys:
                 total_keys_in_request += len(keys)
                 response_text += f"*{escape_markdown(game)}*:\n"

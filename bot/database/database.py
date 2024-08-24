@@ -16,7 +16,12 @@ load_dotenv()
 DATABASE_URL = f"postgresql+asyncpg://{os.getenv('DATABASE_USER')}:{os.getenv('DATABASE_PASSWORD')}@{os.getenv('DATABASE_HOST')}:{os.getenv('DATABASE_PORT')}/{os.getenv('DATABASE_NAME')}"
 
 # Creating an asynchronous engine
-engine = create_async_engine(DATABASE_URL, echo=False)
+engine = create_async_engine(
+    DATABASE_URL,
+    echo=False,
+    pool_size=10,
+    max_overflow=20
+)
 
 # Creating a session factory
 AsyncSessionLocal = sessionmaker(
