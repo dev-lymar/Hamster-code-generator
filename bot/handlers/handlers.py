@@ -5,11 +5,12 @@ import logging
 from aiogram import types, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import FSInputFile
+from datetime import datetime, timezone
 from config import bot, dp, BOT_ID, games, status_limits, set_commands
 from database.database import (get_session, get_or_create_user, update_user_language, log_user_action,
                                reset_daily_keys_if_needed, is_user_banned, get_user_language,
                                get_oldest_keys, update_keys_generated, delete_keys, check_user_limits,
-                               get_last_request_time)
+                               get_last_request_time, get_user_status_info)
 from keyboards.inline import get_action_buttons, get_settings_menu, create_language_keyboard
 from utils.helpers import load_translations, get_translation, escape_markdown, get_remaining_time
 from states.form import Form
@@ -196,22 +197,24 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
     async with await get_session() as session:
         user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
         await callback_query.answer()
-        # Ban check
-        if await is_user_banned(session, user_id):
+
+        user_info = await get_user_status_info(session, user_id)
+        if user_info.is_banned:
             await handle_banned_user(callback_query.message)
             return
 
-        # Check for reaching the limit of keys per day
-        if not await check_user_limits(session, user_id, status_limits):
+        current_date = datetime.now(timezone.utc).date()
+        if user_info.last_reset_date != current_date:
+            await reset_daily_keys_if_needed(session, user_id)
+            user_info.daily_requests_count = 0
+
+        limit = status_limits.get(user_info.user_status, {}).get('daily_limit', 0)
+        if user_info.daily_requests_count >= limit:
             await send_limit_reached_message(callback_query, user_id)
             return
 
-        # Checking the time of the last request
-        last_request_time, user_status = await get_last_request_time(session, user_id)
-        interval_minutes = status_limits[user_status]['interval_minutes']
-
-        # Calculation of remaining time
-        minutes, seconds = get_remaining_time(last_request_time, interval_minutes)
+        interval_minutes = status_limits[user_info.user_status]['interval_minutes']
+        minutes, seconds = get_remaining_time(user_info.last_request_time, interval_minutes)
         if minutes > 0 or seconds > 0:
             translation = await get_translation(user_id, "wait_time_message")
             wait_message = translation.format(minutes=minutes, sec=seconds)
@@ -227,7 +230,6 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
         tasks = [get_oldest_keys(session, game) for game in games]
         keys_list = await asyncio.gather(*tasks)
 
-        # If the limit is not reached, continue processing
         response_text = f"{escape_markdown(await get_translation(user_id, 'keys_generated_ok'))}\n\n"
         total_keys_in_request = 0
 
@@ -235,12 +237,8 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
             if keys:
                 total_keys_in_request += len(keys)
                 response_text += f"*{escape_markdown(game)}*:\n"
-                keys_to_delete = []
-                for key in keys:
-                    promo_code = key[0]
-                    response_text += f"`{escape_markdown(promo_code)}`\n"
-                    keys_to_delete.append(promo_code)
-                response_text += "\n"
+                keys_to_delete = [key[0] for key in keys]
+                response_text += "\n".join([f"`{escape_markdown(key)}`" for key in keys_to_delete]) + "\n\n"
                 await delete_keys(session, game, keys_to_delete)
             else:
                 response_text += (
