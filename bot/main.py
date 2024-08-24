@@ -1,7 +1,7 @@
 import asyncio
 import logging.handlers
 import os
-from config import bot, set_commands, dp
+from config import bot, dp
 from database.database import create_database_connection, create_table_users, create_table_logs
 import handlers.handlers
 
@@ -30,7 +30,6 @@ async def main():
     finally:
         await conn.close()
 
-    await set_commands(bot)
     await dp.start_polling(bot)
 
 if __name__ == '__main__':

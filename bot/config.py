@@ -1,10 +1,14 @@
 import os
 from aiogram import Bot, Dispatcher
-from aiogram.types import BotCommand
+from aiogram.types import BotCommand, BotCommandScopeChat
 from aiogram.fsm.storage.memory import MemoryStorage
 from dotenv import load_dotenv
+from utils.helpers import load_translations
+
 
 load_dotenv()
+
+translations = load_translations()
 
 API_TOKEN = os.getenv('BOT_TOKEN')
 BOT_ID = int(API_TOKEN.split(':')[0])
@@ -31,8 +35,10 @@ status_limits = {
 }
 
 
-async def set_commands(bot: Bot):
+async def set_commands(bot: Bot, user_id: int, language_code: str):
+    command_description = translations[language_code]["choose_language"]
+
     commands = [
-        BotCommand(command="/change_lang", description="Change language / Сменить язык")
+        BotCommand(command="/change_lang", description=command_description)
     ]
-    await bot.set_my_commands(commands)
+    await bot.set_my_commands(commands, scope=BotCommandScopeChat(chat_id=user_id))

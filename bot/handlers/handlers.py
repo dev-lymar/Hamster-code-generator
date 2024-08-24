@@ -4,7 +4,7 @@ import logging
 from aiogram import types, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
-from config import bot, dp, BOT_ID, games, status_limits
+from config import bot, dp, BOT_ID, games, status_limits, set_commands
 from database.database import (create_database_connection, add_user, update_user_language, log_user_action,
                                reset_daily_keys_if_needed, is_user_banned, get_user_language,
                                get_oldest_keys, update_keys_generated, delete_keys, check_user_limits,
@@ -39,6 +39,8 @@ async def send_welcome(message: types.Message, state: FSMContext):
             selected_language = "ru"
         else:
             selected_language = "en"
+
+        await set_commands(bot, user_id, selected_language)
 
         # Save user in DB
         await add_user(conn, chat_id, user_id, first_name, last_name, username, selected_language)
@@ -133,14 +135,16 @@ async def change_language(message: types.Message, state: FSMContext):
             await handle_banned_user(message)
             return
 
-        language_buttons = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="English", callback_data="en"),
-             InlineKeyboardButton(text="Русский", callback_data="ru")],
-        ])
+        language_buttons = []
+        for lang_code, translation_data in translations.items():
+            language_buttons.append(
+                InlineKeyboardButton(text=translation_data["language_name"], callback_data=lang_code)
+            )
+        keyboard_markup = InlineKeyboardMarkup(inline_keyboard=[language_buttons])
 
         # Send the message and store its ID in the state
         lang_message = await message.answer(
-            await get_translation(conn, user_id, "choose_language"), reply_markup=language_buttons
+            await get_translation(conn, user_id, "choose_language"), reply_markup=keyboard_markup
         )
 
         # Save the IDs of the language message and user's command message
@@ -152,7 +156,7 @@ async def change_language(message: types.Message, state: FSMContext):
 
 
 # Language selection processing
-@dp.callback_query(F.data.in_({"en", "ru"}))
+@dp.callback_query(F.data.in_(translations.keys()))
 async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
     conn = await create_database_connection()
     try:
@@ -167,6 +171,7 @@ async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
 
         # Updating the language in the database
         await update_user_language(conn, user_id, selected_language)
+        await set_commands(bot, user_id, selected_language)
 
         # Forcibly query the language from the database again
         new_language = await get_user_language(conn, user_id)

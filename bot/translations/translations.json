@@ -1,5 +1,6 @@
 {
   "en": {
+    "language_name": "English",
     "welcome_message": "Hey there, {first_name}! 👋 Ready to dive in? Pick an option to get started:",
     "ban_message": "🚫 Oops! Looks like you're banned. Reach out to support for assistance.",
     "chose_action": "What’s next? 🤔 Choose an option to keep going:",
@@ -15,6 +16,7 @@
     "daily_limit_reached": "🚧 Whoa, slow down! You’ve hit today’s limit. Come back tomorrow for more fun. 😎"
   },
   "ru": {
+    "language_name": "Русский",
     "welcome_message": "Привет, {first_name}! 👋 Готовы начать? Выберите действие ниже:",
     "ban_message": "🚫 Ой! Похоже, вы заблокированы. Свяжитесь с поддержкой для решения вопроса.",
     "chose_action": "Что дальше? 🤔\n🎮 Играй и зарабатывай вместе с нами. Новые комбо, игры и раздачи. <a href=\"https://t.me/TapEnot\">Подпишись TapEnot</a> 📱\nВыберите действие, чтобы продолжить:",
@@ -30,6 +32,7 @@
     "daily_limit_reached": "🚧 Ого, притормозите! Вы достигли лимита на сегодня. Возвращайтесь завтра за новыми впечатлениями. 😎"
   },
     "sk": {
+    "language_name": "Slovenský",
     "welcome_message": "Ahoj, {first_name}! 👋 Pripravený na začiatok? Vyber si možnosť nižšie:",
     "ban_message": "🚫 Ups! Vyzerá to, že si bol zablokovaný. Kontaktuj podporu, ak potrebuješ pomoc.",
     "chose_action": "Čo ďalej? 🤔 Vyber si možnosť, aby si pokračoval:",
