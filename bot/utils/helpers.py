@@ -3,7 +3,7 @@ import json
 import logging
 import re
 from datetime import datetime, timedelta, timezone
-from database.database import get_user_language
+from database.database import get_user_language, get_session
 
 
 def load_translations():
@@ -23,16 +23,17 @@ translations = load_translations()
 
 
 # Get translations
-async def get_translation(conn, user_id, key):
-    user_lang = await get_user_language(conn, user_id)
-    return translations.get(user_lang, {}).get(key, key)
+async def get_translation(user_id: int, key: str) -> str:
+    async with await get_session() as session:
+        user_lang = await get_user_language(session, user_id)
+        return translations.get(user_lang, {}).get(key, key)
 
 
-def escape_markdown(text):
+def escape_markdown(text: str) -> str:
     return re.sub(r'([_*\[\]()~`>#+\-=|{}.!\\])', r'\\\1', text)
 
 
-def get_remaining_time(last_request_time, interval_minutes):
+def get_remaining_time(last_request_time: datetime, interval_minutes: int) -> tuple:
     if last_request_time is None:
         return 0, 0  # If no requests have been made yet, return 0
 

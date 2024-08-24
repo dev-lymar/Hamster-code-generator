@@ -3,24 +3,24 @@ from utils.helpers import get_translation
 
 
 # Function that returns the button bar
-async def get_action_buttons(conn, user_id):
+async def get_action_buttons(session, user_id):
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=await get_translation(conn, user_id, "get_keys_key"), callback_data="get_keys")],
-        [InlineKeyboardButton(text=await get_translation(conn, user_id, "settings_key"), callback_data="settings")],
+        [InlineKeyboardButton(text=await get_translation(user_id, "get_keys_key"), callback_data="get_keys")],
+        [InlineKeyboardButton(text=await get_translation(user_id, "settings_key"), callback_data="settings")],
     ])
 
 
 # Function that returns settings menu
-async def get_settings_menu(conn, user_id):
+async def get_settings_menu(session, user_id):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=await get_translation(
-            conn, user_id, "choose_language_key"), callback_data="choose_language")],
-        [InlineKeyboardButton(text=await get_translation(conn, user_id, "back_key"), callback_data="back_to_main")],
+            user_id, "choose_language_key"), callback_data="choose_language")],
+        [InlineKeyboardButton(text=await get_translation(user_id, "back_key"), callback_data="back_to_main")],
     ])
 
 
 # Creating a keyboard with language keys
-def create_language_keyboard(translations, conn, user_id):
+def create_language_keyboard(translations):
     language_buttons = []
     for lang_code, translation_data in translations.items():
         language_buttons.append(

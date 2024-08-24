@@ -2,8 +2,8 @@ import asyncio
 import logging.handlers
 import os
 from config import bot, dp
-from database.database import create_database_connection, create_table_users, create_table_logs
-import handlers.handlers
+from database.database import init_db, close_db
+from handlers import handlers
 
 # Set up logging configuration
 log_directory = os.path.join(os.path.dirname(__file__), 'logs')
@@ -20,17 +20,16 @@ logging.basicConfig(
         )
     ]
 )
+# Reduce the logging level of SQLAlchemy to WARNING
+logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
 
 
 async def main():
-    conn = await create_database_connection()
+    await init_db()
     try:
-        await create_table_users(conn)
-        await create_table_logs(conn)
+        await dp.start_polling(bot)
     finally:
-        await conn.close()
-
-    await dp.start_polling(bot)
+        await close_db()
 
 if __name__ == '__main__':
     asyncio.run(main())
