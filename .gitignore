@@ -165,10 +165,10 @@ cython_debug/
 .DS_Store
 
 # File poxies
-proxies.py
+proxies.txt
 
-# DB
-*.db
+# DB dump
+*.dump
 
 # BackUP
 *.sql
