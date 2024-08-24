@@ -8,9 +8,8 @@ from aiogram.types import FSInputFile
 from datetime import datetime, timezone
 from config import bot, dp, BOT_ID, games, status_limits, set_commands
 from database.database import (get_session, get_or_create_user, update_user_language, log_user_action,
-                               reset_daily_keys_if_needed, is_user_banned, get_user_language,
-                               get_oldest_keys, update_keys_generated, delete_keys, check_user_limits,
-                               get_last_request_time, get_user_status_info)
+                               reset_daily_keys_if_needed, get_user_language,
+                               get_oldest_keys, update_keys_generated, delete_keys, get_user_status_info)
 from keyboards.inline import get_action_buttons, get_settings_menu, create_language_keyboard
 from utils.helpers import load_translations, get_translation, escape_markdown, get_remaining_time
 from states.form import Form
@@ -109,7 +108,8 @@ async def send_keys_menu(message: types.Message, state: FSMContext):
 async def execute_change_language_logic(message: types.Message, user_id: int, state: FSMContext):
     async with await get_session() as session:
         # Ban check
-        if await is_user_banned(session, user_id):
+        user_info = await get_user_status_info(session, user_id)
+        if user_info.is_banned:
             await handle_banned_user(message)
             return
 
@@ -154,7 +154,8 @@ async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
         user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
 
         # Ban check
-        if await is_user_banned(session, user_id):
+        user_info = await get_user_status_info(session, user_id)
+        if user_info.is_banned:
             await handle_banned_user(callback_query.message)
             return
 
@@ -206,7 +207,7 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
         current_date = datetime.now(timezone.utc).date()
         if user_info.last_reset_date != current_date:
             await reset_daily_keys_if_needed(session, user_id)
-            user_info.daily_requests_count = 0
+            user_info = await get_user_status_info(session, user_id)
 
         limit = status_limits.get(user_info.user_status, {}).get('daily_limit', 0)
         if user_info.daily_requests_count >= limit:
@@ -330,14 +331,6 @@ async def handle_message(message: types.Message, state: FSMContext):
     async with await get_session() as session:
         user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
 
-        # Ban check
-        if await is_user_banned(session, user_id):
-            await handle_banned_user(message)
-            return
-
-        # Reset daily keys if needed
-        await reset_daily_keys_if_needed(session, user_id)
-
         # Logging a user's message
         await log_user_action(session, user_id, f"User message: {message.text}")
 
@@ -378,7 +371,8 @@ async def show_settings_menu(callback_query: types.CallbackQuery):
         user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
 
         # Ban check
-        if await is_user_banned(session, user_id):
+        user_info = await get_user_status_info(session, user_id)
+        if user_info.is_banned:
             await handle_banned_user(callback_query.message)
             return
 
@@ -395,11 +389,6 @@ async def show_settings_menu(callback_query: types.CallbackQuery):
 async def back_to_main_menu(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
-
-        # Ban check
-        if await is_user_banned(session, user_id):
-            await handle_banned_user(callback_query.message)
-            return
 
         await log_user_action(session, user_id, "Return to main menu")
 

@@ -101,13 +101,6 @@ async def reset_daily_keys_if_needed(session: AsyncSession, user_id: int):
         await session.commit()
 
 
-# Checks if the user is banned
-async def is_user_banned(session: AsyncSession, user_id: int) -> bool:
-    result = await session.execute(select(User.is_banned).filter(User.user_id == user_id))
-    user = result.scalar_one_or_none()
-    return user if user else False
-
-
 # Logs user action
 async def log_user_action(session: AsyncSession, user_id: int, action: str):
     new_log = UserLog(user_id=user_id, action=action)
@@ -174,15 +167,7 @@ async def check_user_limits(session: AsyncSession, user_id: int, status_limits: 
     return True
 
 
-# Getting the time of the last request and user status
-async def get_last_request_time(session: AsyncSession, user_id: int):
-    result = await session.execute(
-        select(User.last_request_time, User.user_status)
-        .filter(User.user_id == user_id)
-    )
-    return result.one_or_none()
-
-
+# Check for ban, status, user limits
 async def get_user_status_info(session: AsyncSession, user_id: int):
     result = await session.execute(
         select(User.is_banned, User.last_request_time, User.user_status, User.daily_requests_count, User.last_reset_date)
