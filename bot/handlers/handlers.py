@@ -9,7 +9,7 @@ from database.database import (create_database_connection, add_user, update_user
                                reset_daily_keys_if_needed, is_user_banned, get_user_language,
                                get_oldest_keys, update_keys_generated, delete_keys, check_user_limits,
                                get_last_request_time)
-from keyboards.inline import get_action_buttons
+from keyboards.inline import get_action_buttons, get_settings_menu, create_language_keyboard
 from utils.helpers import load_translations, get_translation, escape_markdown, get_remaining_time
 from states.form import Form
 
@@ -115,42 +115,48 @@ async def send_keys_menu(message: types.Message, state: FSMContext):
         await conn.close()
 
 
+async def execute_change_language_logic(message: types.Message, user_id: int, state: FSMContext, conn):
+    # Ban check
+    if await is_user_banned(conn, user_id):
+        await handle_banned_user(message)
+        return
+
+    # Log user action
+    await log_user_action(conn, user_id, "/change_lang command used")
+
+    # Creating a keyboard using a separate function
+    keyboard_markup = create_language_keyboard(translations, conn, user_id)
+
+    # Sending a message with the keypad
+    lang_message = await bot.send_message(
+        chat_id=message.chat.id,
+        text=await get_translation(conn, user_id, "choose_language"),
+        reply_markup=keyboard_markup
+    )
+
+    # Saving message IDs in the state
+    await state.update_data(lang_message_id=lang_message.message_id)
+
+    await state.set_state(Form.choosing_language)
+
+
 # Change language command
 @dp.message(F.text == "/change_lang")
 async def change_language(message: types.Message, state: FSMContext):
     conn = await create_database_connection()
     try:
         user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
+        await execute_change_language_logic(message, user_id, state, conn)
+    finally:
+        await conn.close()
 
-        # Ban check
-        if await is_user_banned(conn, user_id):
-            await handle_banned_user(message)
-            return
 
-        # Log user action
-        await log_user_action(conn, user_id, "/change_lang command used")
-
-        # Check for a ban before performing any actions
-        if await is_user_banned(conn, user_id):
-            await handle_banned_user(message)
-            return
-
-        language_buttons = []
-        for lang_code, translation_data in translations.items():
-            language_buttons.append(
-                InlineKeyboardButton(text=translation_data["language_name"], callback_data=lang_code)
-            )
-        keyboard_markup = InlineKeyboardMarkup(inline_keyboard=[language_buttons])
-
-        # Send the message and store its ID in the state
-        lang_message = await message.answer(
-            await get_translation(conn, user_id, "choose_language"), reply_markup=keyboard_markup
-        )
-
-        # Save the IDs of the language message and user's command message
-        await state.update_data(lang_message_id=lang_message.message_id, user_command_message_id=message.message_id)
-
-        await state.set_state(Form.choosing_language)
+@dp.callback_query(F.data == "choose_language")
+async def change_language_via_button(callback_query: types.CallbackQuery, state: FSMContext):
+    conn = await create_database_connection()
+    try:
+        user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        await execute_change_language_logic(callback_query.message, user_id, state, conn)
     finally:
         await conn.close()
 
@@ -230,6 +236,12 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
             wait_message = translation.format(minutes=minutes, sec=seconds)
             await send_wait_time_message(callback_query, user_id, wait_message)
             return
+
+        await bot.edit_message_reply_markup(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            reply_markup=None
+        )
 
         # If the limit is not reached, continue processing
         response_text = f"{escape_markdown(await get_translation(conn, user_id, 'keys_generated_ok'))}\n\n"
@@ -393,5 +405,49 @@ async def handle_banned_user(message: types.Message):
                 )
                 return
         await bot.send_message(chat_id, await get_translation(conn, user_id, "ban_message"))
+    finally:
+        await conn.close()
+
+
+@dp.callback_query(F.data == "settings")
+async def show_settings_menu(callback_query: types.CallbackQuery):
+    conn = await create_database_connection()
+    try:
+        user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+
+        # Ban check
+        if await is_user_banned(conn, user_id):
+            await handle_banned_user(callback_query.message)
+            return
+
+        await log_user_action(conn, user_id, "Settings menu opened")
+
+        await bot.edit_message_reply_markup(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            reply_markup=await get_settings_menu(conn, user_id)
+        )
+    finally:
+        await conn.close()
+
+
+@dp.callback_query(F.data == "back_to_main")
+async def back_to_main_menu(callback_query: types.CallbackQuery):
+    conn = await create_database_connection()
+    try:
+        user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+
+        # Ban check
+        if await is_user_banned(conn, user_id):
+            await handle_banned_user(callback_query.message)
+            return
+
+        await log_user_action(conn, user_id, "Return to main menu")
+
+        await bot.edit_message_reply_markup(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            reply_markup=await get_action_buttons(conn, user_id)
+        )
     finally:
         await conn.close()
