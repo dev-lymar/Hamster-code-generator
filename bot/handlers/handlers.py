@@ -14,7 +14,11 @@ from database.database import (get_session, get_or_create_user, update_user_lang
 from keyboards.inline import get_action_buttons, get_settings_menu, create_language_keyboard
 from utils.helpers import load_translations, get_translation, escape_markdown, get_remaining_time
 from states.form import Form
-from config import GROUP_CHAT_ID
+from config import bot, GROUP_CHAT_ID
+
+
+# Mapping between forwarded message IDs and user IDs
+message_user_mapping = {}
 
 translations = load_translations()
 
@@ -331,17 +335,31 @@ async def send_wait_time_message(callback_query: types.CallbackQuery, user_id: i
 @dp.message(F.text)
 async def handle_message(message: types.Message, state: FSMContext):
     async with await get_session() as session:
-        user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
+        user_id = message.from_user.id
 
-        # Logging a user's message
+        # Logging the receipt of a message
+        logging.info(f"Received message from {message.from_user.username}: {message.text}")
+
+        # Check whether the message is a reply to a forwarded message
+        if message.reply_to_message and message.reply_to_message.message_id in message_user_mapping:
+            original_user_id = message_user_mapping[message.reply_to_message.message_id]
+            logging.info(f"Message is a reply from admin. Forwarding to user {original_user_id}.")
+            await bot.send_message(chat_id=original_user_id, text=message.text)
+            return
+
+        # If the message came from a group, skip it
+        if message.chat.id == GROUP_CHAT_ID:
+            logging.info("Message received from the group chat, skipping response_text.")
+            return
+
         await log_user_action(session, user_id, f"User message: {message.text}")
 
-        # Forward to admins
+        # Forwarding message to administrators
         if not await is_admin(user_id):
             await forward_message_to_admins(message)
 
-        # Response to user post
-        await message.answer(await get_translation(user_id, "default_response"))
+        response_text = await get_translation(user_id, "default_response")
+        await message.answer(response_text)
 
 
 # Handling banned users
@@ -410,30 +428,36 @@ async def back_to_main_menu(callback_query: types.CallbackQuery):
 # Forward a message to all admins and optionally to a group chat
 async def forward_message_to_admins(message: Message):
     admin_chat_ids = await get_admin_chat_ids()
-
     tasks = []
+    message_ids = {}
+
     # Forward the message to all admins
     for admin_chat_id in admin_chat_ids:
         logging.info(f"Forwarding message from {message.chat.username} to admin {admin_chat_id}")
-        tasks.append(
-            bot.forward_message(
-                chat_id=admin_chat_id,
-                from_chat_id=message.chat.id,
-                message_id=message.message_id
-            )
+        task = bot.forward_message(
+            chat_id=admin_chat_id,
+            from_chat_id=message.chat.id,
+            message_id=message.message_id
         )
+        tasks.append(task)
+
     # Forward the message to the group chat if GROUP_CHAT_ID is defined
     if GROUP_CHAT_ID:
         logging.info(f"Forwarding message from {message.chat.username} to group {GROUP_CHAT_ID}")
-        tasks.append(
-            bot.forward_message(
-                chat_id=GROUP_CHAT_ID,
-                from_chat_id=message.chat.id,
-                message_id=message.message_id
-            )
+        task = bot.forward_message(
+            chat_id=GROUP_CHAT_ID,
+            from_chat_id=message.chat.id,
+            message_id=message.message_id
         )
+        tasks.append(task)
 
     results = await asyncio.gather(*tasks, return_exceptions=True)
+
+    # Save the message IDs to allow admins to reply
+    for admin_chat_id, result in zip(admin_chat_ids + [GROUP_CHAT_ID], results):
+        if isinstance(result, types.Message):
+            message_ids[admin_chat_id] = result.message_id
+            message_user_mapping[result.message_id] = message.from_user.id
 
     # Handle any exceptions that were raised during execution
     for result in results:
@@ -444,6 +468,8 @@ async def forward_message_to_admins(message: Message):
             )
             logging.error(error_message)
             await send_error_to_admins(admin_chat_ids, error_message)
+
+    return message_ids
 
 
 # Send an error message to all admins
