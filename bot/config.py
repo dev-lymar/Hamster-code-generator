@@ -29,10 +29,13 @@ games = [
 ]
 
 status_limits = {
-    'free': {'daily_limit': 10, 'interval_minutes': 10},
-    'friend': {'daily_limit': 25, 'interval_minutes': 10},
+    'free': {'daily_limit': 5, 'interval_minutes': 10},
+    'friend': {'daily_limit': 15, 'interval_minutes': 10},
     'premium': {'daily_limit': 50, 'interval_minutes': 10}
 }
+
+# Forwarding message to group
+GROUP_CHAT_ID = int(os.getenv("GROUP_CHAT_ID", 0))
 
 
 async def set_commands(bot: Bot, user_id: int, language_code: str):

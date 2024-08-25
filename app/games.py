@@ -18,7 +18,7 @@ game_configs = [
         'promo_id': '43e35910-c168-4634-ad4f-52fd764a843f',
         'base_delay': 20,
         'attempts': 30,
-        'copies': 12,
+        'copies': 11,
     },
     {
         'name': 'Chain Cube 2048',
@@ -34,7 +34,7 @@ game_configs = [
         'promo_id': 'fe693b26-b342-4159-8808-15e3ff7f8767',
         'base_delay': 130,
         'attempts': 30,
-        'copies': 22,
+        'copies': 17,
     },
     {
         'name': 'Train Miner',
@@ -58,7 +58,7 @@ game_configs = [
         'promo_id': '61308365-9d16-4040-8bb0-2f4a4c69074c',
         'base_delay': 20,
         'attempts': 20,
-        'copies': 10,
+        'copies': 9,
     },
     {
         'name': 'Polysphere',
@@ -66,7 +66,7 @@ game_configs = [
         'promo_id': '2aaf5aee-2cbc-47ec-8a3f-0962cc14bc71',
         'base_delay': 20,
         'attempts': 25,
-        'copies': 22,
+        'copies': 17,
     },
     {
         'name': 'Mow and Trim',
@@ -74,7 +74,7 @@ game_configs = [
         'promo_id': 'ef319a80-949a-492e-8ee0-424fb5fc20a6',
         'base_delay': 20,
         'attempts': 20,
-        'copies': 10,
+        'copies': 6,
     },
     {
         'name': 'Mud Racing',
@@ -82,7 +82,7 @@ game_configs = [
         'promo_id': '8814a785-97fb-4177-9193-ca4180ff9da8',
         'base_delay': 20,
         'attempts': 25,
-        'copies': 22,
+        'copies': 6,
     }
 ]
 
