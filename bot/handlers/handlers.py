@@ -4,12 +4,13 @@ import random
 import logging
 from aiogram import types, F
 from aiogram.fsm.context import FSMContext
-from aiogram.types import FSInputFile
+from aiogram.types import FSInputFile, Message
 from datetime import datetime, timezone
 from config import bot, dp, BOT_ID, games, status_limits, set_commands
 from database.database import (get_session, get_or_create_user, update_user_language, log_user_action,
                                reset_daily_keys_if_needed, get_user_language,
-                               get_oldest_keys, update_keys_generated, delete_keys, get_user_status_info)
+                               get_oldest_keys, update_keys_generated, delete_keys, get_user_status_info,
+                               is_admin, get_admin_chat_ids)
 from keyboards.inline import get_action_buttons, get_settings_menu, create_language_keyboard
 from utils.helpers import load_translations, get_translation, escape_markdown, get_remaining_time
 from states.form import Form
@@ -334,6 +335,10 @@ async def handle_message(message: types.Message, state: FSMContext):
         # Logging a user's message
         await log_user_action(session, user_id, f"User message: {message.text}")
 
+        # Forward to admins
+        if not await is_admin(user_id):
+            await forward_message_to_admins(message)
+
         # Response to user post
         await message.answer(await get_translation(user_id, "default_response"))
 
@@ -365,6 +370,7 @@ async def handle_banned_user(message: types.Message):
         await bot.send_message(chat_id, await get_translation(user_id, "ban_message"))
 
 
+# Settings button
 @dp.callback_query(F.data == "settings")
 async def show_settings_menu(callback_query: types.CallbackQuery):
     async with await get_session() as session:
@@ -385,6 +391,7 @@ async def show_settings_menu(callback_query: types.CallbackQuery):
         )
 
 
+# Back to main menu(for settings)
 @dp.callback_query(F.data == "back_to_main")
 async def back_to_main_menu(callback_query: types.CallbackQuery):
     async with await get_session() as session:
@@ -396,4 +403,16 @@ async def back_to_main_menu(callback_query: types.CallbackQuery):
             chat_id=callback_query.message.chat.id,
             message_id=callback_query.message.message_id,
             reply_markup=await get_action_buttons(session, user_id)
+        )
+
+
+# Forwarding message to administrators
+async def forward_message_to_admins(message: Message):
+    admin_chat_ids = await get_admin_chat_ids()
+
+    for admin_chat_id in admin_chat_ids:
+        await bot.forward_message(
+            chat_id=admin_chat_id,
+            from_chat_id=message.chat.id,
+            message_id=message.message_id
         )

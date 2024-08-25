@@ -174,3 +174,24 @@ async def get_user_status_info(session: AsyncSession, user_id: int):
         .filter(User.user_id == user_id)
     )
     return result.one_or_none()
+
+
+# Check if a user is admin
+async def is_admin(user_id: int) -> bool:
+    async with await get_session() as session:
+        user_info = await session.execute(
+            select(User).where(User.user_id == user_id)
+        )
+        user = user_info.scalars().first()
+        if user and user.user_role == 'admin':
+            return True
+        return False
+
+
+# Get admin chat IDs
+async def get_admin_chat_ids():
+    async with await get_session() as session:
+        result = await session.execute(
+            select(User.chat_id).where(User.user_role == 'admin')
+        )
+        return [row[0] for row in result.fetchall()]
