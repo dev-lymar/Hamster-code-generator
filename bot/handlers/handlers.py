@@ -14,6 +14,7 @@ from database.database import (get_session, get_or_create_user, update_user_lang
 from keyboards.inline import get_action_buttons, get_settings_menu, create_language_keyboard
 from utils.helpers import load_translations, get_translation, escape_markdown, get_remaining_time
 from states.form import Form
+from config import GROUP_CHAT_ID
 
 translations = load_translations()
 
@@ -406,13 +407,49 @@ async def back_to_main_menu(callback_query: types.CallbackQuery):
         )
 
 
-# Forwarding message to administrators
+# Forward a message to all admins and optionally to a group chat
 async def forward_message_to_admins(message: Message):
     admin_chat_ids = await get_admin_chat_ids()
 
+    tasks = []
+    # Forward the message to all admins
     for admin_chat_id in admin_chat_ids:
-        await bot.forward_message(
-            chat_id=admin_chat_id,
-            from_chat_id=message.chat.id,
-            message_id=message.message_id
+        logging.info(f"Forwarding message from {message.chat.username} to admin {admin_chat_id}")
+        tasks.append(
+            bot.forward_message(
+                chat_id=admin_chat_id,
+                from_chat_id=message.chat.id,
+                message_id=message.message_id
+            )
         )
+    # Forward the message to the group chat if GROUP_CHAT_ID is defined
+    if GROUP_CHAT_ID:
+        logging.info(f"Forwarding message from {message.chat.username} to group {GROUP_CHAT_ID}")
+        tasks.append(
+            bot.forward_message(
+                chat_id=GROUP_CHAT_ID,
+                from_chat_id=message.chat.id,
+                message_id=message.message_id
+            )
+        )
+
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+
+    # Handle any exceptions that were raised during execution
+    for result in results:
+        if isinstance(result, Exception):
+            error_message = (
+                f"Failed to forward message from {message.chat.username} to group {GROUP_CHAT_ID} "
+                f"due to error: {str(result)[:50]}"
+            )
+            logging.error(error_message)
+            await send_error_to_admins(admin_chat_ids, error_message)
+
+
+# Send an error message to all admins
+async def send_error_to_admins(admin_chat_ids: list[int], error_message: str) -> None:
+    tasks = [
+        bot.send_message(chat_id=admin_chat_id, text=error_message)
+        for admin_chat_id in admin_chat_ids
+    ]
+    await asyncio.gather(*tasks)
