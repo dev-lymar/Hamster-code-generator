@@ -14,7 +14,7 @@ class User(Base):
     first_name = Column(String(100))
     last_name = Column(String(100))
     username = Column(String(100))
-    registration_date = Column(DateTime, default=datetime.utcnow())
+    registration_date = Column(DateTime(timezone=True), default=datetime.utcnow)
     language_code = Column(String(10))
     preferred_currency = Column(String(3))
     is_banned = Column(Boolean, default=False)
@@ -25,7 +25,7 @@ class User(Base):
     is_subscribed = Column(Boolean, default=True)
     daily_requests_count = Column(Integer, default=0)
     last_reset_date = Column(Date, default=datetime.utcnow().date)
-    last_request_time = Column(DateTime)
+    last_request_time = Column(DateTime(timezone=True))
     total_keys_generated = Column(Integer, default=0)
     notes = Column(Text)
 
@@ -36,4 +36,4 @@ class UserLog(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(BigInteger, nullable=False)
     action = Column(Text)
-    timestamp = Column(DateTime, default=datetime.utcnow())
+    timestamp = Column(DateTime(timezone=True), default=datetime.utcnow)
