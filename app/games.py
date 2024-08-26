@@ -29,14 +29,6 @@ game_configs = [
         'copies': 4,
     },
     {
-        'name': 'My Clone Army',
-        'app_token': '74ee0b5b-775e-4bee-974f-63e7f4d5bacb',
-        'promo_id': 'fe693b26-b342-4159-8808-15e3ff7f8767',
-        'base_delay': 130,
-        'attempts': 30,
-        'copies': 0,
-    },
-    {
         'name': 'Train Miner',
         'app_token': '82647f43-3f87-402d-88dd-09a90025313f',
         'promo_id': 'c4480ac7-e178-4973-8061-9ed5b2e17954',
