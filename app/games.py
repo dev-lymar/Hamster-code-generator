@@ -34,7 +34,7 @@ game_configs = [
         'promo_id': 'fe693b26-b342-4159-8808-15e3ff7f8767',
         'base_delay': 130,
         'attempts': 30,
-        'copies': 17,
+        'copies': 0,
     },
     {
         'name': 'Train Miner',

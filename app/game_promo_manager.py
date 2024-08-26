@@ -1,16 +1,14 @@
 import asyncio
 import aiohttp
+import os
 import time
 import random
 import uuid
 import logging.handlers
-import psycopg2
-from psycopg2 import sql
-from dotenv import load_dotenv
-import os
 from urllib.parse import urlparse
-
-load_dotenv()
+from sqlalchemy.ext.asyncio import AsyncSession
+from database import get_session
+from models.game_models import BikeRide3D, ChainCube2048, TrainMiner, MergeAway, TwerkRace3D, Polysphere, MowAndTrim, MudRacing
 
 # Configuring logging
 log_directory = "logs"
@@ -25,50 +23,19 @@ logging.basicConfig(
     handlers=[
         logging.StreamHandler(),
         logging.handlers.RotatingFileHandler(
-            log_file, maxBytes=10*1024*1024, backupCount=5
+            log_file, maxBytes=10 * 1024 * 1024, backupCount=5
         )
     ]
 )
 
 logger = logging.getLogger(__name__)
 
-# DB
-DATABASE_NAME = os.getenv("DATABASE_NAME")
-DATABASE_USER = os.getenv("DATABASE_USER")
-DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
-DATABASE_HOST = os.getenv("DATABASE_HOST")
-DATABASE_PORT = os.getenv("DATABASE_PORT")
-
-
-def create_database():
-    conn = psycopg2.connect(
-        dbname=DATABASE_NAME,
-        user=DATABASE_USER,
-        password=DATABASE_PASSWORD,
-        host=DATABASE_HOST,
-        port=DATABASE_PORT
-    )
-    return conn
-
-
-def create_table_for_game(conn, game_name):
-    table_name = game_name.replace(" ", "_").lower()
-    cursor = conn.cursor()
-    cursor.execute(sql.SQL('''
-        CREATE TABLE IF NOT EXISTS {} (
-            id SERIAL PRIMARY KEY,
-            promo_code TEXT NOT NULL,
-            created_at TIMESTAMPTZ DEFAULT NOW()
-        )
-    ''').format(sql.Identifier(table_name)))
-    conn.commit()
-
 
 class GamePromo:
     def __init__(self, game):
         self.game = game
         self.token = None
-        self.session = aiohttp.ClientSession()  # Create a session once
+        self.session = aiohttp.ClientSession()
 
     async def close_session(self):
         await self.session.close()
@@ -82,7 +49,6 @@ class GamePromo:
         client_id = await self.generate_client_id()
         proxy = self.game['proxy']
 
-        # Parsing URL to extract the login and password
         parsed_url = urlparse(f"http://{proxy}")
         username = parsed_url.username
         password = parsed_url.password
@@ -136,14 +102,13 @@ class GamePromo:
                             'Content-Type': 'application/json; charset=utf-8',
                         }
                 ) as response:
-                    # Check if the response is HTML
                     if 'text/html' in response.headers.get('Content-Type', ''):
                         error_text = await response.text()
                         logger.error(
                             f"Server Error: {response.status} - {self.game['name']} proxy IP: {ip}, Port: {port} - Unexpected HTML response")
                         logger.error(
                             f"HTML Response: {error_text[:500]}...")
-                        continue  # Let's move on to the next attempt
+                        continue
 
                     if response.status != 200:
                         error_text = await response.text()
@@ -204,38 +169,50 @@ class GamePromo:
                 await asyncio.sleep(random.uniform(1, 3.5))
         return response['promoCode']
 
+    async def save_code_to_db(self, code_data: str, game_name: str):
+        session = await get_session()
+        try:
+            table_mapping = {
+                'Bike Ride 3D': BikeRide3D,
+                'Chain Cube 2048': ChainCube2048,
+                'Train Miner': TrainMiner,
+                'Merge Away': MergeAway,
+                'Twerk Race 3D': TwerkRace3D,
+                'Polysphere': Polysphere,
+                'Mow and Trim': MowAndTrim,
+                'Mud Racing': MudRacing
+            }
+            GameTable = table_mapping.get(game_name)
+            if GameTable:
+                table_entry = GameTable(promo_code=code_data)
+                session.add(table_entry)
+                await session.commit()
+                logger.info(f"--KEY-- {code_data} saved in table {game_name.replace(' ', '_').lower()}")
+        except Exception as e:
+            logger.error(f"Failed to save promo code {code_data} for game {game_name}: {e}")
+            await session.rollback()
+        finally:
+            await session.close()
+
     async def gen_promo_code(self):
         await self.login_client()
 
         if await self.register_event():
-            return await self.create_code()
+            promo_code = await self.create_code()
+            if promo_code:
+                await self.save_code_to_db(promo_code, self.game['name'])
+            return promo_code
         return None
 
 
 async def gen(game):
-    table_name = game['name'].replace(" ", "_").lower()
     promo = GamePromo(game)
 
-    while True:
-        code_data = await promo.gen_promo_code()
+    try:
+        while True:
+            code_data = await promo.gen_promo_code()
 
-        if code_data:
-            conn = create_database()
-            try:
-                cursor = conn.cursor()
-                cursor.execute(sql.SQL("INSERT INTO {} (promo_code) VALUES (%s)").format(sql.Identifier(table_name)),
-                               (code_data,))
-                conn.commit()
-                logger.info(f"--KEY-- {code_data} generated and stored in a table {table_name}")
-            except Exception as e:
-                parsed_url = urlparse(f"http://{game['proxy']}")
-                ip = parsed_url.hostname
-                port = parsed_url.port
-                logger.error(f"Error saving key: {game['name']} proxy: {ip}:{port} - {e}")
-            finally:
-                cursor.close()
-                conn.close()
-        # Add a short pause before next generation
-        await asyncio.sleep(1)
-
-    await promo.close_session()
+            if code_data:
+                await asyncio.sleep(1)
+    finally:
+        await promo.close_session()
