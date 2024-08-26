@@ -201,7 +201,7 @@ async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
 # Handling of "get_keys" button pressing
 @dp.callback_query(F.data == "get_keys")
 async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
-    async with await get_session() as session:
+    async with (await get_session()) as session:
         user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
         await callback_query.answer()
 
@@ -234,8 +234,10 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
             reply_markup=None
         )
 
-        tasks = [get_oldest_keys(session, game) for game in games]
-        keys_list = await asyncio.gather(*tasks)
+        keys_list = []
+        for game in games:
+            keys = await get_oldest_keys(session, game)
+            keys_list.append(keys)
 
         response_text = f"{escape_markdown(await get_translation(user_id, 'keys_generated_ok'))}\n\n"
         total_keys_in_request = 0

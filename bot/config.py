@@ -20,7 +20,6 @@ games = [
     'Bike Ride 3D',
     'Train Miner',
     'Chain Cube 2048',
-    'My Clone Army',
     'Merge Away',
     'Twerk Race 3D',
     'Polysphere',
