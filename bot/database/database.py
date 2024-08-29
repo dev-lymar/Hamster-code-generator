@@ -13,7 +13,8 @@ from .models import Base, User, UserLog
 load_dotenv()
 
 # Database connection
-DATABASE_URL = f"postgresql+asyncpg://{os.getenv('DATABASE_USER')}:{os.getenv('DATABASE_PASSWORD')}@{os.getenv('DATABASE_HOST')}:{os.getenv('DATABASE_PORT')}/{os.getenv('DATABASE_NAME')}"
+DATABASE_URL = (f"postgresql+asyncpg://{os.getenv('DATABASE_USER')}:{os.getenv('DATABASE_PASSWORD')}@"
+                f"{os.getenv('DATABASE_HOST')}:{os.getenv('DATABASE_PORT')}/{os.getenv('DATABASE_NAME')}")
 
 # Creating an asynchronous engine
 engine = create_async_engine(
@@ -170,7 +171,8 @@ async def check_user_limits(session: AsyncSession, user_id: int, status_limits: 
 # Check for ban, status, user limits
 async def get_user_status_info(session: AsyncSession, user_id: int):
     result = await session.execute(
-        select(User.is_banned, User.last_request_time, User.user_status, User.daily_requests_count, User.last_reset_date)
+        select(User.is_banned, User.last_request_time, User.user_status,
+               User.daily_requests_count, User.last_reset_date)
         .filter(User.user_id == user_id)
     )
     return result.one_or_none()

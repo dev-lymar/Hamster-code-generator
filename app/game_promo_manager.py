@@ -6,7 +6,6 @@ import random
 import uuid
 import logging.handlers
 from urllib.parse import urlparse
-from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_session
 from models.game_models import (BikeRide3D, ChainCube2048, TrainMiner, MergeAway,
                                 TwerkRace3D, Polysphere, MowAndTrim, MudRacing, CafeDash)
@@ -106,7 +105,8 @@ class GamePromo:
                     if 'text/html' in response.headers.get('Content-Type', ''):
                         error_text = await response.text()
                         logger.error(
-                            f"Server Error: {response.status} - {self.game['name']} proxy IP: {ip}, Port: {port} - Unexpected HTML response")
+                            f"Server Error: {response.status} - {self.game['name']} proxy IP: "
+                            f"{ip}, Port: {port} - Unexpected HTML response")
                         logger.error(
                             f"HTML Response: {error_text[:500]}...")
                         continue

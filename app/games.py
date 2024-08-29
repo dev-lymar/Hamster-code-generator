@@ -104,7 +104,8 @@ for config in game_configs:
     for i in range(config['copies']):
         if proxy_index >= len(proxies):
             raise ValueError(
-                f"Not enough proxies for game copies: {config['name']} needs {config['copies']} copies, but only {len(proxies)} proxies are available.")
+                f"Not enough proxies for game copies: {config['name']} needs {config['copies']} copies, "
+                f"but only {len(proxies)} proxies are available.")
 
         game_copy = {
             'name': config['name'],

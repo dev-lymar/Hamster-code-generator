@@ -3,7 +3,7 @@ import logging.handlers
 import os
 from config import bot, dp
 from database.database import init_db, close_db
-from handlers import handlers
+from handlers import handlers  # noqa: F401
 
 # Set up logging configuration
 log_directory = os.path.join(os.path.dirname(__file__), 'logs')

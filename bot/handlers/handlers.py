@@ -6,7 +6,7 @@ from aiogram import types, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import FSInputFile, Message
 from datetime import datetime, timezone
-from config import bot, dp, BOT_ID, games, status_limits, set_commands
+from config import bot, dp, BOT_ID, games, status_limits, set_commands, GROUP_CHAT_ID
 from database.database import (get_session, get_or_create_user, update_user_language, log_user_action,
                                reset_daily_keys_if_needed, get_user_language,
                                get_oldest_keys, update_keys_generated, delete_keys, get_user_status_info,
@@ -14,8 +14,6 @@ from database.database import (get_session, get_or_create_user, update_user_lang
 from keyboards.inline import get_action_buttons, get_settings_menu, create_language_keyboard
 from utils.helpers import load_translations, get_translation, escape_markdown, get_remaining_time
 from states.form import Form
-from config import bot, GROUP_CHAT_ID
-
 
 # Mapping between forwarded message IDs and user IDs
 message_user_mapping = {}
@@ -141,7 +139,7 @@ async def execute_change_language_logic(message: types.Message, user_id: int, st
 # Change language command
 @dp.message(F.text == "/change_lang")
 async def change_language(message: types.Message, state: FSMContext):
-    async with await get_session() as session:
+    async with await get_session() as _:
         user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
         await execute_change_language_logic(message, user_id, state)
 
@@ -149,8 +147,10 @@ async def change_language(message: types.Message, state: FSMContext):
 @dp.callback_query(F.data == "choose_language")
 async def change_language_via_button(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.answer()
-    async with await get_session() as session:
-        user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+    async with await get_session() as _:
+        user_id = (
+            callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        )
         await execute_change_language_logic(callback_query.message, user_id, state)
 
 
@@ -158,7 +158,9 @@ async def change_language_via_button(callback_query: types.CallbackQuery, state:
 @dp.callback_query(F.data.in_(translations.keys()))
 async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
     async with await get_session() as session:
-        user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        user_id = (
+            callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        )
 
         # Ban check
         user_info = await get_user_status_info(session, user_id)
@@ -203,7 +205,9 @@ async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
 @dp.callback_query(F.data == "get_keys")
 async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
     async with (await get_session()) as session:
-        user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        user_id = (
+            callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        )
         await callback_query.answer()
 
         user_info = await get_user_status_info(session, user_id)
@@ -396,7 +400,9 @@ async def handle_banned_user(message: types.Message):
 @dp.callback_query(F.data == "settings")
 async def show_settings_menu(callback_query: types.CallbackQuery):
     async with await get_session() as session:
-        user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        user_id = (
+            callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        )
 
         # Ban check
         user_info = await get_user_status_info(session, user_id)
@@ -417,7 +423,9 @@ async def show_settings_menu(callback_query: types.CallbackQuery):
 @dp.callback_query(F.data == "back_to_main")
 async def back_to_main_menu(callback_query: types.CallbackQuery):
     async with await get_session() as session:
-        user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        user_id = (
+            callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        )
 
         await log_user_action(session, user_id, "Return to main menu")
 
