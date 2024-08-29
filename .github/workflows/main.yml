@@ -31,6 +31,8 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           source: "."
           target: "/home/ubuntu/Hamster-code-generator"
+      - name: Wait for SCP completion
+        run: sleep 10
 
       - name: Create .env file
         run: echo "${{ secrets.ENV_CONTENT }}" > /home/ubuntu/Hamster-code-generator/.env
