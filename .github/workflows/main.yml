@@ -42,6 +42,9 @@ jobs:
           script: |
             cd /home/ubuntu/Hamster-code-generator
             
+            source .venv/bin/activate
+            pip install -r requirements.txt
+
             ps aux | grep "python3 main.py" | grep -v grep | awk '{print $2}' | xargs -r kill -9
 
             docker-compose stop
