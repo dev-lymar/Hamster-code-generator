@@ -148,6 +148,7 @@ async def change_language(message: types.Message, state: FSMContext):
 
 @dp.callback_query(F.data == "choose_language")
 async def change_language_via_button(callback_query: types.CallbackQuery, state: FSMContext):
+    await callback_query.answer()
     async with await get_session() as session:
         user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
         await execute_change_language_logic(callback_query.message, user_id, state)
