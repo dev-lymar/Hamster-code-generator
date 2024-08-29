@@ -1,6 +1,7 @@
 aiogram==3.10.0
 alembic==1.13.2
 asyncpg==0.29.0
+flake8==7.1.1
 python-dotenv==1.0.1
 psycopg2-binary==2.9.9
 sqlalchemy==2.0.32
