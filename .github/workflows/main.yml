@@ -2,10 +2,6 @@ name: CI/CD
 
 on: push
 
-env:
-  MAJOR_VERSION: 1
-  MINOR_VERSION: ${{ github.run_number }}
-
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -69,8 +65,8 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v${{ env.MAJOR_VERSION }}.${{ env.MINOR_VERSION }}.0
-          name: "Release v${{ env.MAJOR_VERSION }}.${{ env.MINOR_VERSION }}.0"
+          tag: v1.0.0
+          name: "Release v1.0.0"
           body: |
             Initial Release: 
             Launch of the Hamster-Code-Generator, a bot designed for automated promo code farming. 
