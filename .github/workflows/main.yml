@@ -1,0 +1,84 @@
+name: CI/CD
+
+on: push
+
+env:
+  MAJOR_VERSION: 1
+  MINOR_VERSION: ${{ github.run_number }}
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install requirements
+        run: pip install -r requirements.txt
+      - name: Lint Flake8
+        run: flake8 .
+
+  build:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Copy repository contents via scp
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          port: ${{ secrets.PORT }}
+          key: ${{ secrets.SSHKEY }}
+          source: "."
+          target: "/home/ubuntu/Hamster-code-generator"
+
+      - name: Create .env file
+        run: echo "${{ secrets.ENV_CONTENT }}" > /home/ubuntu/Hamster-code-generator/.env
+
+      - name: Create proxies.txt file
+        run: echo "${{ secrets.PROXIES_CONTENT }}" > /home/ubuntu/Hamster-code-generator/app/proxies.txt
+
+      - name: Executing remote command
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          port: ${{ secrets.PORT }}
+          key: ${{ secrets.SSHKEY }}
+          script: |
+            cd /home/ubuntu/Hamster-code-generator
+            
+            ps aux | grep "python3 main.py" | grep -v grep | awk '{print $2}' | xargs -r kill -9
+
+            docker-compose stop
+            docker-compose up -d postgres backup
+            sleep 10
+            
+            alembic upgrade head || { echo "Alembic migration failed"; exit 1; }
+            
+            cd /home/ubuntu/Hamster-code-generator/bot
+            nohup python3 main.py > /dev/null 2>&1 &
+
+            cd /home/ubuntu/Hamster-code-generator/app
+            nohup python3 main.py > /dev/null 2>&1 &
+
+  create-release:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: v${{ env.MAJOR_VERSION }}.${{ env.MINOR_VERSION }}.0
+          name: "Release v${{ env.MAJOR_VERSION }}.${{ env.MINOR_VERSION }}.0"
+          body: |
+            Initial Release: 
+            Launch of the Hamster-Code-Generator, a bot designed for automated promo code farming. 
+            This release includes core features such as promo code generation, 
+            Telegram bot integration, and robust error handling with logging. 
+            The bot also supports a multilingual interface, allowing users to interact in their preferred language. 
+            Users can now easily generate and request promo codes through a seamless Telegram interface.
+          token: ${{ secrets.GITHUB_TOKEN }}

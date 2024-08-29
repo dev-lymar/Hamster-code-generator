@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:16.3-alpine
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backup:
+      image: postgres:16.3-alpine
+      volumes:
+        - postgres_backups:/backups
+      environment:
+        POSTGRES_USER: ${DATABASE_USER}
+        POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+        POSTGRES_DB: ${DATABASE_NAME}
+        PGPASSWORD: ${DATABASE_PASSWORD}
+      entrypoint: [ "sh", "-c", "crond -f & while true; do sleep 86400; done" ]
+      command: >
+        bash -c 'echo "0 0 * * * pg_dump -h postgres -U ${DATABASE_USER} ${DATABASE_NAME} > /backups/db_backup_$(date +\%Y-\%m-\%d).sql" > /etc/crontabs/root &&
+        crond'
+
+volumes:
+  postgres_data:
+  postgres_backups:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/ubuntu/Hamster-code-generator/backups
+      o: bind
