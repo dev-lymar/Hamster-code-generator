@@ -66,3 +66,10 @@ class MudRacing(GameTableBase):
     __table_args__ = (
         Index('ix_mud_racing_promo_code', 'promo_code'),
     )
+
+
+class CafeDash(GameTableBase):
+    __tablename__ = 'cafe_dash'
+    __table_args__ = (
+        Index('ix_cafe_dash_promo_code', 'promo_code'),
+    )

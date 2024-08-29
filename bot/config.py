@@ -24,7 +24,8 @@ games = [
     'Twerk Race 3D',
     'Polysphere',
     'Mud Racing',
-    'Mow and Trim'
+    'Mow and Trim',
+    'Cafe Dash'
 ]
 
 status_limits = {

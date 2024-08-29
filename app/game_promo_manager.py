@@ -8,7 +8,8 @@ import logging.handlers
 from urllib.parse import urlparse
 from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_session
-from models.game_models import BikeRide3D, ChainCube2048, TrainMiner, MergeAway, TwerkRace3D, Polysphere, MowAndTrim, MudRacing
+from models.game_models import (BikeRide3D, ChainCube2048, TrainMiner, MergeAway,
+                                TwerkRace3D, Polysphere, MowAndTrim, MudRacing, CafeDash)
 
 # Configuring logging
 log_directory = "logs"
@@ -180,7 +181,8 @@ class GamePromo:
                 'Twerk Race 3D': TwerkRace3D,
                 'Polysphere': Polysphere,
                 'Mow and Trim': MowAndTrim,
-                'Mud Racing': MudRacing
+                'Mud Racing': MudRacing,
+                'CafeDash': CafeDash
             }
             GameTable = table_mapping.get(game_name)
             if GameTable:

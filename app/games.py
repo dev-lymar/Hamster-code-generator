@@ -75,6 +75,14 @@ game_configs = [
         'base_delay': 20,
         'attempts': 25,
         'copies': 6,
+    },
+    {
+        'name': 'Cafe Dash',
+        'app_token': 'bc0971b8-04df-4e72-8a3e-ec4dc663cd11',
+        'promo_id': 'bc0971b8-04df-4e72-8a3e-ec4dc663cd11',
+        'base_delay': 23,
+        'attempts': 35,
+        'copies': 17,
     }
 ]
 
