@@ -33,15 +33,21 @@ def escape_markdown(text: str) -> str:
     return re.sub(r'([_*\[\]()~`>#+\-=|{}.!\\])', r'\\\1', text)
 
 
-def get_remaining_time(last_request_time: datetime, interval_minutes: int) -> tuple:
+def get_remaining_time(last_request_time, interval_minutes):
     if last_request_time is None:
-        return 0, 0  # If no requests have been made yet, return 0
+        return 0, 0
 
-    now = datetime.now(timezone.utc)
-    elapsed_time = now - last_request_time
-    remaining_time = timedelta(minutes=interval_minutes) - elapsed_time
+    # Ensure the current time is in UTC
+    current_time = datetime.now(timezone.utc)
 
-    if remaining_time.total_seconds() > 0:
-        minutes, seconds = divmod(int(remaining_time.total_seconds()), 60)
+    # Calculate the time when the next request can be made
+    next_allowed_time = last_request_time + timedelta(minutes=interval_minutes)
+    remaining_time = next_allowed_time - current_time
+    remaining_seconds = remaining_time.total_seconds()
+
+    if remaining_seconds > 0:
+        minutes = int(remaining_seconds // 60)
+        seconds = int(remaining_seconds % 60)
         return minutes, seconds
-    return 0, 0  # If the waiting time has elapsed, return 0
+    else:
+        return 0, 0

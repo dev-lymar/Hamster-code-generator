@@ -126,8 +126,8 @@ async def delete_keys(session: AsyncSession, game_name: str, keys: list):
 
 # Update key count and time of the last request
 async def update_keys_generated(session: AsyncSession, user_id: int, keys_generated: int):
-    current_date = datetime.now(timezone.utc).date()
-    current_time = datetime.now(timezone.utc).replace(tzinfo=None)
+    # Get the current time in UTC with timezone info
+    current_time = datetime.now(timezone.utc)
 
     await session.execute(
         update(User)
@@ -136,7 +136,7 @@ async def update_keys_generated(session: AsyncSession, user_id: int, keys_genera
             total_keys_generated=User.total_keys_generated + keys_generated,
             daily_requests_count=User.daily_requests_count + 1,
             last_request_time=current_time,
-            last_reset_date=current_date
+            last_reset_date=current_time.date()
         )
     )
     await session.commit()
