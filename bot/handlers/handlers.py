@@ -138,7 +138,7 @@ async def execute_change_language_logic(message: types.Message, user_id: int, st
         )
 
         # Saving message IDs in the state
-        await state.update_data(lang_message_id=lang_message.message_id)
+        await state.update_data(lang_message_id=lang_message.message_id, prev_message_id=message.message_id)
 
         await state.set_state(Form.choosing_language)
 
@@ -192,6 +192,8 @@ async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
         data = await state.get_data()
         if "lang_message_id" in data:
             await bot.delete_message(chat_id=callback_query.message.chat.id, message_id=data["lang_message_id"])
+        if "prev_message_id" in data:
+            await bot.delete_message(chat_id=callback_query.message.chat.id, message_id=data["prev_message_id"])
         if "user_command_message_id" in data:
             await bot.delete_message(chat_id=callback_query.message.chat.id, message_id=data["user_command_message_id"])
 
