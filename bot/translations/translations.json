@@ -19,7 +19,10 @@
     "no_keys_for": "🚫 No keys available for",
     "no_keys_available": "this game at the moment.",
     "wait_time_message": "⏳ Hold tight! You need to wait {minutes} min {sec} sec before trying again.",
-    "daily_limit_reached": "🚧 Whoa, slow down! You’ve hit today’s limit. Come back tomorrow for more fun. 😎"
+    "daily_limit_reached": "🚧 Whoa, slow down! You’ve hit today’s limit. Come back tomorrow for more fun. 😎",
+    "not_admin_message": "🚫 Oopsie! Trying to sneak into the admin panel, huh? Nice try, but you don't have the magic key! 🔑 If you think you should, holler at us!",
+    "admin_command_description": "👨‍💼💼 Admin panel"
+
   },
   "ru": {
     "language_name": "Русский",
@@ -41,7 +44,9 @@
     "no_keys_for": "🚫 Ключи для игры",
     "no_keys_available": "сейчас недоступны.",
     "wait_time_message": "⏳ Подождите {minutes} мин {sec} сек перед следующей попыткой.",
-    "daily_limit_reached": "🚧 Ого, притормозите! Вы достигли лимита на сегодня. Возвращайтесь завтра за новыми впечатлениями. 😎"
+    "daily_limit_reached": "🚧 Ого, притормозите! Вы достигли лимита на сегодня. Возвращайтесь завтра за новыми впечатлениями. 😎",
+    "not_admin_message": "🚫 Опа! Пытаетесь пробраться в админку? 😏 Но у вас нет волшебного ключа! 🔑 Думаете, это ошибка? Пишите нам!",
+    "admin_command_description": "👨‍💼💼 Админ панель"
   },
   "sk": {
     "language_name": "Slovenský",
@@ -62,7 +67,9 @@
     "no_keys_for": "🚫 Momentálne nemáme kľúče pre hru",
     "no_keys_available": "v tomto momente.",
     "wait_time_message": "⏳ Ešte chvíľu! Musíš počkať {minutes} minút {sec} sekúnd pred ďalším pokusom.",
-    "daily_limit_reached": "🚧 Wow, spomaľ! Dosiahol si dnešný limit. Vráť sa zajtra pre viac zábavy. 😎"
+    "daily_limit_reached": "🚧 Wow, spomaľ! Dosiahol si dnešný limit. Vráť sa zajtra pre viac zábavy. 😎",
+    "not_admin_message": "🚫 Ojoj! Snažíš sa dostať do admin panelu? 😏 Pekný pokus, ale nemáš čarovný kľúč! 🔑 Ak si myslíš, že je to omyl, ozvi sa nám!",
+    "admin_command_description": "👨‍💼💼 Admin panel"
   },
   "uk": {
     "language_name": "Українська",
@@ -83,6 +90,8 @@
     "no_keys_for": "🚫 Ключі для гри",
     "no_keys_available": "наразі недоступні.",
     "wait_time_message": "⏳ Зачекайте {minutes} хв {sec} сек перед наступною спробою.",
-    "daily_limit_reached": "🚧 Вау, сповільніться! Ви досягли денного ліміту. Повертайтесь завтра за новими враженнями. 😎"
+    "daily_limit_reached": "🚧 Вау, сповільніться! Ви досягли денного ліміту. Повертайтесь завтра за новими враженнями. 😎",
+    "not_admin_message": "🚫 Ого! Хочете підглядати за адмінкою? 😏 Гарна спроба, але у вас немає чарівного ключа! 🔑 Якщо вважаєте, що це помилка, пишіть нам!",
+    "admin_command_description": "👨‍💼💼 Админ панель"
   }
 }

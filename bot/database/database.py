@@ -171,7 +171,7 @@ async def check_user_limits(session: AsyncSession, user_id: int, status_limits: 
 # Check for ban, status, user limits
 async def get_user_status_info(session: AsyncSession, user_id: int):
     result = await session.execute(
-        select(User.is_banned, User.last_request_time, User.user_status,
+        select(User.is_banned, User.user_role, User.last_request_time, User.user_status,
                User.daily_requests_count, User.last_reset_date)
         .filter(User.user_id == user_id)
     )

@@ -283,6 +283,7 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
 # Function for sending a message when the daily limit is reached
 async def send_limit_reached_message(callback_query: types.CallbackQuery, user_id: int):
     async with await get_session() as session:
+        limit_message = await get_translation(user_id, "daily_limit_reached")
         image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "wait")
         if os.path.exists(image_dir) and os.path.isdir(image_dir):
             image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
@@ -291,16 +292,29 @@ async def send_limit_reached_message(callback_query: types.CallbackQuery, user_i
                 image_path = os.path.join(image_dir, random_image)
 
                 photo = FSInputFile(image_path)
-                await bot.send_photo(
-                    chat_id=callback_query.message.chat.id,
-                    photo=photo,
-                    caption=await get_translation(user_id, "daily_limit_reached"),
-                    reply_markup=await get_action_buttons(session, user_id)
-                )
-                return
+                if callback_query.message.photo:
+                    await bot.send_photo(
+                        chat_id=callback_query.message.chat.id,
+                        photo=photo,
+                        caption=limit_message,
+                        reply_markup=await get_action_buttons(session, user_id)
+                    )
+                    return
+                else:
+                    await bot.delete_message(
+                        chat_id=callback_query.message.chat.id,
+                        message_id=callback_query.message.message_id
+                    )
+                    await bot.send_photo(
+                        chat_id=callback_query.message.chat.id,
+                        photo=photo,
+                        caption=limit_message,
+                        parse_mode="HTML",
+                        reply_markup=await get_action_buttons(session, user_id)
+                    )
         await bot.send_message(
             chat_id=callback_query.message.chat.id,
-            text=await get_translation(user_id, "daily_limit_reached"),
+            text=limit_message,
             reply_markup=await get_action_buttons(session, user_id)
         )
 
@@ -322,14 +336,27 @@ async def send_wait_time_message(callback_query: types.CallbackQuery, user_id: i
                 photo = FSInputFile(image_path)
                 new_media = types.InputMediaPhoto(media=photo, caption=wait_message)
 
-                # Updating the image and signature in a post
-                await bot.edit_message_media(
-                    chat_id=chat_id,
-                    message_id=message_id,
-                    media=new_media,
-                    reply_markup=await get_action_buttons(session, user_id)
-                )
-                return
+                if callback_query.message.photo:
+                    # Updating the image and signature in a post
+                    await bot.edit_message_media(
+                        chat_id=chat_id,
+                        message_id=message_id,
+                        media=new_media,
+                        reply_markup=await get_action_buttons(session, user_id)
+                    )
+                    return
+                else:
+                    await bot.delete_message(
+                        chat_id=callback_query.message.chat.id,
+                        message_id=callback_query.message.message_id
+                    )
+                    await bot.send_photo(
+                        chat_id=callback_query.message.chat.id,
+                        photo=photo,
+                        caption=wait_message,
+                        parse_mode="HTML",
+                        reply_markup=await get_action_buttons(session, user_id)
+                    )
 
         # If image directory is missing or empty, update text or send a new text message
         if callback_query.message.text:
@@ -345,6 +372,41 @@ async def send_wait_time_message(callback_query: types.CallbackQuery, user_id: i
                 text=wait_message,
                 reply_markup=await get_action_buttons(session, user_id)
             )
+
+
+# Admin panel handler
+@dp.message(F.text == "/admin")
+async def admin_panel(message: types.Message, state: FSMContext):
+    async with await get_session() as session:
+        user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
+
+        # Is user admin
+        user_info = await get_user_status_info(session, user_id)
+        if user_info.is_banned:
+            await handle_banned_user(message)
+            return
+        if user_info.user_role != 'admin':
+            await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+            not_admin_message = await get_translation(user_id, "not_admin_message")
+            message_sent = await bot.send_message(
+                chat_id=message.chat.id,
+                text=not_admin_message,
+            )
+
+            await asyncio.sleep(2)
+            chose_action_message = await get_translation(user_id, "chose_action")
+            await bot.delete_message(
+                chat_id=message.chat.id,
+                message_id=message_sent.message_id,
+            )
+            await send_keys_menu(message, state)
+            return
+
+        admin_text = "Только для избранных !"
+        await bot.send_message(
+            chat_id=message.chat.id,
+            text=admin_text,
+        )
 
 
 # Handler of other messages (including ban check)
@@ -428,24 +490,39 @@ async def show_settings_menu(callback_query: types.CallbackQuery):
             if image_files:
                 random_image = random.choice(image_files)
                 image_path = os.path.join(image_dir, random_image)
-
-                # Create a new image object
                 photo = FSInputFile(image_path)
-                new_media = types.InputMediaPhoto(media=photo)
 
-                await bot.edit_message_media(
-                    chat_id=callback_query.message.chat.id,
-                    message_id=callback_query.message.message_id,
-                    media=new_media,
-                )
-                await bot.edit_message_caption(
-                    chat_id=callback_query.message.chat.id,
-                    message_id=callback_query.message.message_id,
-                    caption=settings_message,
-                    parse_mode="HTML",
-                    reply_markup=await get_settings_menu(session, user_id)
-                )
-        # If image directory is missing or empty, update text or send a new text message
+                if callback_query.message.photo:
+                    # If the previous message had a photo, update it
+                    new_media = types.InputMediaPhoto(media=photo)
+                    await bot.edit_message_media(
+                        chat_id=callback_query.message.chat.id,
+                        message_id=callback_query.message.message_id,
+                        media=new_media,
+                    )
+                    await bot.edit_message_caption(
+                        chat_id=callback_query.message.chat.id,
+                        message_id=callback_query.message.message_id,
+                        caption=settings_message,
+                        parse_mode="HTML",
+                        reply_markup=await get_settings_menu(session, user_id)
+                    )
+                else:
+                    # Delete the old message without a photo and send a new one
+                    await bot.delete_message(
+                        chat_id=callback_query.message.chat.id,
+                        message_id=callback_query.message.message_id
+                    )
+                    await bot.send_photo(
+                        chat_id=callback_query.message.chat.id,
+                        photo=photo,
+                        caption=settings_message,
+                        parse_mode="HTML",
+                        reply_markup=await get_settings_menu(session, user_id)
+                    )
+            return
+
+        # If no image directory or files, just edit the text message
         if callback_query.message.text:
             await bot.edit_message_text(
                 chat_id=callback_query.message.chat.id,
@@ -467,13 +544,22 @@ async def show_info_message(callback_query: types.CallbackQuery, state: FSMConte
 
         info_message = await get_translation(user_id, "info_message")
 
-        await bot.edit_message_caption(
-            chat_id=callback_query.message.chat.id,
-            message_id=callback_query.message.message_id,
-            caption=info_message,
-            parse_mode="HTML",
-            reply_markup=await get_main_from_info(session, user_id)
-        )
+        if callback_query.message.photo:
+            await bot.edit_message_caption(
+                chat_id=callback_query.message.chat.id,
+                message_id=callback_query.message.message_id,
+                caption=info_message,
+                parse_mode="HTML",
+                reply_markup=await get_main_from_info(session, user_id)
+            )
+        else:
+            await bot.edit_message_text(
+                chat_id=callback_query.message.chat.id,
+                message_id=callback_query.message.message_id,
+                text=info_message,
+                parse_mode="HTML",
+                reply_markup=await get_main_from_info(session, user_id)
+            )
 
 
 # Back to main menu(for settings)
@@ -497,19 +583,31 @@ async def back_to_main_menu(callback_query: types.CallbackQuery):
                 # Create a new image object
                 photo = FSInputFile(image_path)
                 new_media = types.InputMediaPhoto(media=photo)
-
-                await bot.edit_message_media(
-                    chat_id=callback_query.message.chat.id,
-                    message_id=callback_query.message.message_id,
-                    media=new_media,
-                )
-                await bot.edit_message_caption(
-                    chat_id=callback_query.message.chat.id,
-                    message_id=callback_query.message.message_id,
-                    caption=main_menu_text,
-                    parse_mode="HTML",
-                    reply_markup=await get_action_buttons(session, user_id)
-                )
+                if callback_query.message.photo:
+                    await bot.edit_message_media(
+                        chat_id=callback_query.message.chat.id,
+                        message_id=callback_query.message.message_id,
+                        media=new_media,
+                    )
+                    await bot.edit_message_caption(
+                        chat_id=callback_query.message.chat.id,
+                        message_id=callback_query.message.message_id,
+                        caption=main_menu_text,
+                        parse_mode="HTML",
+                        reply_markup=await get_action_buttons(session, user_id)
+                    )
+                else:
+                    await bot.delete_message(
+                        chat_id=callback_query.message.chat.id,
+                        message_id=callback_query.message.message_id
+                    )
+                    await bot.send_photo(
+                        chat_id=callback_query.message.chat.id,
+                        photo=photo,
+                        caption=main_menu_text,
+                        parse_mode="HTML",
+                        reply_markup=await get_action_buttons(session, user_id)
+                    )
 
 
 # Forward a message to all admins and optionally to a group chat
