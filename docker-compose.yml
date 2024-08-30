@@ -13,18 +13,17 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   backup:
-      image: postgres:16.3-alpine
-      volumes:
-        - postgres_backups:/backups
-      environment:
-        POSTGRES_USER: ${DATABASE_USER}
-        POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-        POSTGRES_DB: ${DATABASE_NAME}
-        PGPASSWORD: ${DATABASE_PASSWORD}
-      entrypoint: [ "sh", "-c", "crond -f & while true; do sleep 86400; done" ]
-      command: >
-        bash -c 'echo "0 0 * * * pg_dump -h postgres -U ${DATABASE_USER} ${DATABASE_NAME} > /backups/db_backup_$(date +\%Y-\%m-\%d).sql" > /etc/crontabs/root &&
-        crond'
+    image: postgres:16.3-alpine
+    volumes:
+      - postgres_backups:/backups
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+      PGPASSWORD: ${DATABASE_PASSWORD}
+    entrypoint: [ "sh", "-c", "crond -f & while true; do sleep 86400; done" ]
+    command: >
+      sh -c 'echo "0 0 * * * pg_dump -h postgres -U ${DATABASE_USER} ${DATABASE_NAME} > /backups/db_backup_$(date +\%Y-\%m-\%d).sql" > /etc/crontabs/root && crond'
 
 volumes:
   postgres_data:

@@ -80,7 +80,7 @@ game_configs = [
         'name': 'Gangs Wars',
         'app_token': 'b6de60a0-e030-48bb-a551-548372493523',
         'promo_id': 'c7821fa7-6632-482c-9635-2bd5798585f9',
-        'base_delay': 23,
+        'base_delay': 40,
         'attempts': 35,
         'copies': 35,
     }
