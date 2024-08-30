@@ -8,11 +8,11 @@ from aiogram.types import FSInputFile, Message
 from datetime import datetime, timezone
 from config import bot, dp, BOT_ID, games, status_limits, set_commands, GROUP_CHAT_ID
 from database.database import (get_session, get_or_create_user, update_user_language, log_user_action,
-                               reset_daily_keys_if_needed, get_user_language,
-                               get_oldest_keys, update_keys_generated, delete_keys, get_user_status_info,
-                               is_admin, get_admin_chat_ids)
-from keyboards.inline import (get_action_buttons, get_settings_menu,
-                              create_language_keyboard, get_main_from_info)
+                               reset_daily_keys_if_needed, get_user_language, get_oldest_keys, update_keys_generated,
+                               delete_keys, get_user_status_info, is_admin, get_admin_chat_ids,
+                               get_keys_count_for_games)
+from keyboards.inline import (get_action_buttons, get_settings_menu,create_language_keyboard,
+                              get_main_from_info, get_admin_panel, get_main_in_admin)
 from utils.helpers import load_translations, get_translation, escape_markdown, get_remaining_time
 from states.form import Form
 
@@ -385,6 +385,7 @@ async def admin_panel(message: types.Message, state: FSMContext):
         if user_info.is_banned:
             await handle_banned_user(message)
             return
+        # JOKE 🤡
         if user_info.user_role != 'admin':
             await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
             not_admin_message = await get_translation(user_id, "not_admin_message")
@@ -392,20 +393,63 @@ async def admin_panel(message: types.Message, state: FSMContext):
                 chat_id=message.chat.id,
                 text=not_admin_message,
             )
-
-            await asyncio.sleep(2)
-            chose_action_message = await get_translation(user_id, "chose_action")
+            await asyncio.sleep(3)
             await bot.delete_message(
                 chat_id=message.chat.id,
                 message_id=message_sent.message_id,
             )
+            not_admin_message_second = await get_translation(user_id, "not_admin_message_second")
+            message_sent = await bot.send_message(
+                chat_id=message.chat.id,
+                text=not_admin_message_second,
+            )
+            await asyncio.sleep(3)
+            await bot.delete_message(
+                chat_id=message.chat.id,
+                message_id=message_sent.message_id,
+            )
+
+            # Normal
             await send_keys_menu(message, state)
             return
 
-        admin_text = "Только для избранных !"
+        admin_text = await get_translation(user_id, "admin_description")
         await bot.send_message(
             chat_id=message.chat.id,
             text=admin_text,
+            reply_markup=await get_admin_panel(session, user_id)
+        )
+
+
+# Get keys button admin panel
+@dp.callback_query(F.data == "keys_admin_panel")
+async def keys_admin_panel(callback_query: types.CallbackQuery):
+    async with await get_session() as session:
+        user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.chat.id
+        keys_count_message = await get_keys_count_for_games(session, games)
+        await bot.edit_message_text(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            text=keys_count_message,
+            parse_mode="HTML",
+            reply_markup=await get_main_in_admin(session, user_id)
+        )
+
+
+# Back to main menu(for admin)
+@dp.callback_query(F.data == "back_to_admin_main")
+async def back_to_main_menu(callback_query: types.CallbackQuery):
+    async with await get_session() as session:
+        user_id = (
+            callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        )
+        admin_text = await get_translation(user_id, "admin_description")
+        await log_user_action(session, user_id, "Return to main admin menu")
+        await bot.edit_message_text(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            text=admin_text,
+            reply_markup=await get_admin_panel(session, user_id)
         )
 
 

@@ -20,9 +20,13 @@
     "no_keys_available": "this game at the moment.",
     "wait_time_message": "⏳ Hold tight! You need to wait {minutes} min {sec} sec before trying again.",
     "daily_limit_reached": "🚧 Whoa, slow down! You’ve hit today’s limit. Come back tomorrow for more fun. 😎",
-    "not_admin_message": "🚫 Oopsie! Trying to sneak into the admin panel, huh? Nice try, but you don't have the magic key! 🔑 If you think you should, holler at us!",
-    "admin_command_description": "👨‍💼💼 Admin panel"
-
+    "not_admin_message": "🚫 Oh, caught you trying to sneak into the admin panel? 😏 Nice try, but you don't have the magic key! 🔑 Think this is a mistake? I doubt it...",
+    "not_admin_message_second": "Wanted to feel all-powerful, huh? 👑 Dream on... maybe in another life!",
+    "admin_command_description": "👨‍💼💼 Admin panel",
+    "admin_description": "👨‍💼💼 Admin panel. Time to wield the power! (But shh... keep it secret!)",
+    "admin_keys_key": "🔑 Magic Keys",
+    "admin_users_key": "🚫🧑‍💻 User Wrangling",
+    "admin_notifications_key": "📢 Announce Chaos"
   },
   "ru": {
     "language_name": "Русский",
@@ -45,8 +49,13 @@
     "no_keys_available": "сейчас недоступны.",
     "wait_time_message": "⏳ Подождите {minutes} мин {sec} сек перед следующей попыткой.",
     "daily_limit_reached": "🚧 Ого, притормозите! Вы достигли лимита на сегодня. Возвращайтесь завтра за новыми впечатлениями. 😎",
-    "not_admin_message": "🚫 Опа! Пытаетесь пробраться в админку? 😏 Но у вас нет волшебного ключа! 🔑 Думаете, это ошибка? Пишите нам!",
-    "admin_command_description": "👨‍💼💼 Админ панель"
+    "not_admin_message": "🚫 Ой, а что мы тут потеряли ? 😏 Но у тебя нет волшебного ключа! 🔑 Думаешь, это ошибка? Я так не думаю...",
+    "not_admin_message_second": "Захотел почувствовать себя всевластным? 👑 Ага, мечтать не вредно...",
+    "admin_command_description": "👨‍💼💼 Админ панель",
+    "admin_description": "👨‍💼💼 Админ панель. Самое время почувствовать себя всевластным! (Только тс-с-с...)",
+    "admin_keys_key": "🔑 Волшебные ключи",
+    "admin_users_key": "🚫 Управление пользователями 🧑‍💻",
+    "admin_notifications_key": "📢 Создать хаос"
   },
   "sk": {
     "language_name": "Slovenský",
@@ -68,8 +77,13 @@
     "no_keys_available": "v tomto momente.",
     "wait_time_message": "⏳ Ešte chvíľu! Musíš počkať {minutes} minút {sec} sekúnd pred ďalším pokusom.",
     "daily_limit_reached": "🚧 Wow, spomaľ! Dosiahol si dnešný limit. Vráť sa zajtra pre viac zábavy. 😎",
-    "not_admin_message": "🚫 Ojoj! Snažíš sa dostať do admin panelu? 😏 Pekný pokus, ale nemáš čarovný kľúč! 🔑 Ak si myslíš, že je to omyl, ozvi sa nám!",
-    "admin_command_description": "👨‍💼💼 Admin panel"
+    "not_admin_message": "🚫 No čo to tu máme? 😏 Pokúšaš sa dostať do admin panelu? Bez čarovného kľúča to nejde! 🔑 Myslíš, že je to omyl? Pochybujem...",
+    "not_admin_message_second": "Chcel si sa cítiť všemocný? 👑 No, len snívaj ďalej... možno inokedy!",
+    "admin_command_description": "👨‍💼💼 Admin panel",
+    "admin_description": "👨‍💼💼 Admin panel. Čas prevziať moc! (Ale pssst... je to tajomstvo!)",
+    "admin_keys_key": "🔑 Magické kľúče",
+    "admin_users_key": "🚫🧑‍💻 Používateľské manévre",
+    "admin_notifications_key": "📢 Ohlásiť zmätok"
   },
   "uk": {
     "language_name": "Українська",
@@ -91,7 +105,12 @@
     "no_keys_available": "наразі недоступні.",
     "wait_time_message": "⏳ Зачекайте {minutes} хв {sec} сек перед наступною спробою.",
     "daily_limit_reached": "🚧 Вау, сповільніться! Ви досягли денного ліміту. Повертайтесь завтра за новими враженнями. 😎",
-    "not_admin_message": "🚫 Ого! Хочете підглядати за адмінкою? 😏 Гарна спроба, але у вас немає чарівного ключа! 🔑 Якщо вважаєте, що це помилка, пишіть нам!",
-    "admin_command_description": "👨‍💼💼 Админ панель"
+    "not_admin_message": "🚫 Ой, а що це ми тут шукаємо? 😏 Немає чарівного ключа — немає доступу! 🔑 Думаєш, це помилка? Дуже сумніваюся...",
+    "not_admin_message_second": "Захотілося відчути себе всесильним? 👑 Ну-ну, мрій далі...",
+    "admin_command_description": "👨‍💼💼 Админ панель",
+    "admin_description": "👨‍💼💼 Адмін панель. Час відчути себе всевладним! (Тільки тс-с-с...)",
+    "admin_keys_key": "🔑 Чарівні ключі",
+    "admin_users_key": "🚫🧑‍💻 Керування користувачами",
+    "admin_notifications_key": "📢 Оголосити хаос"
   }
 }

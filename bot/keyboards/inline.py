@@ -2,7 +2,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from utils.helpers import get_translation
 
 
-# Function that returns the button bar
+# Buttons that returns the button bar
 async def get_action_buttons(session, user_id):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=await get_translation(user_id, "get_keys_key"), callback_data="get_keys")],
@@ -11,7 +11,7 @@ async def get_action_buttons(session, user_id):
     ])
 
 
-# Function that returns settings menu
+# Buttons that returns settings menu
 async def get_settings_menu(session, user_id):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=await get_translation(
@@ -20,10 +20,28 @@ async def get_settings_menu(session, user_id):
     ])
 
 
-# Function that returns settings menu
+# Button that returns main from info
 async def get_main_from_info(session, user_id):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=await get_translation(user_id, "back_key"), callback_data="back_to_main")],
+    ])
+
+
+# Function that returns admin panel
+async def get_admin_panel(session, user_id):
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=await get_translation(user_id, "admin_keys_key"), callback_data="keys_admin_panel"),
+         InlineKeyboardButton(
+             text=await get_translation(user_id, "admin_users_key"), callback_data="users_admin_panel")],
+        [InlineKeyboardButton(
+            text=await get_translation(user_id, "admin_notifications_key"), callback_data="notifications_admin_panel")],
+    ])
+
+
+# Button that returns main from info
+async def get_main_in_admin(session, user_id):
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=await get_translation(user_id, "back_key"), callback_data="back_to_admin_main")],
     ])
 
 

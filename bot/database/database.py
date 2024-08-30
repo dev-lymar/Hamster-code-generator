@@ -1,10 +1,9 @@
 import os
-from sqlalchemy import update
+from sqlalchemy import update, text, func
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import text
 from dotenv import load_dotenv
 from datetime import datetime, timezone
 
@@ -197,3 +196,16 @@ async def get_admin_chat_ids():
             select(User.chat_id).where(User.user_role == 'admin')
         )
         return [row[0] for row in result.fetchall()]
+
+
+# Get count games keys in DB
+async def get_keys_count_for_games(session: AsyncSession, games: list) -> list:
+    results = ["<i>Кол-во</i>....<b>Игра</b>\n"]
+    for game in games:
+        table_name = game.replace(" ", "_").lower()
+        query = text(f"SELECT COUNT(*) FROM {table_name}")
+        result = await session.execute(query)
+        keys_count = result.scalar()
+        results.append(f"<i>{keys_count}</i>......<b>{game}</b>")
+
+    return "\n".join(results)
