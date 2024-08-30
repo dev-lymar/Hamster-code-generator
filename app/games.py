@@ -13,20 +13,12 @@ proxies = load_proxies_from_file('proxies.txt')
 # Basic configuration of games and proxies
 game_configs = [
     {
-        'name': 'Bike Ride 3D',
-        'app_token': 'd28721be-fd2d-4b45-869e-9f253b554e50',
-        'promo_id': '43e35910-c168-4634-ad4f-52fd764a843f',
-        'base_delay': 20,
-        'attempts': 30,
-        'copies': 11,
-    },
-    {
         'name': 'Chain Cube 2048',
         'app_token': 'd1690a07-3780-4068-810f-9b5bbf2931b2',
         'promo_id': 'b4170868-cef0-424f-8eb9-be0622e8e8e3',
         'base_delay': 20,
         'attempts': 20,
-        'copies': 4,
+        'copies': 0,
     },
     {
         'name': 'Train Miner',
@@ -34,7 +26,7 @@ game_configs = [
         'promo_id': 'c4480ac7-e178-4973-8061-9ed5b2e17954',
         'base_delay': 20,
         'attempts': 15,
-        'copies': 4,
+        'copies': 0,
     },
     {
         'name': 'Merge Away',
@@ -42,7 +34,7 @@ game_configs = [
         'promo_id': 'dc128d28-c45b-411c-98ff-ac7726fbaea4',
         'base_delay': 20,
         'attempts': 30,
-        'copies': 6,
+        'copies': 0,
     },
     {
         'name': 'Twerk Race 3D',
@@ -50,7 +42,7 @@ game_configs = [
         'promo_id': '61308365-9d16-4040-8bb0-2f4a4c69074c',
         'base_delay': 20,
         'attempts': 20,
-        'copies': 9,
+        'copies': 0,
     },
     {
         'name': 'Polysphere',
@@ -58,7 +50,7 @@ game_configs = [
         'promo_id': '2aaf5aee-2cbc-47ec-8a3f-0962cc14bc71',
         'base_delay': 20,
         'attempts': 25,
-        'copies': 17,
+        'copies': 0,
     },
     {
         'name': 'Mow and Trim',
@@ -66,15 +58,7 @@ game_configs = [
         'promo_id': 'ef319a80-949a-492e-8ee0-424fb5fc20a6',
         'base_delay': 20,
         'attempts': 20,
-        'copies': 6,
-    },
-    {
-        'name': 'Mud Racing',
-        'app_token': '8814a785-97fb-4177-9193-ca4180ff9da8',
-        'promo_id': '8814a785-97fb-4177-9193-ca4180ff9da8',
-        'base_delay': 20,
-        'attempts': 25,
-        'copies': 6,
+        'copies': 0,
     },
     {
         'name': 'Cafe Dash',
@@ -82,7 +66,23 @@ game_configs = [
         'promo_id': 'bc0971b8-04df-4e72-8a3e-ec4dc663cd11',
         'base_delay': 23,
         'attempts': 35,
-        'copies': 17,
+        'copies': 10,
+    },
+    {
+        'name': 'Zoopolis',
+        'app_token': 'b2436c89-e0aa-4aed-8046-9b0515e1c46b',
+        'promo_id': 'b2436c89-e0aa-4aed-8046-9b0515e1c46b',
+        'base_delay': 23,
+        'attempts': 35,
+        'copies': 35,
+    },
+    {
+        'name': 'Gangs Wars',
+        'app_token': 'b6de60a0-e030-48bb-a551-548372493523',
+        'promo_id': 'c7821fa7-6632-482c-9635-2bd5798585f9',
+        'base_delay': 23,
+        'attempts': 35,
+        'copies': 35,
     }
 ]
 

@@ -17,15 +17,15 @@ storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 
 games = [
-    'Bike Ride 3D',
     'Train Miner',
     'Chain Cube 2048',
     'Merge Away',
     'Twerk Race 3D',
     'Polysphere',
-    'Mud Racing',
     'Mow and Trim',
-    'Cafe Dash'
+    'Cafe Dash',
+    'Zoopolis',
+    'Gangs Wars'
 ]
 
 status_limits = {

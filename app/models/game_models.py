@@ -12,13 +12,6 @@ class GameTableBase(Base):
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
 
 
-class BikeRide3D(GameTableBase):
-    __tablename__ = 'bike_ride_3d'
-    __table_args__ = (
-        Index('ix_bike_ride_3d_promo_code', 'promo_code'),
-    )
-
-
 class ChainCube2048(GameTableBase):
     __tablename__ = 'chain_cube_2048'
     __table_args__ = (
@@ -61,15 +54,22 @@ class MowAndTrim(GameTableBase):
     )
 
 
-class MudRacing(GameTableBase):
-    __tablename__ = 'mud_racing'
-    __table_args__ = (
-        Index('ix_mud_racing_promo_code', 'promo_code'),
-    )
-
-
 class CafeDash(GameTableBase):
     __tablename__ = 'cafe_dash'
     __table_args__ = (
         Index('ix_cafe_dash_promo_code', 'promo_code'),
+    )
+
+
+class Zoopolis(GameTableBase):
+    __tablename__ = 'zoopolis'
+    __table_args__ = (
+        Index('ix_zoopolis_promo_code', 'promo_code'),
+    )
+
+
+class GangsWars(GameTableBase):
+    __tablename__ = 'gangs_wars'
+    __table_args__ = (
+        Index('ix_gangs_wars_promo_code', 'promo_code'),
     )

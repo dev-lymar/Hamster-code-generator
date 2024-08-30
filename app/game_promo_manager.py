@@ -7,8 +7,8 @@ import uuid
 import logging.handlers
 from urllib.parse import urlparse
 from database import get_session
-from models.game_models import (BikeRide3D, ChainCube2048, TrainMiner, MergeAway,
-                                TwerkRace3D, Polysphere, MowAndTrim, MudRacing, CafeDash)
+from models.game_models import (ChainCube2048, TrainMiner, MergeAway,
+                                TwerkRace3D, Polysphere, MowAndTrim, CafeDash, Zoopolis, GangsWars)
 
 # Configuring logging
 log_directory = "logs"
@@ -174,15 +174,15 @@ class GamePromo:
         session = await get_session()
         try:
             table_mapping = {
-                'Bike Ride 3D': BikeRide3D,
                 'Chain Cube 2048': ChainCube2048,
                 'Train Miner': TrainMiner,
                 'Merge Away': MergeAway,
                 'Twerk Race 3D': TwerkRace3D,
                 'Polysphere': Polysphere,
                 'Mow and Trim': MowAndTrim,
-                'Mud Racing': MudRacing,
-                'CafeDash': CafeDash
+                'CafeDash': CafeDash,
+                'Zoopolis': Zoopolis,
+                'Gangs Wars': GangsWars
             }
             GameTable = table_mapping.get(game_name)
             if GameTable:
