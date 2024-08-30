@@ -65,13 +65,9 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.0.0
-          name: "Release v1.0.0"
+          tag: v1.0.1
+          name: "Release v1.0.1"
           body: |
-            Initial Release: 
-            Launch of the Hamster-Code-Generator, a bot designed for automated promo code farming. 
-            This release includes core features such as promo code generation, 
-            Telegram bot integration, and robust error handling with logging. 
-            The bot also supports a multilingual interface, allowing users to interact in their preferred language. 
-            Users can now easily generate and request promo codes through a seamless Telegram interface.
+            Added new games: 
+            Added Zoopolis, Gangs Wars. Deleted the bike ride and mud racing tables of unused games.
           token: ${{ secrets.GITHUB_TOKEN }}
