@@ -11,7 +11,8 @@ from database.database import (get_session, get_or_create_user, update_user_lang
                                reset_daily_keys_if_needed, get_user_language,
                                get_oldest_keys, update_keys_generated, delete_keys, get_user_status_info,
                                is_admin, get_admin_chat_ids)
-from keyboards.inline import get_action_buttons, get_settings_menu, create_language_keyboard
+from keyboards.inline import (get_action_buttons, get_settings_menu,
+                              create_language_keyboard, get_main_from_info)
 from utils.helpers import load_translations, get_translation, escape_markdown, get_remaining_time
 from states.form import Form
 
@@ -65,15 +66,21 @@ async def send_welcome(message: types.Message, state: FSMContext):
                 image_path = os.path.join(image_dir, random_image)
                 photo = FSInputFile(image_path)
                 await bot.send_photo(
-                    chat_id,
+                    chat_id=chat_id,
                     photo=photo,
                     caption=welcome_text,
-                    reply_markup=await get_action_buttons(session, user_id)
+                    reply_markup=await get_action_buttons(session, user_id),
+                    parse_mode="HTML"
                 )
                 return
 
         # Sending welcome message without photo
-        await bot.send_message(chat_id, text=welcome_text, reply_markup=await get_action_buttons(session, user_id))
+        await bot.send_message(
+            chat_id=chat_id,
+            text=welcome_text,
+            reply_markup=await get_action_buttons(session, user_id),
+            parse_mode="HTML"
+        )
 
 
 # Function to send keys menu after generating keys
@@ -411,11 +418,59 @@ async def show_settings_menu(callback_query: types.CallbackQuery):
             return
 
         await log_user_action(session, user_id, "Settings menu opened")
+        settings_message = await get_translation(user_id, "settings_message")
 
-        await bot.edit_message_reply_markup(
+        image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "generate")
+        if os.path.exists(image_dir) and os.path.isdir(image_dir):
+            image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
+            if image_files:
+                random_image = random.choice(image_files)
+                image_path = os.path.join(image_dir, random_image)
+
+                # Create a new image object
+                photo = FSInputFile(image_path)
+                new_media = types.InputMediaPhoto(media=photo)
+
+                await bot.edit_message_media(
+                    chat_id=callback_query.message.chat.id,
+                    message_id=callback_query.message.message_id,
+                    media=new_media,
+                )
+                await bot.edit_message_caption(
+                    chat_id=callback_query.message.chat.id,
+                    message_id=callback_query.message.message_id,
+                    caption=settings_message,
+                    parse_mode="HTML",
+                    reply_markup=await get_settings_menu(session, user_id)
+                )
+        # If image directory is missing or empty, update text or send a new text message
+        if callback_query.message.text:
+            await bot.edit_message_text(
+                chat_id=callback_query.message.chat.id,
+                message_id=callback_query.message.message_id,
+                text=settings_message,
+                parse_mode="HTML",
+                reply_markup=await get_settings_menu(session, user_id)
+            )
+
+
+@dp.callback_query(F.data == "info")
+async def show_info_message(callback_query: types.CallbackQuery, state: FSMContext):
+    async with await get_session() as session:
+        user_id = (
+            callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        )
+
+        await log_user_action(session, user_id, "Info opened")
+
+        info_message = await get_translation(user_id, "info_message")
+
+        await bot.edit_message_caption(
             chat_id=callback_query.message.chat.id,
             message_id=callback_query.message.message_id,
-            reply_markup=await get_settings_menu(session, user_id)
+            caption=info_message,
+            parse_mode="HTML",
+            reply_markup=await get_main_from_info(session, user_id)
         )
 
 
@@ -428,12 +483,31 @@ async def back_to_main_menu(callback_query: types.CallbackQuery):
         )
 
         await log_user_action(session, user_id, "Return to main menu")
+        main_menu_text = await get_translation(user_id, "chose_action")
 
-        await bot.edit_message_reply_markup(
-            chat_id=callback_query.message.chat.id,
-            message_id=callback_query.message.message_id,
-            reply_markup=await get_action_buttons(session, user_id)
-        )
+        image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "key_generated")
+        if os.path.exists(image_dir) and os.path.isdir(image_dir):
+            image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
+            if image_files:
+                random_image = random.choice(image_files)
+                image_path = os.path.join(image_dir, random_image)
+
+                # Create a new image object
+                photo = FSInputFile(image_path)
+                new_media = types.InputMediaPhoto(media=photo)
+
+                await bot.edit_message_media(
+                    chat_id=callback_query.message.chat.id,
+                    message_id=callback_query.message.message_id,
+                    media=new_media,
+                )
+                await bot.edit_message_caption(
+                    chat_id=callback_query.message.chat.id,
+                    message_id=callback_query.message.message_id,
+                    caption=main_menu_text,
+                    parse_mode="HTML",
+                    reply_markup=await get_action_buttons(session, user_id)
+                )
 
 
 # Forward a message to all admins and optionally to a group chat

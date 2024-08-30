@@ -6,7 +6,8 @@ from utils.helpers import get_translation
 async def get_action_buttons(session, user_id):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=await get_translation(user_id, "get_keys_key"), callback_data="get_keys")],
-        [InlineKeyboardButton(text=await get_translation(user_id, "settings_key"), callback_data="settings")],
+        [InlineKeyboardButton(text=await get_translation(user_id, "settings_key"), callback_data="settings"),
+         InlineKeyboardButton(text=await get_translation(user_id, "info_key"), callback_data="info")],
     ])
 
 
@@ -15,6 +16,13 @@ async def get_settings_menu(session, user_id):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=await get_translation(
             user_id, "choose_language_key"), callback_data="choose_language")],
+        [InlineKeyboardButton(text=await get_translation(user_id, "back_key"), callback_data="back_to_main")],
+    ])
+
+
+# Function that returns settings menu
+async def get_main_from_info(session, user_id):
+    return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=await get_translation(user_id, "back_key"), callback_data="back_to_main")],
     ])
 
