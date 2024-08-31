@@ -1,10 +1,9 @@
 import os
-from sqlalchemy import update
+from sqlalchemy import update, text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import text
 from dotenv import load_dotenv
 from datetime import datetime, timezone
 
@@ -171,7 +170,7 @@ async def check_user_limits(session: AsyncSession, user_id: int, status_limits: 
 # Check for ban, status, user limits
 async def get_user_status_info(session: AsyncSession, user_id: int):
     result = await session.execute(
-        select(User.is_banned, User.last_request_time, User.user_status,
+        select(User.is_banned, User.user_role, User.last_request_time, User.user_status,
                User.daily_requests_count, User.last_reset_date)
         .filter(User.user_id == user_id)
     )
@@ -197,3 +196,72 @@ async def get_admin_chat_ids():
             select(User.chat_id).where(User.user_role == 'admin')
         )
         return [row[0] for row in result.fetchall()]
+
+
+# Get count games keys in DB
+async def get_keys_count_for_games(session: AsyncSession, games: list) -> list:
+    results = ["<i>Кол-во</i>....<b>Игра</b>\n"]
+    for game in games:
+        table_name = game.replace(" ", "_").lower()
+        query = text(f"SELECT COUNT(*) FROM {table_name}")
+        result = await session.execute(query)
+        keys_count = result.scalar()
+        results.append(f"<i>{keys_count}</i>......<b>{game}</b>")
+
+    return "\n".join(results)
+
+
+# Get users list for admin panel
+async def get_users_list_admin_panel(session: AsyncSession):
+    result = await session.execute(select(User.user_id, User.username, User.first_name, User.last_name))
+    users = result.fetchall()
+    users_count = len(users)
+
+    user_list = [f"Всего пользователей: <b>{users_count}</b>\n<i>(нажми ID что бы скопировать)</i>"]
+    for user in users:
+        user_id = f"<code>{user.user_id}</code>"
+        username = f"<b>{user.username}</b>" if user.username else "<i>no username</i>"
+        first_name = f"<b>{user.first_name}</b>" if user.first_name else "<i>no first name</i>"
+
+        user_info = f"{user_id}  {username}  {first_name}"
+        user_list.append(user_info)
+
+    return "\n".join(user_list)
+
+
+# Get user detail for admin panel
+async def get_user_details(session: AsyncSession, user_id: int) -> str:
+    result = await session.execute(
+        select(
+            User.user_id, User.chat_id, User.first_name, User.last_name, User.username,
+            User.registration_date, User.language_code,
+            User.is_banned, User.user_status, User.user_role,
+            User.is_subscribed, User.daily_requests_count,
+            User.last_request_time, User.total_keys_generated, User.notes
+        ).filter(User.user_id == user_id)
+    )
+    user = result.one_or_none()
+
+    if user is None:
+        return f"<i>User with ID {user_id} not found.</i>"
+
+    if user:
+        details = [
+            f"<b>User Details:</b>\n"
+            f"<b>ID</b>: <code>{user.user_id}</code>\n"
+            f"<b>First Name</b>: {user.first_name or 'N/A'}\n"
+            f"<b>Last Name</b>: {user.last_name or 'N/A'}\n"
+            f"<b>Username</b>: @{user.username or 'N/A'}\n"
+            f"<b>Registration</b>: {user.registration_date.strftime('%Y-%m-%d %H:%M:%S')}\n"
+            f"<b>Language</b>: {user.language_code or 'N/A'}\n"
+            f"<b>Role</b>: {user.user_role}\n"
+            f"<b>Status</b>: {user.user_status or '<i>not provided</i>'}\n"
+            f"<b>Subscription</b>: {'Active' if user.is_subscribed else 'Inactive'}\n"
+            f"<b>Banned</b>: {'Yes' if user.is_banned else 'No'}\n"
+            f"<b>Keys Generated</b>: {user.total_keys_generated}\n"
+            f"<b>Keys Generated Today</b>: {user.daily_requests_count}\n"
+            f"<b>Last Request</b>: "
+            f"{user.last_request_time.strftime('%Y-%m-%d %H:%M:%S') if user.last_request_time else 'N/A'}\n"
+            f"<b>Notes</b>: {user.notes or 'N/A'}"
+        ]
+    return "\n".join(details)
