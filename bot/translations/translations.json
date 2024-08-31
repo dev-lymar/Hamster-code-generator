@@ -26,7 +26,8 @@
     "admin_description": "👨‍💼💼 Admin panel. Time to wield the power! (But shh... keep it secret!)",
     "admin_keys_key": "🔑 Magic Keys",
     "admin_users_key": "🚫🧑‍💻 User Wrangling",
-    "admin_notifications_key": "📢 Announce Chaos"
+    "admin_notifications_key": "📢 Announce Chaos",
+    "admin_detail_info_key": "🔍 Get Details"
   },
   "ru": {
     "language_name": "Русский",
@@ -55,7 +56,8 @@
     "admin_description": "👨‍💼💼 Админ панель. Самое время почувствовать себя всевластным! (Только тс-с-с...)",
     "admin_keys_key": "🔑 Волшебные ключи",
     "admin_users_key": "🚫 Управление пользователями 🧑‍💻",
-    "admin_notifications_key": "📢 Создать хаос"
+    "admin_notifications_key": "📢 Создать хаос",
+    "admin_detail_info_key": "🔍 Узнать подробности"
   },
   "sk": {
     "language_name": "Slovenský",
@@ -83,7 +85,9 @@
     "admin_description": "👨‍💼💼 Admin panel. Čas prevziať moc! (Ale pssst... je to tajomstvo!)",
     "admin_keys_key": "🔑 Magické kľúče",
     "admin_users_key": "🚫🧑‍💻 Používateľské manévre",
-    "admin_notifications_key": "📢 Ohlásiť zmätok"
+    "admin_notifications_key": "📢 Ohlásiť zmätok",
+    "admin_detail_info_key": "🔍 Získať podrobnosti"
+
   },
   "uk": {
     "language_name": "Українська",
@@ -111,6 +115,7 @@
     "admin_description": "👨‍💼💼 Адмін панель. Час відчути себе всевладним! (Тільки тс-с-с...)",
     "admin_keys_key": "🔑 Чарівні ключі",
     "admin_users_key": "🚫🧑‍💻 Керування користувачами",
-    "admin_notifications_key": "📢 Оголосити хаос"
+    "admin_notifications_key": "📢 Оголосити хаос",
+    "admin_detail_info_key": "🔍 Дізнатися деталі"
   }
 }

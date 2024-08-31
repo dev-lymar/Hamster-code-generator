@@ -45,6 +45,14 @@ async def get_main_in_admin(session, user_id):
     ])
 
 
+# Button that returns main from info
+async def get_detail_info_in_admin(session, user_id):
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(
+            text=await get_translation(user_id, "admin_detail_info_key"), callback_data="detail_info_in_admin")],
+    ])
+
+
 # Creating a keyboard with language keys
 def create_language_keyboard(translations):
     language_buttons = []

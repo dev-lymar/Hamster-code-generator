@@ -4,15 +4,15 @@ import random
 import logging
 from aiogram import types, F
 from aiogram.fsm.context import FSMContext
-from aiogram.types import FSInputFile, Message
+from aiogram.types import FSInputFile, Message, InlineKeyboardMarkup
 from datetime import datetime, timezone
 from config import bot, dp, BOT_ID, games, status_limits, set_commands, GROUP_CHAT_ID
 from database.database import (get_session, get_or_create_user, update_user_language, log_user_action,
                                reset_daily_keys_if_needed, get_user_language, get_oldest_keys, update_keys_generated,
                                delete_keys, get_user_status_info, is_admin, get_admin_chat_ids,
-                               get_keys_count_for_games)
-from keyboards.inline import (get_action_buttons, get_settings_menu,create_language_keyboard,
-                              get_main_from_info, get_admin_panel, get_main_in_admin)
+                               get_keys_count_for_games, get_users_list_admin_panel, get_user_details)
+from keyboards.inline import (get_action_buttons, get_settings_menu, create_language_keyboard,
+                              get_main_from_info, get_admin_panel, get_main_in_admin, get_detail_info_in_admin)
 from utils.helpers import load_translations, get_translation, escape_markdown, get_remaining_time
 from states.form import Form
 
@@ -436,9 +436,71 @@ async def keys_admin_panel(callback_query: types.CallbackQuery):
         )
 
 
+# Get users button admin panel
+@dp.callback_query(F.data == "users_admin_panel")
+async def users_admin_panel(callback_query: types.CallbackQuery):
+    async with await get_session() as session:
+        user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.chat.id
+
+        users_list_admin_panel_message = await get_users_list_admin_panel(session)
+
+        back_keyboard = await get_main_in_admin(session, user_id)
+        detail_info_keyboard = await get_detail_info_in_admin(session, user_id)
+
+        combined_keyboard = InlineKeyboardMarkup(
+            inline_keyboard=detail_info_keyboard.inline_keyboard + back_keyboard.inline_keyboard
+        )
+
+        await bot.edit_message_text(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            text=users_list_admin_panel_message,
+            parse_mode="HTML",
+            reply_markup=combined_keyboard
+        )
+
+
+@dp.callback_query(F.data == "detail_info_in_admin")
+async def request_user_id(callback_query: types.CallbackQuery, state: FSMContext):
+    await callback_query.answer()
+
+    await bot.send_message(
+        chat_id=callback_query.message.chat.id,
+        text="Пожалуйста, введите ID пользователя, информацию о котором вы хотите получить:"
+    )
+
+    await state.set_state(Form.waiting_for_user_id)
+
+
+# Get user detail button admin panel
+@dp.message(Form.waiting_for_user_id)
+async def user_detail_admin_panel(message: types.Message, state: FSMContext):
+    user_detail_id = message.text.strip()
+
+    async with await get_session() as session:
+        user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
+        back_keyboard = await get_main_in_admin(session, user_id)
+
+        try:
+            user_detail_id = int(user_detail_id)
+        except ValueError:
+            text = "<i><b>ID</b> дожно быть целым числом. Пожалуйста, повторите снова!</i>"
+            await message.answer(text, parse_mode="HTML", reply_markup=back_keyboard)
+            return
+        user_details = await get_user_details(session, user_detail_id)
+
+        if "not_found" in user_details:
+            text = "<i>Пользователь с таким <b>ID</b> не найден.</i>"
+            await message.answer(text, parse_mode="HTML", reply_markup=back_keyboard)
+        else:
+            await message.answer(user_details, parse_mode="HTML", reply_markup=back_keyboard)
+
+    await state.clear()
+
+
 # Back to main menu(for admin)
 @dp.callback_query(F.data == "back_to_admin_main")
-async def back_to_main_menu(callback_query: types.CallbackQuery):
+async def back_to_admin_main_menu(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
             callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
