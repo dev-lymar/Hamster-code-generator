@@ -10,7 +10,8 @@ from config import bot, dp, BOT_ID, games, status_limits, set_commands, GROUP_CH
 from database.database import (get_session, get_or_create_user, update_user_language, log_user_action,
                                reset_daily_keys_if_needed, get_user_language, get_oldest_keys, update_keys_generated,
                                delete_keys, get_user_status_info, is_admin, get_admin_chat_ids,
-                               get_keys_count_for_games, get_users_list_admin_panel, get_user_details)
+                               get_keys_count_for_games, get_users_list_admin_panel, get_user_details,
+                               get_subscribed_users)
 from keyboards.inline import (get_action_buttons, get_settings_menu, create_language_keyboard,
                               get_main_from_info, get_admin_panel_keyboard, get_main_in_admin, get_detail_info_in_admin,
                               notification_menu, confirmation_button_notification)
@@ -559,7 +560,7 @@ async def send_to_myself_handler(callback_query: types.CallbackQuery):
 
         await log_user_action(session, user_id, "Sent ad to themselves")
 
-        # Sending a ban notification
+        # Image path (if available)
         image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "notification")
         if os.path.exists(image_dir) and os.path.isdir(image_dir):
             image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
@@ -594,6 +595,68 @@ async def send_to_myself_handler(callback_query: types.CallbackQuery):
         await bot.send_message(
             chat_id=callback_query.message.chat.id,
             text="Панель рассылки !!!",
+            reply_markup=await notification_menu(session, user_id)
+        )
+
+
+@dp.callback_query(F.data == "confirm_send")
+async def confirm_send_handler(callback_query: types.CallbackQuery):
+    async with await get_session() as session:
+        user_id = (
+            callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        )
+        await bot.delete_message(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id
+        )
+        await log_user_action(session, user_id, "Started sending notifications to all users")
+
+        # Getting a list of users for mailing
+        users = await get_subscribed_users(session)
+
+        # Notification text
+        notification_text = "Когда тебе нечем занятся..."
+
+        # Image path (if available)
+        image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "notification")
+        image_files = []
+        if os.path.exists(image_dir) and os.path.isdir(image_dir):
+            image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
+
+        for user in users:
+            chat_id = user.chat_id
+            first_name = user.first_name
+            language_code = user.language_code
+            personalized_text = f"{first_name}, {notification_text}"
+
+            # Если есть изображения, отправляем сообщение с изображением
+            if image_files:
+                random_image = random.choice(image_files)
+                image_path = os.path.join(image_dir, random_image)
+                photo = FSInputFile(image_path)
+                try:
+                    await bot.send_photo(
+                        chat_id=chat_id,
+                        photo=photo,
+                        caption=personalized_text,
+                        parse_mode="HTML"
+                    )
+                except Exception as e:
+                    logging.error(f"Failed to send photo notification to {chat_id}: {e}")
+            else:
+                # Если нет изображения, отправляем текстовое сообщение
+                try:
+                    await bot.send_message(
+                        chat_id=chat_id,
+                        text=personalized_text,
+                        parse_mode="HTML"
+                    )
+                except Exception as e:
+                    logging.error(f"Failed to send text notification to {chat_id}: {e}")
+
+        await bot.send_message(
+            chat_id=callback_query.message.chat.id,
+            text="Рассылка успешно завершена.",
             reply_markup=await notification_menu(session, user_id)
         )
 

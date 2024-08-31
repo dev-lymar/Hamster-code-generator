@@ -265,3 +265,11 @@ async def get_user_details(session: AsyncSession, user_id: int) -> str:
             f"<b>Notes</b>: {user.notes or 'N/A'}"
         ]
     return "\n".join(details)
+
+
+async def get_subscribed_users(session):
+    stmt = select(
+        User.chat_id, User.first_name, User.language_code, User.is_subscribed).where(User.is_subscribed == True)
+    result = await session.execute(stmt)
+    users = result.fetchall()
+    return users
