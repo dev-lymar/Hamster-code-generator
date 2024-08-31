@@ -28,13 +28,14 @@ async def get_main_from_info(session, user_id):
 
 
 # Function that returns admin panel
-async def get_admin_panel(session, user_id):
+async def get_admin_panel_keyboard(session, user_id):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=await get_translation(user_id, "admin_keys_key"), callback_data="keys_admin_panel"),
          InlineKeyboardButton(
              text=await get_translation(user_id, "admin_users_key"), callback_data="users_admin_panel")],
         [InlineKeyboardButton(
             text=await get_translation(user_id, "admin_notifications_key"), callback_data="notifications_admin_panel")],
+        [InlineKeyboardButton(text="Стать обычным человеком...", callback_data="back_to_main")]
     ])
 
 
@@ -42,6 +43,24 @@ async def get_admin_panel(session, user_id):
 async def get_main_in_admin(session, user_id):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=await get_translation(user_id, "back_key"), callback_data="back_to_admin_main")],
+    ])
+
+
+# Notification menu
+async def notification_menu(session, user_id):
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Отправить себе", callback_data="send_to_myself"),
+         InlineKeyboardButton(text="Отправить всем !", callback_data="send_all")],
+        [InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_admin_main")]
+    ])
+
+
+# Confirmation button
+async def confirmation_button_notification(session, user_id):
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Да !", callback_data="confirm_send"),
+         InlineKeyboardButton(text="Нет, не отправлять...", callback_data="cancel_send")],
+        [InlineKeyboardButton(text="🔙 Назад", callback_data="notifications_admin_panel")]
     ])
 
 

@@ -12,7 +12,8 @@ from database.database import (get_session, get_or_create_user, update_user_lang
                                delete_keys, get_user_status_info, is_admin, get_admin_chat_ids,
                                get_keys_count_for_games, get_users_list_admin_panel, get_user_details)
 from keyboards.inline import (get_action_buttons, get_settings_menu, create_language_keyboard,
-                              get_main_from_info, get_admin_panel, get_main_in_admin, get_detail_info_in_admin)
+                              get_main_from_info, get_admin_panel_keyboard, get_main_in_admin, get_detail_info_in_admin,
+                              notification_menu, confirmation_button_notification)
 from utils.helpers import load_translations, get_translation, escape_markdown, get_remaining_time
 from states.form import Form
 
@@ -376,7 +377,7 @@ async def send_wait_time_message(callback_query: types.CallbackQuery, user_id: i
 
 # Admin panel handler
 @dp.message(F.text == "/admin")
-async def admin_panel(message: types.Message, state: FSMContext):
+async def admin_panel_handler(message: types.Message, state: FSMContext):
     async with await get_session() as session:
         user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
 
@@ -417,7 +418,7 @@ async def admin_panel(message: types.Message, state: FSMContext):
         await bot.send_message(
             chat_id=message.chat.id,
             text=admin_text,
-            reply_markup=await get_admin_panel(session, user_id)
+            reply_markup=await get_admin_panel_keyboard(session, user_id)
         )
 
 
@@ -511,7 +512,89 @@ async def back_to_admin_main_menu(callback_query: types.CallbackQuery):
             chat_id=callback_query.message.chat.id,
             message_id=callback_query.message.message_id,
             text=admin_text,
-            reply_markup=await get_admin_panel(session, user_id)
+            reply_markup=await get_admin_panel_keyboard(session, user_id)
+        )
+
+
+@dp.callback_query(F.data == "notifications_admin_panel")
+async def notification_menu_handler(callback_query: types.CallbackQuery):
+    async with await get_session() as session:
+        user_id = (
+            callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        )
+        await log_user_action(session, user_id, "Send notification menu")
+        await bot.edit_message_text(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            text="Панель рассылки !!!",
+            reply_markup=await notification_menu(session, user_id)
+        )
+
+
+@dp.callback_query(F.data == "send_all")
+async def confirmation_menu_handler(callback_query: types.CallbackQuery):
+    async with await get_session() as session:
+        user_id = (
+            callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        )
+        await log_user_action(session, user_id, "Confirmation send notification")
+        await bot.edit_message_text(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            text="Ты точно хочешь этого ???",
+            reply_markup=await confirmation_button_notification(session, user_id)
+        )
+
+
+@dp.callback_query(F.data == "send_to_myself")
+async def send_to_myself_handler(callback_query: types.CallbackQuery):
+    async with await get_session() as session:
+        user_id = (
+            callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        )
+        await bot.delete_message(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id
+        )
+
+        await log_user_action(session, user_id, "Sent ad to themselves")
+
+        # Sending a ban notification
+        image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "notification")
+        if os.path.exists(image_dir) and os.path.isdir(image_dir):
+            image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
+            if image_files:
+                random_image = random.choice(image_files)
+                image_path = os.path.join(image_dir, random_image)
+
+                # Create a new image object
+                photo = FSInputFile(image_path)
+
+                test_message = await bot.send_photo(
+                    chat_id=callback_query.message.chat.id,
+                    photo=photo,
+                    caption="Это ваше рекламное сообщение! Посмотрите на него!",
+                    reply_markup=await get_action_buttons(session, user_id),
+                    parse_mode="HTML"
+                )
+        else:
+            await bot.send_message(
+                chat_id=callback_query.message.chat.id,
+                text="Это ваше рекламное сообщение! Посмотрите на него!",
+                reply_markup=await get_action_buttons(session, user_id),
+                parse_mode="HTML"
+            )
+        await asyncio.sleep(2)
+        await bot.delete_message(
+            chat_id=callback_query.message.chat.id,
+            message_id=test_message.message_id
+        )
+
+        # Return keyboard
+        await bot.send_message(
+            chat_id=callback_query.message.chat.id,
+            text="Панель рассылки !!!",
+            reply_markup=await notification_menu(session, user_id)
         )
 
 
