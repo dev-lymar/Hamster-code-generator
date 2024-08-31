@@ -16,6 +16,9 @@ bot = Bot(token=API_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 
+# Supported languages
+SUPPORTED_LANGUAGES = ['ru', 'sk', 'en', 'uk']
+
 games = [
     'Train Miner',
     'Chain Cube 2048',

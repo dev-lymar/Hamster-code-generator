@@ -6,7 +6,7 @@ from aiogram import types, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import FSInputFile, Message, InlineKeyboardMarkup
 from datetime import datetime, timezone
-from config import bot, dp, BOT_ID, games, status_limits, set_commands, GROUP_CHAT_ID
+from config import bot, dp, BOT_ID, games, status_limits, set_commands, GROUP_CHAT_ID, SUPPORTED_LANGUAGES
 from database.database import (get_session, get_or_create_user, update_user_language, log_user_action,
                                reset_daily_keys_if_needed, get_user_language, get_oldest_keys, update_keys_generated,
                                delete_keys, get_user_status_info, is_admin, get_admin_chat_ids,
@@ -32,13 +32,16 @@ async def send_welcome(message: types.Message, state: FSMContext):
         user_id = user.id if user.id != BOT_ID else message.chat.id
         chat_id = message.chat.id
 
+        # Define user language, if not supported, set to English
+        user_language_code = user.language_code if user.language_code in SUPPORTED_LANGUAGES else 'en'
+
         user_data = {
             'chat_id': chat_id,
             'user_id': user_id,
             'first_name': user.first_name,
             'last_name': user.last_name,
             'username': user.username,
-            'language_code': user.language_code
+            'language_code': user_language_code
         }
 
         # Log user action
@@ -600,7 +603,7 @@ async def send_to_myself_handler(callback_query: types.CallbackQuery):
 
 
 @dp.callback_query(F.data == "confirm_send")
-async def confirm_send_handler(callback_query: types.CallbackQuery):
+async def confirm_send_all_handler(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
             callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
