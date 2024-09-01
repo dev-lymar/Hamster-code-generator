@@ -73,7 +73,7 @@ class GamePromo:
                 logger.info(f"Token: {self.game['name']} proxy: {proxy} generated")
         except Exception as error:
             logger.error(f"Client login error {self.game['name']} proxy: {proxy}: {error}")
-            await asyncio.sleep(self.game['base_delay'] + random.uniform(0.1, 3) + 5)
+            await asyncio.sleep(random.uniform(0.1, 3) + 6)
             await self.login_client()
 
     async def register_event(self):
@@ -118,7 +118,7 @@ class GamePromo:
                         logger.error(f"Response body: {error_text}")
 
                         if response.status == 400 and "TooManyRegister" in error_text:
-                            delay_time = self.game['base_delay'] + random.uniform(5, 25) + random.uniform(1, 3)
+                            delay_time = self.game['base_delay'] + random.uniform(5, 15) + random.uniform(1, 3)
                             logger.warning(
                                 f"New delay time {delay_time:.2f} sec.")
                             await asyncio.sleep(delay_time)
@@ -215,6 +215,6 @@ async def gen(game):
             code_data = await promo.gen_promo_code()
 
             if code_data:
-                await asyncio.sleep(1)
+                await asyncio.sleep(random.uniform(0.1, 3) + 1)
     finally:
         await promo.close_session()
