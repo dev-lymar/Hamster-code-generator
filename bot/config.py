@@ -19,7 +19,7 @@ dp = Dispatcher(storage=storage)
 # Supported languages
 SUPPORTED_LANGUAGES = ['ru', 'sk', 'en', 'uk']
 
-games = [
+GAMES = [
     'Zoopolis',
     'Gangs Wars',
     'Cafe Dash',
@@ -31,10 +31,10 @@ games = [
     'Polysphere',
 ]
 
-status_limits = {
+STATUS_LIMITS = {
     'free': {'daily_limit': 5, 'interval_minutes': 10},
     'friend': {'daily_limit': 15, 'interval_minutes': 10},
-    'premium': {'daily_limit': 50, 'interval_minutes': 10}
+    'premium': {'daily_limit': 2, 'interval_minutes': 360}
 }
 
 # Forwarding message to group
@@ -42,10 +42,12 @@ GROUP_CHAT_ID = int(os.getenv("GROUP_CHAT_ID", 0))
 
 
 async def set_commands(bot: Bot, user_id: int, language_code: str):
+    start_command_description = translations[language_code]["get_keys_key"]
     change_lang_command_description = translations[language_code]["choose_language"]
     admin_command_description = translations[language_code]["admin_command_description"]
 
     commands = [
+        BotCommand(command="/start", description=start_command_description),
         BotCommand(command="/change_lang", description=change_lang_command_description),
         BotCommand(command="/admin", description=admin_command_description)
     ]
