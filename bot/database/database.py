@@ -220,7 +220,7 @@ async def get_keys_count_for_games(session: AsyncSession, games: list) -> list:
 
 
 # Get users list for admin panel
-async def get_users_list_admin_panel(session: AsyncSession):
+async def get_users_list_admin_panel(session: AsyncSession, games: list):
     today = datetime.utcnow().date()
 
     # Query to count the total number of users
@@ -243,7 +243,7 @@ async def get_users_list_admin_panel(session: AsyncSession):
         select(func.sum(User.daily_requests_count))
         .where(User.last_reset_date == today)
     )
-    keys_today = keys_today_result.scalar() or 0
+    keys_today = (keys_today_result.scalar() * len(games)*4) or 0
 
     user_list = [
         f"<i>Всего пользователей:  <b>{users_count}</b>\n(нажми ID что бы скопировать)</i>\n",

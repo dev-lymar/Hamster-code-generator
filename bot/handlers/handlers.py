@@ -468,7 +468,7 @@ async def users_admin_panel(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.chat.id
 
-        users_list_admin_panel_message = await get_users_list_admin_panel(session)
+        users_list_admin_panel_message = await get_users_list_admin_panel(session, GAMES)
 
         back_keyboard = await get_main_in_admin(session, user_id)
         detail_info_keyboard = await get_detail_info_in_admin(session, user_id)
