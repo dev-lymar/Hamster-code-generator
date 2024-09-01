@@ -563,6 +563,17 @@ async def send_to_myself_handler(callback_query: types.CallbackQuery):
 
         await log_user_action(session, user_id, "Sent ad to themselves")
 
+        # Notification text
+        notification_texts = {
+            "en": "<b>Eng Notification !!!</b>",
+            "sk": "<b>SK Notification !!!</b>",
+            "ru": "<b>Уведомление на рус яз !!!!</b>",
+            "uk": "<b>Уведомление для укр язы...</b>",
+        }
+        notification_text = []
+        for value in notification_texts.values():
+            notification_text.append(value)
+        notification_string = " ".join(notification_text)
         # Image path (if available)
         image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "notification")
         if os.path.exists(image_dir) and os.path.isdir(image_dir):
@@ -577,18 +588,18 @@ async def send_to_myself_handler(callback_query: types.CallbackQuery):
                 test_message = await bot.send_photo(
                     chat_id=callback_query.message.chat.id,
                     photo=photo,
-                    caption="Это ваше рекламное сообщение! Посмотрите на него!",
+                    caption=notification_string,
                     reply_markup=await get_action_buttons(session, user_id),
                     parse_mode="HTML"
                 )
         else:
             await bot.send_message(
                 chat_id=callback_query.message.chat.id,
-                text="Это ваше рекламное сообщение! Посмотрите на него!",
+                text=notification_string,
                 reply_markup=await get_action_buttons(session, user_id),
                 parse_mode="HTML"
             )
-        await asyncio.sleep(2)
+        await asyncio.sleep(5)
         await bot.delete_message(
             chat_id=callback_query.message.chat.id,
             message_id=test_message.message_id
@@ -618,7 +629,12 @@ async def confirm_send_all_handler(callback_query: types.CallbackQuery):
         users = await get_subscribed_users(session)
 
         # Notification text
-        notification_text = "Когда тебе нечем занятся..."
+        notification_texts = {
+            "en": "<b>Eng Notification !!!</b>",
+            "sk": "<b>SK Notification !!!</b>",
+            "ru": "<b>Уведомление на рус яз !!!!</b>",
+            "uk": "<b>Уведомление для укр язы...</b>",
+        }
 
         # Image path (if available)
         image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "notification")
@@ -629,8 +645,8 @@ async def confirm_send_all_handler(callback_query: types.CallbackQuery):
         for user in users:
             chat_id = user.chat_id
             first_name = user.first_name
-            language_code = user.language_code
-            personalized_text = f"{first_name}, {notification_text}"
+            language_code = user.language_code if user.language_code in SUPPORTED_LANGUAGES else "en"
+            personalized_text = f"{first_name}, {notification_texts[language_code]}"
 
             # Если есть изображения, отправляем сообщение с изображением
             if image_files:
