@@ -269,7 +269,7 @@ async def get_user_details(session: AsyncSession, user_id: int) -> str:
 
 async def get_subscribed_users(session):
     stmt = select(
-        User.chat_id, User.first_name, User.language_code, User.is_subscribed).where(User.is_subscribed == True)
+        User.chat_id, User.first_name, User.is_subscribed).where(User.is_subscribed)
     result = await session.execute(stmt)
     users = result.fetchall()
     return users
