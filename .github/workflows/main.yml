@@ -65,8 +65,8 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.2.2
-          name: "Release v1.2.2"
+          tag: v1.2.3
+          name: "Release v1.2.3"
           body: |
-            Fixed issue migrations
+            Fixed issue migrations (part2)
           token: ${{ secrets.GITHUB_TOKEN }}
