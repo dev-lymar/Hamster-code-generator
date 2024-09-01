@@ -240,7 +240,7 @@ async def get_users_list_admin_panel(session: AsyncSession):
     user_list = [
         f"<i>Всего пользователей:  <b>{users_count}</b>\n(нажми ID что бы скопировать)</i>\n",
         f"<i>Сегодня забрали ключей:  <b>{keys_today}</b></i>\n",
-        f"<u>Последние 90 пользователей. Новые вверху:</u>"
+        "<u>Последние 90 пользователей. Новые вверху:</u>"
     ]
     for user in users:
         user_id = f"<code>{user.user_id}</code>"
