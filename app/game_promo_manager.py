@@ -1,10 +1,12 @@
 import asyncio
+import json
 import aiohttp
 import os
 import time
 import random
 import uuid
 import logging.handlers
+import coloredlogs
 from urllib.parse import urlparse
 from database import get_session
 from models.game_models import (ChainCube2048, TrainMiner, MergeAway,
@@ -26,6 +28,25 @@ logging.basicConfig(
             log_file, maxBytes=10 * 1024 * 1024, backupCount=5
         )
     ]
+)
+
+# Setup coloredlogs
+coloredlogs.install(
+    level='INFO',
+    logger=logging.getLogger(__name__),
+    fmt='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level_styles={
+        'info': {'color': 'green'},
+        'warning': {'color': 'yellow'},
+        'error': {'color': 'red'},
+        'critical': {'color': 'red', 'bold': True},
+    },
+    field_styles={
+        'asctime': {'color': 220},
+        'name': {'color': 'blue'},
+        'levelname': {'color': 'white', 'bold': True},
+
+    }
 )
 
 logger = logging.getLogger(__name__)
@@ -52,6 +73,8 @@ class GamePromo:
         parsed_url = urlparse(f"http://{proxy}")
         username = parsed_url.username
         password = parsed_url.password
+        ip = parsed_url.hostname
+        port = parsed_url.port
 
         try:
             auth = aiohttp.BasicAuth(username, password) if username and password else None
@@ -70,23 +93,28 @@ class GamePromo:
             ) as response:
                 data = await response.json()
                 self.token = data['clientToken']
-                logger.info(f"Token: {self.game['name']} proxy: {proxy} generated")
+                logger.info(
+                    f"`{response.status}` ✅ | Token for game: `{self.game['name']}` | Proxy: `{ip}:{port}` generated"
+                )
         except Exception as error:
-            logger.error(f"Client login error {self.game['name']} proxy: {proxy}: {error}")
+            logger.error(
+                f"`{response.status}` ⚠️ | Client login error `{self.game['name']}` | Proxy: `{ip}:{port}`| {error}"
+            )
             await asyncio.sleep(random.uniform(0.1, 3) + 6)
             await self.login_client()
 
     async def register_event(self):
         event_id = str(uuid.uuid4())
         proxy = self.game['proxy']
+        parsed_url = urlparse(f"http://{proxy}")
+        ip = parsed_url.hostname
+        port = parsed_url.port
 
         for attempt in range(self.game['attempts']):
             try:
-                parsed_url = urlparse(f"http://{proxy}")
                 username = parsed_url.username
                 password = parsed_url.password
-                ip = parsed_url.hostname
-                port = parsed_url.port
+
                 auth = aiohttp.BasicAuth(username, password) if username and password else None
                 async with self.session.post(
                         'https://api.gamepromo.io/promo/register-event',
@@ -105,24 +133,24 @@ class GamePromo:
                     if 'text/html' in response.headers.get('Content-Type', ''):
                         error_text = await response.text()
                         logger.error(
-                            f"Server Error: {response.status} - {self.game['name']} proxy IP: "
-                            f"{ip}, Port: {port} - Unexpected HTML response")
-                        logger.error(
+                            f"`{response.status}` ⚠️ | Game: `{self.game['name']}` | Proxy: ({ip}:{port}) | "
                             f"HTML Response: {error_text[:500]}...")
                         continue
 
                     if response.status != 200:
                         error_text = await response.text()
-                        logger.error(
-                            f"Server Error: {response.status} - {self.game['name']} proxy IP: {ip}, Port: {port}")
-                        logger.error(f"Response body: {error_text}")
-
                         if response.status == 400 and "TooManyRegister" in error_text:
+                            error_data = json.loads(error_text)
                             delay_time = self.game['base_delay'] + random.uniform(5, 15) + random.uniform(1, 3)
                             logger.warning(
-                                f"New delay time {delay_time:.2f} sec.")
+                                f"`{response.status}` ⚠️ | Game: `{self.game['name']}` | Proxy: `{ip}:{port})` | "
+                                f"Error: `{error_data['error_code']}` ⏱️ | New delay: `{delay_time:.2f}`s."
+                            )
                             await asyncio.sleep(delay_time)
                             continue
+                        else:
+                            logger.warning(f"`{response.status}` ⚠️ | Game: ({self.game['name']} | "
+                                           f"Proxy: {ip}:{port}): {error_text}")
 
                         await asyncio.sleep(random.uniform(3, 6))
                         continue
@@ -131,7 +159,8 @@ class GamePromo:
                         data = await response.json()
                         if data.get('hasCode', False):
                             logger.info(
-                                f"Event {self.game['name']} proxy: {proxy} successfully registered")
+                                f"`{response.status}` ✅ | Event: `{self.game['name']}` | "
+                                f"Proxy: `{ip}:{port}` successfully registered")
                             return True
                     else:
                         logger.warning(f"Unexpected response from the server: {await response.text()}")
@@ -140,9 +169,9 @@ class GamePromo:
 
             except Exception as error:
                 logger.error(
-                    f"Error in event registration {self.game['name']} proxy: {proxy}: {error}")
+                    f" ⚠️ Error in event registration `{self.game['name']}` | Proxy: `{ip}:{port}`: {error}")
                 await asyncio.sleep(5)
-        logger.error(f"Failed to register an event for {self.game['name']} proxy: {proxy}, restart!")
+        logger.error(f" ❌ Failed to register an event for `{self.game['name']}` | Proxy: {ip}:{port}, restart!")
         return False
 
     async def create_code(self):
@@ -151,6 +180,8 @@ class GamePromo:
         parsed_url = urlparse(f"http://{proxy}")
         username = parsed_url.username
         password = parsed_url.password
+        ip = parsed_url.hostname
+        port = parsed_url.port
         auth = aiohttp.BasicAuth(username, password) if username and password else None
         while not response or not response.get('promoCode'):
             try:
@@ -166,7 +197,7 @@ class GamePromo:
                 ) as resp:
                     response = await resp.json()
             except Exception as error:
-                logger.error(f"Error creating code {self.game['name']} proxy: {proxy}: {error}")
+                logger.error(f" ⚠️ Error creating code `{self.game['name']}` | Proxy: `{ip}:{port}` | `{error}`")
                 await asyncio.sleep(random.uniform(1, 3.5))
         return response['promoCode']
 
@@ -180,7 +211,7 @@ class GamePromo:
                 'Twerk Race 3D': TwerkRace3D,
                 'Polysphere': Polysphere,
                 'Mow and Trim': MowAndTrim,
-                'CafeDash': CafeDash,
+                'Cafe Dash': CafeDash,
                 'Zoopolis': Zoopolis,
                 'Gangs Wars': GangsWars
             }
@@ -189,9 +220,9 @@ class GamePromo:
                 table_entry = GameTable(promo_code=code_data)
                 session.add(table_entry)
                 await session.commit()
-                logger.info(f"--KEY-- {code_data} saved in table {game_name.replace(' ', '_').lower()}")
+                logger.info(f"🔑 `KEY` | `{code_data[:12]}` | Saved in table `{game_name.replace(' ', '_').lower()}` 🔑")
         except Exception as e:
-            logger.error(f"Failed to save promo code {code_data} for game {game_name}: {e}")
+            logger.critical(f" ❌ Failed to save promo code `{code_data[:12]}` for game `{game_name}`: {e}")
             await session.rollback()
         finally:
             await session.close()

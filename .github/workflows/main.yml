@@ -65,8 +65,8 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.2.0
-          name: "Release v1.2.0"
+          tag: v1.2.1
+          name: "Release v1.2.1"
           body: |
-            Added notification system for users, customised admin panel!
+            Fixed issue #9. Added `coloredlogs` to logging in app
           token: ${{ secrets.GITHUB_TOKEN }}
