@@ -1,12 +1,12 @@
 import asyncio
 import json
-
 import aiohttp
 import os
 import time
 import random
 import uuid
 import logging.handlers
+import coloredlogs
 from urllib.parse import urlparse
 from database import get_session
 from models.game_models import (ChainCube2048, TrainMiner, MergeAway,
@@ -28,6 +28,25 @@ logging.basicConfig(
             log_file, maxBytes=10 * 1024 * 1024, backupCount=5
         )
     ]
+)
+
+# Setup coloredlogs
+coloredlogs.install(
+    level='INFO',
+    logger=logging.getLogger(__name__),
+    fmt='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level_styles={
+        'info': {'color': 'green'},
+        'warning': {'color': 'yellow'},
+        'error': {'color': 'red'},
+        'critical': {'color': 'red', 'bold': True},
+    },
+    field_styles={
+        'asctime': {'color': 220},
+        'name': {'color': 'blue'},
+        'levelname': {'color': 'white', 'bold': True},
+
+    }
 )
 
 logger = logging.getLogger(__name__)
@@ -124,7 +143,7 @@ class GamePromo:
                             error_data = json.loads(error_text)
                             delay_time = self.game['base_delay'] + random.uniform(5, 15) + random.uniform(1, 3)
                             logger.warning(
-                                f"`{response.status}` ⚠️ | Game: `{self.game['name']}` Proxy: `{ip}:{port})` | "
+                                f"`{response.status}` ⚠️ | Game: `{self.game['name']}` | Proxy: `{ip}:{port})` | "
                                 f"Error: `{error_data['error_code']}` ⏱️ | New delay: `{delay_time:.2f}`s."
                             )
                             await asyncio.sleep(delay_time)
