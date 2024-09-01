@@ -23,9 +23,8 @@ services:
       PGPASSWORD: ${DATABASE_PASSWORD}
     volumes:
       - postgres_backups:/backups
-    entrypoint: [ "sh", "-c", "crond -f & while true; do sleep 86400; done" ]
-    command: >
-      sh -c 'echo "0 0 * * * pg_dump -h postgres -U $${POSTGRES_USER} $${POSTGRES_DB} > /backups/db_backup_$(date +\%Y-\%m-\%d).sql 2>> /backups/backup.log" > /etc/crontabs/root && crond'
+    entrypoint: >
+      sh -c 'echo "0 0 * * * pg_dump -h postgres -U $${POSTGRES_USER} $${POSTGRES_DB} > /backups/db_backup_$(date +\%Y-\%m-\%d_%H-%M-%S).sql 2>> /backups/backup.log" > /etc/crontabs/root && crond -f'
 
 volumes:
   postgres_data:
