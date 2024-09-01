@@ -65,8 +65,8 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.2.1
-          name: "Release v1.2.1"
+          tag: v1.2.2
+          name: "Release v1.2.2"
           body: |
-            Fixed issue #9. Added `coloredlogs` to logging in app
+            Fixed issue migrations
           token: ${{ secrets.GITHUB_TOKEN }}

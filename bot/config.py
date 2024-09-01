@@ -20,15 +20,15 @@ dp = Dispatcher(storage=storage)
 SUPPORTED_LANGUAGES = ['ru', 'sk', 'en', 'uk']
 
 games = [
-    'Train Miner',
+    'Zoopolis',
+    'Gangs Wars',
+    'Cafe Dash',
+    'Mow and Trim',
     'Chain Cube 2048',
+    'Train Miner',
     'Merge Away',
     'Twerk Race 3D',
     'Polysphere',
-    'Mow and Trim',
-    'Cafe Dash',
-    'Zoopolis',
-    'Gangs Wars'
 ]
 
 status_limits = {
