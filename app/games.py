@@ -50,7 +50,7 @@ game_configs = [
         'promo_id': '2aaf5aee-2cbc-47ec-8a3f-0962cc14bc71',
         'base_delay': 20,
         'attempts': 25,
-        'copies': 0,
+        'copies': 10,
     },
     {
         'name': 'Mow and Trim',
@@ -64,9 +64,9 @@ game_configs = [
         'name': 'Cafe Dash',
         'app_token': 'bc0971b8-04df-4e72-8a3e-ec4dc663cd11',
         'promo_id': 'bc0971b8-04df-4e72-8a3e-ec4dc663cd11',
-        'base_delay': 23,
-        'attempts': 35,
-        'copies': 10,
+        'base_delay': 30,
+        'attempts': 50,
+        'copies': 30,
     },
     {
         'name': 'Zoopolis',
@@ -74,7 +74,7 @@ game_configs = [
         'promo_id': 'b2436c89-e0aa-4aed-8046-9b0515e1c46b',
         'base_delay': 23,
         'attempts': 35,
-        'copies': 35,
+        'copies': 0,
     },
     {
         'name': 'Gangs Wars',
@@ -82,7 +82,7 @@ game_configs = [
         'promo_id': 'c7821fa7-6632-482c-9635-2bd5798585f9',
         'base_delay': 40,
         'attempts': 35,
-        'copies': 35,
+        'copies': 40,
     }
 ]
 

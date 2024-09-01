@@ -6,13 +6,15 @@ from aiogram import types, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import FSInputFile, Message, InlineKeyboardMarkup
 from datetime import datetime, timezone
-from config import bot, dp, BOT_ID, games, status_limits, set_commands, GROUP_CHAT_ID
+from config import bot, dp, BOT_ID, games, status_limits, set_commands, GROUP_CHAT_ID, SUPPORTED_LANGUAGES
 from database.database import (get_session, get_or_create_user, update_user_language, log_user_action,
                                reset_daily_keys_if_needed, get_user_language, get_oldest_keys, update_keys_generated,
                                delete_keys, get_user_status_info, is_admin, get_admin_chat_ids,
-                               get_keys_count_for_games, get_users_list_admin_panel, get_user_details)
+                               get_keys_count_for_games, get_users_list_admin_panel, get_user_details,
+                               get_subscribed_users)
 from keyboards.inline import (get_action_buttons, get_settings_menu, create_language_keyboard,
-                              get_main_from_info, get_admin_panel, get_main_in_admin, get_detail_info_in_admin)
+                              get_main_from_info, get_admin_panel_keyboard, get_main_in_admin, get_detail_info_in_admin,
+                              notification_menu, confirmation_button_notification)
 from utils.helpers import load_translations, get_translation, escape_markdown, get_remaining_time
 from states.form import Form
 
@@ -30,13 +32,16 @@ async def send_welcome(message: types.Message, state: FSMContext):
         user_id = user.id if user.id != BOT_ID else message.chat.id
         chat_id = message.chat.id
 
+        # Define user language, if not supported, set to English
+        user_language_code = user.language_code if user.language_code in SUPPORTED_LANGUAGES else 'en'
+
         user_data = {
             'chat_id': chat_id,
             'user_id': user_id,
             'first_name': user.first_name,
             'last_name': user.last_name,
             'username': user.username,
-            'language_code': user.language_code
+            'language_code': user_language_code
         }
 
         # Log user action
@@ -376,7 +381,7 @@ async def send_wait_time_message(callback_query: types.CallbackQuery, user_id: i
 
 # Admin panel handler
 @dp.message(F.text == "/admin")
-async def admin_panel(message: types.Message, state: FSMContext):
+async def admin_panel_handler(message: types.Message, state: FSMContext):
     async with await get_session() as session:
         user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
 
@@ -417,7 +422,7 @@ async def admin_panel(message: types.Message, state: FSMContext):
         await bot.send_message(
             chat_id=message.chat.id,
             text=admin_text,
-            reply_markup=await get_admin_panel(session, user_id)
+            reply_markup=await get_admin_panel_keyboard(session, user_id)
         )
 
 
@@ -466,7 +471,7 @@ async def request_user_id(callback_query: types.CallbackQuery, state: FSMContext
 
     await bot.send_message(
         chat_id=callback_query.message.chat.id,
-        text="Пожалуйста, введите ID пользователя, информацию о котором вы хотите получить:"
+        text="Please enter the user ID of the user whose information you wish to retrieve:"  # Add translation ‼️
     )
 
     await state.set_state(Form.waiting_for_user_id)
@@ -484,13 +489,13 @@ async def user_detail_admin_panel(message: types.Message, state: FSMContext):
         try:
             user_detail_id = int(user_detail_id)
         except ValueError:
-            text = "<i><b>ID</b> дожно быть целым числом. Пожалуйста, повторите снова!</i>"
+            text = "<i><b>ID</b> must be an integer. Please do it again!</i>"  # Add translation ‼️
             await message.answer(text, parse_mode="HTML", reply_markup=back_keyboard)
             return
         user_details = await get_user_details(session, user_detail_id)
 
         if "not_found" in user_details:
-            text = "<i>Пользователь с таким <b>ID</b> не найден.</i>"
+            text = "<i>User with this <b>ID</b> not found!</i>"  # Add translation ‼️
             await message.answer(text, parse_mode="HTML", reply_markup=back_keyboard)
         else:
             await message.answer(user_details, parse_mode="HTML", reply_markup=back_keyboard)
@@ -505,13 +510,179 @@ async def back_to_admin_main_menu(callback_query: types.CallbackQuery):
         user_id = (
             callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
         )
-        admin_text = await get_translation(user_id, "admin_description")
+
         await log_user_action(session, user_id, "Return to main admin menu")
+
+        admin_text = await get_translation(user_id, "admin_description")
         await bot.edit_message_text(
             chat_id=callback_query.message.chat.id,
             message_id=callback_query.message.message_id,
             text=admin_text,
-            reply_markup=await get_admin_panel(session, user_id)
+            reply_markup=await get_admin_panel_keyboard(session, user_id)
+        )
+
+
+@dp.callback_query(F.data == "notifications_admin_panel")
+async def notification_menu_handler(callback_query: types.CallbackQuery):
+    async with await get_session() as session:
+        user_id = (
+            callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        )
+
+        await log_user_action(session, user_id, "Send notification menu")
+
+        await bot.edit_message_text(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            text="🚨 Watch out! The panel for sending notifications to users 📤",  # Add translation ‼️
+            reply_markup=await notification_menu(session, user_id)
+        )
+
+
+@dp.callback_query(F.data == "send_all")
+async def confirmation_menu_handler(callback_query: types.CallbackQuery):
+    async with await get_session() as session:
+        user_id = (
+            callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        )
+
+        await log_user_action(session, user_id, "Confirmation send notification")
+
+        await bot.edit_message_text(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            text="‼️ <i>Send a notification to <b>ALL</b> users ?</i> ‼️",  # Add translation ‼️
+            reply_markup=await confirmation_button_notification(session, user_id),
+            parse_mode="HTML"
+        )
+
+
+@dp.callback_query(F.data == "send_to_myself")
+async def send_to_myself_handler(callback_query: types.CallbackQuery):
+    async with await get_session() as session:
+        user_id = (
+            callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        )
+        await bot.delete_message(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id
+        )
+
+        await log_user_action(session, user_id, "Sent ad to themselves")
+
+        # Notification text
+        notification_texts = {
+            "en": translations.get("en", {}).get("notification_text"),
+            "sk": translations.get("sk", {}).get("notification_text"),
+            "ru": translations.get("ru", {}).get("notification_text"),
+            "uk": translations.get("uk", {}).get("notification_text"),
+        }
+
+        # Merge all texts into one line
+        notification_text = "\n\n".join(notification_texts.values())
+
+        # ℹ️ Test sending an advertising message to yourself and deleting it ℹ️
+        # Image path (if available)
+        image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "notification")
+        if os.path.exists(image_dir) and os.path.isdir(image_dir):
+            image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
+            if image_files:
+                random_image = random.choice(image_files)
+                image_path = os.path.join(image_dir, random_image)
+
+                # Create a new image object
+                photo = FSInputFile(image_path)
+
+                test_message = await bot.send_photo(
+                    chat_id=callback_query.message.chat.id,
+                    photo=photo,
+                    caption=notification_text,
+                    reply_markup=await get_action_buttons(session, user_id),
+                    parse_mode="HTML"
+                )
+        else:
+            await bot.send_message(
+                chat_id=callback_query.message.chat.id,
+                text=notification_text,
+                reply_markup=await get_action_buttons(session, user_id),
+                parse_mode="HTML"
+            )
+        await asyncio.sleep(7)
+        await bot.delete_message(
+            chat_id=callback_query.message.chat.id,
+            message_id=test_message.message_id
+        )
+
+        # Return keyboard
+        await bot.send_message(
+            chat_id=callback_query.message.chat.id,
+            text="🚨 Watch out! The panel for sending notifications to users 📤",   # Add translation ‼️
+            reply_markup=await notification_menu(session, user_id)
+        )
+
+
+@dp.callback_query(F.data == "confirm_send")
+async def confirm_send_all_handler(callback_query: types.CallbackQuery):
+    async with await get_session() as session:
+        user_id = (
+            callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        )
+        await bot.delete_message(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id
+        )
+
+        await log_user_action(session, user_id, "Started sending notifications to all users")
+
+        # Getting a list of users for mailing
+        users = await get_subscribed_users(session)
+
+        # Image path (if available)
+        image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "notification")
+        image_files = []
+        if os.path.exists(image_dir) and os.path.isdir(image_dir):
+            image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
+
+        for user in users:
+            chat_id = user.chat_id
+            first_name = user.first_name
+
+            # Notification text
+            notification_text = await get_translation(chat_id, "notification_text")
+            personalized_text = f"{first_name}, {notification_text}"
+
+            # If there are images, send a message with the image
+            if image_files:
+                random_image = random.choice(image_files)
+                image_path = os.path.join(image_dir, random_image)
+                photo = FSInputFile(image_path)
+                try:
+                    await bot.send_photo(
+                        chat_id=chat_id,
+                        photo=photo,
+                        caption=personalized_text,
+                        reply_markup=await get_action_buttons(session, chat_id),
+                        parse_mode="HTML"
+                    )
+                except Exception as e:
+                    logging.error(f"Failed to send photo notification to {chat_id}: {e}")
+            else:
+                # If there is no image, send a text message
+                try:
+                    await bot.send_message(
+                        chat_id=chat_id,
+                        text=personalized_text,
+                        reply_markup=await get_action_buttons(session, chat_id),
+                        parse_mode="HTML"
+                    )
+                except Exception as e:
+                    logging.error(f"Failed to send text notification to {chat_id}: {e}")
+
+        await bot.send_message(
+            chat_id=callback_query.message.chat.id,
+            text="📬 <i>The mailing has been successfully <b>completed</b>!!</i> 📭",  # Add translation ‼️
+            reply_markup=await get_admin_panel_keyboard(session, user_id),
+            parse_mode="HTML"
         )
 
 
@@ -590,7 +761,7 @@ async def show_settings_menu(callback_query: types.CallbackQuery):
         await log_user_action(session, user_id, "Settings menu opened")
         settings_message = await get_translation(user_id, "settings_message")
 
-        image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "generate")
+        image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "settings")
         if os.path.exists(image_dir) and os.path.isdir(image_dir):
             image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
             if image_files:

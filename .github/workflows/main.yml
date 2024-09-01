@@ -65,8 +65,8 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.0.1
-          name: "Release v1.1.0"
+          tag: v1.2.0
+          name: "Release v1.2.0"
           body: |
-            Added info key. Added admin panel.
+            Added notification system for users, customised admin panel!
           token: ${{ secrets.GITHUB_TOKEN }}
