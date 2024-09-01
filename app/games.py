@@ -18,7 +18,7 @@ game_configs = [
         'promo_id': 'b4170868-cef0-424f-8eb9-be0622e8e8e3',
         'base_delay': 20,
         'attempts': 20,
-        'copies': 0,
+        'copies': 3,
     },
     {
         'name': 'Train Miner',
@@ -26,7 +26,7 @@ game_configs = [
         'promo_id': 'c4480ac7-e178-4973-8061-9ed5b2e17954',
         'base_delay': 20,
         'attempts': 15,
-        'copies': 0,
+        'copies': 5,
     },
     {
         'name': 'Merge Away',
@@ -34,7 +34,7 @@ game_configs = [
         'promo_id': 'dc128d28-c45b-411c-98ff-ac7726fbaea4',
         'base_delay': 20,
         'attempts': 30,
-        'copies': 0,
+        'copies': 10,
     },
     {
         'name': 'Twerk Race 3D',
@@ -42,15 +42,15 @@ game_configs = [
         'promo_id': '61308365-9d16-4040-8bb0-2f4a4c69074c',
         'base_delay': 20,
         'attempts': 20,
-        'copies': 0,
+        'copies': 10,
     },
     {
         'name': 'Polysphere',
         'app_token': '2aaf5aee-2cbc-47ec-8a3f-0962cc14bc71',
         'promo_id': '2aaf5aee-2cbc-47ec-8a3f-0962cc14bc71',
-        'base_delay': 20,
-        'attempts': 25,
-        'copies': 10,
+        'base_delay': 15,
+        'attempts': 50,
+        'copies': 20,
     },
     {
         'name': 'Mow and Trim',
@@ -58,23 +58,23 @@ game_configs = [
         'promo_id': 'ef319a80-949a-492e-8ee0-424fb5fc20a6',
         'base_delay': 20,
         'attempts': 20,
-        'copies': 0,
+        'copies': 20,
     },
     {
         'name': 'Cafe Dash',
         'app_token': 'bc0971b8-04df-4e72-8a3e-ec4dc663cd11',
         'promo_id': 'bc0971b8-04df-4e72-8a3e-ec4dc663cd11',
-        'base_delay': 30,
-        'attempts': 50,
-        'copies': 30,
+        'base_delay': 20,
+        'attempts': 30,
+        'copies': 50,
     },
     {
         'name': 'Zoopolis',
         'app_token': 'b2436c89-e0aa-4aed-8046-9b0515e1c46b',
         'promo_id': 'b2436c89-e0aa-4aed-8046-9b0515e1c46b',
-        'base_delay': 23,
+        'base_delay': 20,
         'attempts': 35,
-        'copies': 0,
+        'copies': 10,
     },
     {
         'name': 'Gangs Wars',
@@ -82,7 +82,7 @@ game_configs = [
         'promo_id': 'c7821fa7-6632-482c-9635-2bd5798585f9',
         'base_delay': 40,
         'attempts': 35,
-        'copies': 40,
+        'copies': 50,
     }
 ]
 
