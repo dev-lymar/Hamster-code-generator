@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import update, text
+from sqlalchemy import update, text, func
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.future import select
@@ -213,11 +213,35 @@ async def get_keys_count_for_games(session: AsyncSession, games: list) -> list:
 
 # Get users list for admin panel
 async def get_users_list_admin_panel(session: AsyncSession):
-    result = await session.execute(select(User.user_id, User.username, User.first_name, User.last_name))
-    users = result.fetchall()
-    users_count = len(users)
+    today = datetime.utcnow().date()
 
-    user_list = [f"Всего пользователей: <b>{users_count}</b>\n<i>(нажми ID что бы скопировать)</i>"]
+    # Query to count the total number of users
+    user_count_result = await session.execute(
+        select(func.count(User.user_id))
+    )
+
+    users_count = user_count_result.scalar()
+
+    # Query to retrieve the last 90 users by registration date
+    user_list_last = await session.execute(
+        select(User.user_id, User.username, User.first_name)
+        .order_by(User.registration_date.desc())
+        .limit(90)
+    )
+    users = user_list_last.fetchall()
+
+    # Query to count the number of keys taken today
+    keys_today_result = await session.execute(
+        select(func.sum(User.daily_requests_count))
+        .where(User.last_reset_date == today)
+    )
+    keys_today = keys_today_result.scalar() or 0
+
+    user_list = [
+        f"<i>Всего пользователей:  <b>{users_count}</b>\n(нажми ID что бы скопировать)</i>\n",
+        f"<i>Сегодня забрали ключей:  <b>{keys_today}</b></i>\n",
+        f"<u>Последние 90 пользователей. Новые вверху:</u>"
+    ]
     for user in users:
         user_id = f"<code>{user.user_id}</code>"
         username = f"<b>{user.username}</b>" if user.username else "<i>no username</i>"
