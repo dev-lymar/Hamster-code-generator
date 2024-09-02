@@ -1,8 +1,8 @@
 """Add safety key fields to User model
 
-Revision ID: 83e0af8707da
+Revision ID: f9a9a4e0c526
 Revises: cae706dbea3c
-Create Date: 2024-09-01 22:40:54.049227
+Create Date: 2024-09-02 20:01:09.339212
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '83e0af8707da'
+revision: str = 'f9a9a4e0c526'
 down_revision: Union[str, None] = 'cae706dbea3c'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -27,6 +27,7 @@ def upgrade() -> None:
     op.add_column('users', sa.Column('daily_safety_keys_requests_count', sa.Integer(), nullable=True))
     op.add_column('users', sa.Column('last_reset_date_safety_keys', sa.Date(), nullable=True))
     op.add_column('users', sa.Column('last_safety_keys_request_time', sa.DateTime(timezone=True), nullable=True))
+    op.add_column('users', sa.Column('total_safety_keys_generated', sa.Integer(), nullable=True))
     op.alter_column('users', 'registration_date',
                existing_type=postgresql.TIMESTAMP(timezone=True),
                nullable=True,
@@ -96,6 +97,7 @@ def downgrade() -> None:
                existing_type=postgresql.TIMESTAMP(timezone=True),
                nullable=False,
                existing_server_default=sa.text('now()'))
+    op.drop_column('users', 'total_safety_keys_generated')
     op.drop_column('users', 'last_safety_keys_request_time')
     op.drop_column('users', 'last_reset_date_safety_keys')
     op.drop_column('users', 'daily_safety_keys_requests_count')
