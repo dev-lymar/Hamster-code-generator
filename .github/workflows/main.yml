@@ -49,11 +49,8 @@ jobs:
             
             alembic upgrade head || { echo "Alembic migration failed"; exit 1; }
             
-            cd /home/ubuntu/Hamster-code-generator/bot
-            nohup python3 main.py > /dev/null 2>&1 &
-
-            cd /home/ubuntu/Hamster-code-generator/app
-            nohup python3 main.py > /dev/null 2>&1 &
+            sudo systemctl restart telegram_bot.service
+            sudo systemctl restart farmer.service
 
   create-release:
     runs-on: ubuntu-latest
