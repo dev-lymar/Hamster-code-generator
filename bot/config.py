@@ -34,7 +34,10 @@ GAMES = [
 STATUS_LIMITS = {
     'free': {'daily_limit': 5, 'interval_minutes': 10},
     'friend': {'daily_limit': 15, 'interval_minutes': 10},
-    'premium': {'daily_limit': 2, 'interval_minutes': 360}
+    'premium': {
+        'daily_limit': 5, 'interval_minutes': 10,
+        'safety_daily_limit': 2, 'safety_interval_minutes': 360
+    }
 }
 
 # Forwarding message to group

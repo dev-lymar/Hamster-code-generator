@@ -27,9 +27,17 @@ logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
 async def main():
     await init_db()
     try:
+        logging.info("✅ | Starting the bot and initialising the database")
         await dp.start_polling(bot)
     finally:
+        logging.info("📁 Closing the database connection")
         await close_db()
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    try:
+        logging.info("✅ | Starting bot application")
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logging.info("🛑 | Bot application is terminated by the Ctrl+C signal")
+    finally:
+        logging.info("🏁 | Bot application stopped!")
