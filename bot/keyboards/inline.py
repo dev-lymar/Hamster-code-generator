@@ -23,9 +23,18 @@ async def get_settings_menu(session, user_id):
 
 
 # Button that returns main from info
-async def get_main_from_info(session, user_id):
+async def back_to_main_menu_key(session, user_id):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=await get_translation(user_id, "back_key"), callback_data="back_to_main")],
+    ])
+
+
+# Button instruction premium
+async def instruction_prem_button(session, user_id):
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(
+            text=await get_translation(user_id, "prem_activate_key"), callback_data="activate_prem_button")],
+        [InlineKeyboardButton(text=await get_translation(user_id, "back_key"), callback_data="back_to_main")]
     ])
 
 
