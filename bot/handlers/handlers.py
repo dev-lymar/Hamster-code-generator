@@ -76,8 +76,7 @@ async def send_welcome(message: types.Message, state: FSMContext):
                     chat_id=chat_id,
                     photo=photo,
                     caption=welcome_text,
-                    reply_markup=await get_action_buttons(session, user_id),
-                    parse_mode="HTML"
+                    reply_markup=await get_action_buttons(session, user_id)
                 )
                 return
 
@@ -85,8 +84,7 @@ async def send_welcome(message: types.Message, state: FSMContext):
         await bot.send_message(
             chat_id=chat_id,
             text=welcome_text,
-            reply_markup=await get_action_buttons(session, user_id),
-            parse_mode="HTML"
+            reply_markup=await get_action_buttons(session, user_id)
         )
 
 
@@ -111,14 +109,12 @@ async def send_keys_menu(message: types.Message, state: FSMContext):
                     chat_id,
                     photo=photo,
                     caption=await get_translation(user_id, "chose_action"),
-                    reply_markup=buttons,
-                    parse_mode="HTML",
+                    reply_markup=buttons
                 )
                 return
         await bot.send_message(
             chat_id,
             await get_translation(user_id, "chose_action"),
-            parse_mode="HTML",
             reply_markup=buttons
         )
 
@@ -273,8 +269,7 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
 
         await bot.send_message(
             chat_id=callback_query.message.chat.id,
-            text=response_text.strip(),
-            parse_mode="HTML"
+            text=response_text.strip()
         )
 
         if total_keys_in_request > 0:
@@ -318,7 +313,6 @@ async def send_safety_keys(callback_query: types.CallbackQuery, state: FSMContex
                         chat_id=callback_query.message.chat.id,
                         photo=photo,
                         caption=not_prem_message,
-                        parse_mode="HTML",
                         reply_markup=await instruction_prem_button(session, user_id)
                     )
                     return
@@ -377,8 +371,7 @@ async def send_safety_keys(callback_query: types.CallbackQuery, state: FSMContex
 
         await bot.send_message(
             chat_id=callback_query.message.chat.id,
-            text=response_text.strip(),
-            parse_mode="HTML"
+            text=response_text.strip()
         )
 
         if total_keys_in_request > 0:
@@ -416,7 +409,6 @@ async def send_limit_reached_message(callback_query: types.CallbackQuery, user_i
                         chat_id=callback_query.message.chat.id,
                         photo=photo,
                         caption=limit_message,
-                        parse_mode="HTML",
                         reply_markup=await get_action_buttons(session, user_id)
                     )
         await bot.send_message(
@@ -461,7 +453,6 @@ async def send_wait_time_message(callback_query: types.CallbackQuery, user_id: i
                         chat_id=callback_query.message.chat.id,
                         photo=photo,
                         caption=wait_message,
-                        parse_mode="HTML",
                         reply_markup=await get_action_buttons(session, user_id)
                     )
 
@@ -538,7 +529,6 @@ async def keys_admin_panel(callback_query: types.CallbackQuery):
             chat_id=callback_query.message.chat.id,
             message_id=callback_query.message.message_id,
             text=keys_count_message,
-            parse_mode="HTML",
             reply_markup=await get_main_in_admin(session, user_id)
         )
 
@@ -562,7 +552,6 @@ async def users_admin_panel(callback_query: types.CallbackQuery):
             chat_id=callback_query.message.chat.id,
             message_id=callback_query.message.message_id,
             text=users_list_admin_panel_message,
-            parse_mode="HTML",
             reply_markup=combined_keyboard
         )
 
@@ -592,15 +581,15 @@ async def user_detail_admin_panel(message: types.Message, state: FSMContext):
             user_detail_id = int(user_detail_id)
         except ValueError:
             text = "<i><b>ID</b> must be an integer. Please do it again!</i>"  # Add translation ‼️
-            await message.answer(text, parse_mode="HTML", reply_markup=back_keyboard)
+            await message.answer(text, reply_markup=back_keyboard)
             return
         user_details = await get_user_details(session, user_detail_id)
 
         if "not_found" in user_details:
             text = "<i>User with this <b>ID</b> not found!</i>"  # Add translation ‼️
-            await message.answer(text, parse_mode="HTML", reply_markup=back_keyboard)
+            await message.answer(text, reply_markup=back_keyboard)
         else:
-            await message.answer(user_details, parse_mode="HTML", reply_markup=back_keyboard)
+            await message.answer(user_details, reply_markup=back_keyboard)
 
     await state.clear()
 
@@ -654,8 +643,7 @@ async def confirmation_menu_handler(callback_query: types.CallbackQuery):
             chat_id=callback_query.message.chat.id,
             message_id=callback_query.message.message_id,
             text="‼️ <i>Send a notification to <b>ALL</b> users ?</i> ‼️",  # Add translation ‼️
-            reply_markup=await confirmation_button_notification(session, user_id),
-            parse_mode="HTML"
+            reply_markup=await confirmation_button_notification(session, user_id)
         )
 
 
@@ -699,15 +687,13 @@ async def send_to_myself_handler(callback_query: types.CallbackQuery):
                     chat_id=callback_query.message.chat.id,
                     photo=photo,
                     caption=notification_text,
-                    reply_markup=await get_action_buttons(session, user_id),
-                    parse_mode="HTML"
+                    reply_markup=await get_action_buttons(session, user_id)
                 )
         else:
             await bot.send_message(
                 chat_id=callback_query.message.chat.id,
                 text=notification_text,
-                reply_markup=await get_action_buttons(session, user_id),
-                parse_mode="HTML"
+                reply_markup=await get_action_buttons(session, user_id)
             )
         await asyncio.sleep(7)
         await bot.delete_message(
@@ -763,8 +749,7 @@ async def confirm_send_all_handler(callback_query: types.CallbackQuery):
                         chat_id=chat_id,
                         photo=photo,
                         caption=personalized_text,
-                        reply_markup=await get_action_buttons(session, chat_id),
-                        parse_mode="HTML"
+                        reply_markup=await get_action_buttons(session, chat_id)
                     )
                 except Exception as e:
                     logging.error(f"Failed to send photo notification to {chat_id}: {e}")
@@ -774,8 +759,7 @@ async def confirm_send_all_handler(callback_query: types.CallbackQuery):
                     await bot.send_message(
                         chat_id=chat_id,
                         text=personalized_text,
-                        reply_markup=await get_action_buttons(session, chat_id),
-                        parse_mode="HTML"
+                        reply_markup=await get_action_buttons(session, chat_id)
                     )
                 except Exception as e:
                     logging.error(f"Failed to send text notification to {chat_id}: {e}")
@@ -783,24 +767,24 @@ async def confirm_send_all_handler(callback_query: types.CallbackQuery):
         await bot.send_message(
             chat_id=callback_query.message.chat.id,
             text="📬 <i>The mailing has been successfully <b>completed</b>!!</i> 📭",  # Add translation ‼️
-            reply_markup=await get_admin_panel_keyboard(session, user_id),
-            parse_mode="HTML"
+            reply_markup=await get_admin_panel_keyboard(session, user_id)
         )
 
 
 # Handler of other messages (including ban check)
 @dp.message(F.text)
 async def handle_message(message: types.Message, state: FSMContext):
-    async with await get_session() as session:
+    async with (await get_session() as session):
         user_id = message.from_user.id
 
         # Logging the receipt of a message
         logging.info(f"Received message from {message.from_user.username}: {message.text}")
 
-        # Check whether the message is a reply to a forwarded message
-        if message.reply_to_message and message.reply_to_message.message_id in message_user_mapping:
+        # Check: if the sender of the message is an admin, the message will be sent directly to the user
+        if (await is_admin(user_id) and message.reply_to_message and
+                message.reply_to_message.message_id in message_user_mapping):
             original_user_id = message_user_mapping[message.reply_to_message.message_id]
-            logging.info(f"Message is a reply from admin. Forwarding to user {original_user_id}.")
+            logging.info(f"Admin is replying to user {original_user_id}. Forwarding message.")
             await bot.send_message(chat_id=original_user_id, text=message.text)
             return
 
@@ -812,8 +796,7 @@ async def handle_message(message: types.Message, state: FSMContext):
         await log_user_action(session, user_id, f"User message: {message.text}")
 
         # Forwarding message to administrators
-        if not await is_admin(user_id):
-            await forward_message_to_admins(message)
+        await forward_message_to_admins(message)
 
         response_text = await get_translation(user_id, "default_response")
         await message.answer(response_text)
@@ -883,7 +866,6 @@ async def show_settings_menu(callback_query: types.CallbackQuery):
                         chat_id=callback_query.message.chat.id,
                         message_id=callback_query.message.message_id,
                         caption=settings_message,
-                        parse_mode="HTML",
                         reply_markup=await get_settings_menu(session, user_id)
                     )
                 else:
@@ -896,7 +878,6 @@ async def show_settings_menu(callback_query: types.CallbackQuery):
                         chat_id=callback_query.message.chat.id,
                         photo=photo,
                         caption=settings_message,
-                        parse_mode="HTML",
                         reply_markup=await get_settings_menu(session, user_id)
                     )
             return
@@ -907,7 +888,6 @@ async def show_settings_menu(callback_query: types.CallbackQuery):
                 chat_id=callback_query.message.chat.id,
                 message_id=callback_query.message.message_id,
                 text=settings_message,
-                parse_mode="HTML",
                 reply_markup=await get_settings_menu(session, user_id)
             )
 
@@ -928,7 +908,6 @@ async def show_info_message(callback_query: types.CallbackQuery, state: FSMConte
                 chat_id=callback_query.message.chat.id,
                 message_id=callback_query.message.message_id,
                 caption=info_message,
-                parse_mode="HTML",
                 reply_markup=await back_to_main_menu_key(session, user_id)
             )
         else:
@@ -936,7 +915,6 @@ async def show_info_message(callback_query: types.CallbackQuery, state: FSMConte
                 chat_id=callback_query.message.chat.id,
                 message_id=callback_query.message.message_id,
                 text=info_message,
-                parse_mode="HTML",
                 reply_markup=await back_to_main_menu_key(session, user_id)
             )
 
@@ -972,7 +950,6 @@ async def back_to_main_menu(callback_query: types.CallbackQuery):
                         chat_id=callback_query.message.chat.id,
                         message_id=callback_query.message.message_id,
                         caption=main_menu_text,
-                        parse_mode="HTML",
                         reply_markup=await get_action_buttons(session, user_id)
                     )
                 else:
@@ -984,7 +961,6 @@ async def back_to_main_menu(callback_query: types.CallbackQuery):
                         chat_id=callback_query.message.chat.id,
                         photo=photo,
                         caption=main_menu_text,
-                        parse_mode="HTML",
                         reply_markup=await get_action_buttons(session, user_id)
                     )
 

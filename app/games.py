@@ -18,7 +18,7 @@ game_configs = [
         'promo_id': 'b4170868-cef0-424f-8eb9-be0622e8e8e3',
         'base_delay': 20,
         'attempts': 20,
-        'copies': 10,
+        'copies': 0,
     },
     {
         'name': 'Train Miner',
@@ -26,7 +26,7 @@ game_configs = [
         'promo_id': 'c4480ac7-e178-4973-8061-9ed5b2e17954',
         'base_delay': 20,
         'attempts': 15,
-        'copies': 20,
+        'copies': 0,
     },
     {
         'name': 'Merge Away',
@@ -34,7 +34,7 @@ game_configs = [
         'promo_id': 'dc128d28-c45b-411c-98ff-ac7726fbaea4',
         'base_delay': 20,
         'attempts': 30,
-        'copies': 30,
+        'copies': 0,
     },
     {
         'name': 'Twerk Race 3D',
@@ -42,7 +42,7 @@ game_configs = [
         'promo_id': '61308365-9d16-4040-8bb0-2f4a4c69074c',
         'base_delay': 20,
         'attempts': 20,
-        'copies': 30,
+        'copies': 0,
     },
     {
         'name': 'Polysphere',
@@ -50,7 +50,7 @@ game_configs = [
         'promo_id': '2aaf5aee-2cbc-47ec-8a3f-0962cc14bc71',
         'base_delay': 15,
         'attempts': 50,
-        'copies': 50,
+        'copies': 28,
     },
     {
         'name': 'Mow and Trim',
@@ -58,7 +58,7 @@ game_configs = [
         'promo_id': 'ef319a80-949a-492e-8ee0-424fb5fc20a6',
         'base_delay': 20,
         'attempts': 20,
-        'copies': 20,
+        'copies': 0,
     },
     {
         'name': 'Zoopolis',
@@ -66,7 +66,7 @@ game_configs = [
         'promo_id': 'b2436c89-e0aa-4aed-8046-9b0515e1c46b',
         'base_delay': 20,
         'attempts': 35,
-        'copies': 10,
+        'copies': 0,
     },
     {
         'name': 'Fluff Crusade',
@@ -74,7 +74,7 @@ game_configs = [
         'promoId': '112887b0-a8af-4eb2-ac63-d82df78283d9',
         'base_delay': 30,
         'attempts': 35,
-        'copies': 5,
+        'copies': 0,
     },
     {
         'name': 'Tile Trio',
@@ -82,7 +82,15 @@ game_configs = [
         'promoId': 'e68b39d2-4880-4a31-b3aa-0393e7df10c7',
         'base_delay': 20,
         'attempts': 35,
-        'copies': 3,
+        'copies': 0,
+    },
+    {
+        'name': 'Stone Age',
+        'appToken': '04ebd6de-69b7-43d1-9c4b-04a6ca3305af',
+        'promoId': '04ebd6de-69b7-43d1-9c4b-04a6ca3305af',
+        'base_delay': 20,
+        'attempts': 40,
+        'copies': 150,
     }
 ]
 

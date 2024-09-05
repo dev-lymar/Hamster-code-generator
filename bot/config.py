@@ -1,5 +1,6 @@
 import os
 from aiogram import Bot, Dispatcher
+from aiogram.client.bot import DefaultBotProperties
 from aiogram.types import BotCommand, BotCommandScopeChat
 from aiogram.fsm.storage.memory import MemoryStorage
 from dotenv import load_dotenv
@@ -12,7 +13,7 @@ translations = load_translations()
 
 API_TOKEN = os.getenv('BOT_TOKEN')
 BOT_ID = int(API_TOKEN.split(':')[0])
-bot = Bot(token=API_TOKEN)
+bot = Bot(token=API_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 
@@ -20,17 +21,16 @@ dp = Dispatcher(storage=storage)
 SUPPORTED_LANGUAGES = ['ru', 'sk', 'en', 'uk']
 
 GAMES = [
-    'Zoopolis',
-    # 'Gangs Wars',
-    # 'Cafe Dash',
+    'Stone Age',
+    'Fluff Crusade',
+    'Tile Trio',
     'Mow and Trim',
-    'Chain Cube 2048',
     'Train Miner',
+    'Chain Cube 2048',
     'Merge Away',
+    'Zoopolis',
     'Twerk Race 3D',
     'Polysphere',
-    'Tile Trio',
-    'Fluff Crusade',
 ]
 
 STATUS_LIMITS = {
