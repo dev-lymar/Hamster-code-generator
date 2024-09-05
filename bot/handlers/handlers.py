@@ -663,9 +663,7 @@ async def send_to_myself_handler(callback_query: types.CallbackQuery):
         # Notification text
         notification_texts = {
             "en": translations.get("en", {}).get("notification_text"),
-            "sk": translations.get("sk", {}).get("notification_text"),
             "ru": translations.get("ru", {}).get("notification_text"),
-            "uk": translations.get("uk", {}).get("notification_text"),
         }
 
         # Merge all texts into one line
