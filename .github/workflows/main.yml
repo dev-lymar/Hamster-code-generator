@@ -62,8 +62,8 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.2.6
-          name: "Release v1.2.6"
+          tag: v1.2.7
+          name: "Release v1.2.7"
           body: |
-            Added new game 'Stone Age'. Fixed admin panel answer
+            Added support new languages
           token: ${{ secrets.GITHUB_TOKEN }}
