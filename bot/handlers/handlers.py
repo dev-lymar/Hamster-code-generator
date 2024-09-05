@@ -376,8 +376,7 @@ async def send_safety_keys(callback_query: types.CallbackQuery, state: FSMContex
             else:
                 no_keys_template = await get_translation(user_id, 'no_safety_keys_available')
                 response_text += (
-                    f"{escape_markdown(
-                        await get_translation(user_id, 'no_safety_keys_for'))} *{escape_markdown(game)}* "
+                    f"{escape_markdown(await get_translation(user_id, 'no_safety_keys_for'))} *{escape_markdown(game)}*"
                     f"{escape_markdown(no_keys_template)} 😢\n\n")
 
         await bot.send_message(
