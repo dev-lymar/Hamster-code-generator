@@ -17,7 +17,7 @@ from keyboards.inline import (get_action_buttons, get_settings_menu, create_lang
                               get_detail_info_in_admin,
                               notification_menu, confirmation_button_notification,
                               instruction_prem_button)
-from utils.helpers import load_translations, get_translation, escape_markdown, get_remaining_time
+from utils.helpers import load_translations, get_translation, get_remaining_time
 from states.form import Form
 
 # Mapping between forwarded message IDs and user IDs
@@ -257,26 +257,25 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
             keys_list.append(keys)
 
         response_text_template = await get_translation(user_id, 'keys_generated_ok')
-        response_text = f"{escape_markdown(response_text_template)}\n\n"
+        response_text = f"{response_text_template}\n\n"
         total_keys_in_request = 0
 
         for game, keys in zip(GAMES, keys_list):
             if keys:
                 total_keys_in_request += len(keys)
-                response_text += f"*{escape_markdown(game)}*:\n"
+                response_text += f"<b>{game}</b>:\n"
                 keys_to_delete = [key[0] for key in keys]
-                response_text += "\n".join([f"`{escape_markdown(key)}`" for key in keys_to_delete]) + "\n\n"
+                response_text += "\n".join([f"<code>{key}</code>" for key in keys_to_delete]) + "\n\n"
                 await delete_keys(session, game, keys_to_delete)
             else:
                 no_keys_template = await get_translation(user_id, 'no_keys_available')
                 response_text += (
-                    f"{escape_markdown(await get_translation(user_id, 'no_keys_for'))} *{escape_markdown(game)}* "
-                    f"{escape_markdown(no_keys_template)} 😢\n\n")
+                    f"{await get_translation(user_id, 'no_keys_for')} <b>{game}</b> {no_keys_template} 😢\n\n")
 
         await bot.send_message(
             chat_id=callback_query.message.chat.id,
             text=response_text.strip(),
-            parse_mode="MarkdownV2"
+            parse_mode="HTML"
         )
 
         if total_keys_in_request > 0:
@@ -363,26 +362,25 @@ async def send_safety_keys(callback_query: types.CallbackQuery, state: FSMContex
             keys_list.append(keys)
 
         response_text_template = await get_translation(user_id, 'safety_keys_generated_ok')
-        response_text = f"{escape_markdown(response_text_template)}\n\n"
+        response_text = f"{response_text_template}\n\n"
         total_keys_in_request = 0
 
         for game, keys in zip(GAMES, keys_list):
             if keys:
                 total_keys_in_request += len(keys)
-                response_text += f"*{escape_markdown(game)}*:\n"
+                response_text += f"<b>{game}</b>:\n"
                 keys_to_delete = [key[0] for key in keys]
-                response_text += "\n".join([f"`{escape_markdown(key)}`" for key in keys_to_delete]) + "\n\n"
+                response_text += "\n".join([f"<code>{key}</code>" for key in keys_to_delete]) + "\n\n"
                 await delete_safety_keys(session, game, keys_to_delete)
             else:
                 no_keys_template = await get_translation(user_id, 'no_safety_keys_available')
                 response_text += (
-                    f"{escape_markdown(await get_translation(user_id, 'no_safety_keys_for'))} *{escape_markdown(game)}*"
-                    f"{escape_markdown(no_keys_template)} 😢\n\n")
+                    f"{await get_translation(user_id, 'no_keys_for')} <b>{game}</b> {no_keys_template} 😢\n\n")
 
         await bot.send_message(
             chat_id=callback_query.message.chat.id,
             text=response_text.strip(),
-            parse_mode="MarkdownV2"
+            parse_mode="HTML"
         )
 
         if total_keys_in_request > 0:
