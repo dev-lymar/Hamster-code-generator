@@ -1,5 +1,6 @@
 import os
 from aiogram import Bot, Dispatcher
+from aiogram.client.bot import DefaultBotProperties
 from aiogram.types import BotCommand, BotCommandScopeChat
 from aiogram.fsm.storage.memory import MemoryStorage
 from dotenv import load_dotenv
@@ -12,7 +13,7 @@ translations = load_translations()
 
 API_TOKEN = os.getenv('BOT_TOKEN')
 BOT_ID = int(API_TOKEN.split(':')[0])
-bot = Bot(token=API_TOKEN)
+bot = Bot(token=API_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 
