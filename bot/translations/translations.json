@@ -5,6 +5,7 @@
     "ban_message": "🚫 Oops! Looks like you're banned. Reach out to support for assistance.",
     "chose_action": "What’s next? 🤔 Choose an option to keep going:",
     "get_keys_key": "🔑 Grab Keys",
+    "get_safety_keys_key": "🏖️ It's coming soon...",
     "change_status": "🔄 Update Status",
     "settings_key": "⚙️ Settings",
     "info_key": "ℹ️ Info",
@@ -18,7 +19,8 @@
     "keys_generated_ok": "🎉 All set! Here are your keys (tap to copy):",
     "no_keys_for": "🚫 No keys available for",
     "no_keys_available": "this game at the moment.",
-    "wait_time_message": "⏳ Hold tight! You need to wait {minutes} min {sec} sec before trying again.",
+    "wait_time_message_with_hours": "⏳ Hold tight! You need to wait {hours} h {minutes} min {sec} sec before trying again.",
+    "wait_time_message_no_hours": "⏳ Hold tight! You need to wait {minutes} min {sec} sec before trying again.",
     "daily_limit_reached": "🚧 Whoa, slow down! You’ve hit today’s limit. Come back tomorrow for more fun. 😎",
     "not_admin_message": "🚫 Oh, caught you trying to sneak into the admin panel? 😏 Nice try, but you don't have the magic key! 🔑 Think this is a mistake? I doubt it...",
     "not_admin_message_second": "Wanted to feel all-powerful, huh? 👑 Dream on... maybe in another life!",
@@ -28,7 +30,8 @@
     "admin_users_key": "🚫🧑‍💻 User Wrangling",
     "admin_notifications_key": "📢 Announce Chaos",
     "admin_detail_info_key": "🔍 Get Details",
-    "notification_text": " there could be your advertisement here...\n<i>But you still haven't bought it...!</i>"
+    "notification_text": " there could be your advertisement here...\n<i>But you still haven't bought it...!</i>",
+    "not_prem_message": "😎 <b>Hey, buddy!</b> 😎\n\nYou're almost there — the <b>listing</b> is just around the corner, but there's a little secret... 🕵️‍♂️\nYou've got a chance to fully secure your drop with our bot! 🏖️\nWe've developed a new key farming algorithm. The new keys are indistinguishable from those obtained through mobile gameplay! 🎉\n\nDon't believe it and want to try it for free? 😉\nShhh... just between us — message the admin, and they'll tell you how. 🎁\n\nImagine: <b>September 26th</b> — it could be your day when everything becomes available! 🚀\nDon't miss your chance to join the elite club and get <i>safe</i> keys with no limits! 🔥\n\n🔐 <b>Activate premium now!</b> and become part of the chosen ones! 😎\n➡️ Click the button below and dive into the adventure! 🏆\n\nWe're always here to help if you have any questions! 📨😉"
   },
   "ru": {
     "language_name": "Русский",
@@ -36,12 +39,14 @@
     "ban_message": "🚫 Ой! Похоже, вы заблокированы. Свяжитесь с поддержкой для решения вопроса.",
     "chose_action": "Что дальше? 🤔\n🎮 Играй и зарабатывай вместе с нами. Новые комбо, игры и раздачи. <a href=\"https://t.me/TapEnot\">Подпишись TapEnot</a> 📱\nВыберите действие, чтобы продолжить:",
     "get_keys_key": "🔑 Получить ключи",
+    "get_safety_keys_key": "🏖️ Скоро появится...",
     "settings_key": "⚙️ Настройки",
     "info_key": "ℹ️ Инфо",
     "settings_message": "⚙️ <i>Настройки</i>\n\nВыбери опцию ниже, чтобы настроить бота под свои предпочтения.",
     "info_message": "<b>Привет!</b> Я — твой верный помощник для получения актуальных промокодов для игр 🎮. Со мной ты получишь коды <i>быстро</i> и <i>безопасно</i>!\n🔒 Я всегда на страже: использую надежные прокси и регулярно обновляюсь, чтобы у тебя были только самые свежие и рабочие коды.\n<b>💡 Нравится моя работа?</b>\nТы можешь поддержать проект! Все донаты пойдут на улучшение функционала и будущие розыгрыши. 🎁\n<b>Нажми, чтобы скопировать адрес:</b>\n<b>• USDT (TON):</b>\n<code>UQDPuCTLAXJiUb1-YVeag43rqjWEAJ__zqX5K3sHC3lu3Xsv</code>\n<b>• USDT (TRC20):</b>\n<code>TLSAQyjvZzCr7h9xF52VY2pRyrLq8hXuA9</code>\n<b>• Toncoin (TON):</b>\n<code>UQDPuCTLAXJiUb1-YVeag43rqjWEAJ__zqX5K3sHC3lu3Xsv</code>\n<b>🙏 Спасибо за твою поддержку!</b>\nС тобой мы сможем сделать этот сервис еще лучше.\n\n📬 <b>Есть вопросы?</b>\nВы можете написать боту или напрямую связаться с создателем: <a href=\"https://t.me/vlymar\">Volodymyr</a>",
     "choose_language_key": "🌐 Изменить язык",
     "back_key": "🔙 Назад",
+    "prem_activate_key": "➡️ Инструкция",
     "change_status": "🔄 Обновить статус",
     "language_selected": "🌍 Выбрали русский. Все готово!",
     "choose_language": "🌐 Выберите язык:",
@@ -49,7 +54,8 @@
     "keys_generated_ok": "🎉 Готово! Вот ваши ключи (нажмите на ключ, чтобы скопировать):",
     "no_keys_for": "🚫 Ключи для игры",
     "no_keys_available": "сейчас недоступны.",
-    "wait_time_message": "⏳ Подождите {minutes} мин {sec} сек перед следующей попыткой.",
+    "wait_time_message_with_hours": "⏳ Подождите {hours} ч {minutes} мин {sec} сек перед следующей попыткой.",
+    "wait_time_message_no_hours": "⏳ Подождите {minutes} мин {sec} сек перед следующей попыткой.",
     "daily_limit_reached": "🚧 Ого, притормозите! Вы достигли лимита на сегодня. Возвращайтесь завтра за новыми впечатлениями. 😎",
     "not_admin_message": "🚫 Ой, а что мы тут потеряли ? 😏 Но у тебя нет волшебного ключа! 🔑 Думаешь, это ошибка? Я так не думаю...",
     "not_admin_message_second": "Захотел почувствовать себя всевластным? 👑 Ага, мечтать не вредно...",
@@ -59,7 +65,8 @@
     "admin_users_key": "🚫 Управление пользователями 🧑‍💻",
     "admin_notifications_key": "📢 Создать хаос",
     "admin_detail_info_key": "🔍 Узнать подробности",
-    "notification_text": " тут могла быть ваша реклама...\n<i>Но вы до сих пор ее не купили...!</i>"
+    "notification_text": " тут могла быть ваша реклама...\n<i>Но вы до сих пор ее не купили...!</i>",
+    "not_prem_message": "😎 <b>Эй, дружище!</b> 😎\n\nТы уже почти у цели — <b>листинг</b> совсем близко, но тут есть маленький секрет... 🕵️‍♂️\nУ тебя появилась возможность максимально обезопасить свой дроп с нашим ботом!🏖️\nМы разработали новый алгоритм фарма ключей. Новые ключи не отличить от тех которые получены через игру на мобильном телефоне! 🎉\n\nНе веришь и хочешь попробовать один раз бесплатно? \uD83D\uDE09\nТс-с-с... только между нами — напиши администратору, и он расскажет, как это сделать. \uD83C\uDF81\n\nПредставь: <b>26 сентября</b> — это может стать твоим днем, когда всё станет доступным! 🚀\nНе упусти свой шанс войти в элитный клуб и получать <i>безопастные</i> ключи без всяких ограничений! 🔥\n\n🔐 <b>Активируй премиум прямо сейчас!</b> и стань частью команды избранных! 😎\n➡️ Нажми на кнопку ниже и вперед к приключениям! 🏆\n\nМы всегда на связи и готовы помочь, если у тебя будут вопросы! 📨😉"
   },
   "sk": {
     "language_name": "Slovenský",
@@ -67,6 +74,7 @@
     "ban_message": "🚫 Ups! Vyzerá to, že si bol zablokovaný. Kontaktuj podporu, ak potrebuješ pomoc.",
     "chose_action": "Čo ďalej? 🤔 Vyber si možnosť, aby si pokračoval:",
     "get_keys_key": "🔑 Získať kľúče",
+    "get_safety_keys_key": "🏖️ It's coming soon...",
     "settings_key": "⚙️ Nastavenia",
     "info_key": "ℹ️ Info",
     "settings_message": "⚙️ <i>Nastavenia</i>\n\nVyber si možnosť nižšie, aby si prispôsobil bota svojim preferenciám.",
@@ -79,7 +87,8 @@
     "keys_generated_ok": "🎉 Všetko pripravené! Tu sú tvoje kľúče (klikni na kľúč pre kopírovanie):",
     "no_keys_for": "🚫 Momentálne nemáme kľúče pre hru",
     "no_keys_available": "v tomto momente.",
-    "wait_time_message": "⏳ Ešte chvíľu! Musíš počkať {minutes} minút {sec} sekúnd pred ďalším pokusom.",
+    "wait_time_message_with_hours": "⏳ Ešte chvíľu! Musíš počkať {hours} h {minutes} minút {sec} sekúnd pred ďalším pokusom.",
+    "wait_time_message_no_hours": "⏳ Ešte chvíľu! Musíš počkať {minutes} minút {sec} sekúnd pred ďalším pokusom.",
     "daily_limit_reached": "🚧 Wow, spomaľ! Dosiahol si dnešný limit. Vráť sa zajtra pre viac zábavy. 😎",
     "not_admin_message": "🚫 No čo to tu máme? 😏 Pokúšaš sa dostať do admin panelu? Bez čarovného kľúča to nejde! 🔑 Myslíš, že je to omyl? Pochybujem...",
     "not_admin_message_second": "Chcel si sa cítiť všemocný? 👑 No, len snívaj ďalej... možno inokedy!",
@@ -89,7 +98,8 @@
     "admin_users_key": "🚫🧑‍💻 Používateľské manévre",
     "admin_notifications_key": "📢 Ohlásiť zmätok",
     "admin_detail_info_key": "🔍 Získať podrobnosti",
-    "notification_text": " mohla by tu byť vaša reklama...\n<i>Ale stále ste ju nekúpili...!</i>"
+    "notification_text": " mohla by tu byť vaša reklama...\n<i>Ale stále ste ju nekúpili...!</i>",
+    "not_prem_message": "😎 <b>Ahoj, kamarát!</b> 😎\n\nSi takmer pri cieli — <b>listovanie</b> je na dosah, ale máme tu jedno malé tajomstvo... 🕵️‍♂️\nMáš šancu maximálne zabezpečiť svoj drop s naším botom! 🏖️\nVyvinuli sme nový algoritmus farmenia kľúčov. Nové kľúče sú na nerozoznanie od tých, ktoré získavaš cez hru na mobile! 🎉\n\nNeveríš a chceš si to skúsiť zadarmo? 😉\nTicho, len medzi nami — napíš adminovi a on ti povie, ako na to. 🎁\n\nPredstav si: <b>26. septembra</b> — môže to byť tvoj deň, kedy sa všetko stane dostupným! 🚀\nNezmeškaj šancu vstúpiť do elitného klubu a získavať <i>bezpečné</i> kľúče bez obmedzení! 🔥\n\n🔐 <b>Aktivuj prémium hneď teraz!</b> a staň sa členom vyvolených! 😎\n➡️ Klikni na tlačidlo nižšie a hor sa za dobrodružstvami! 🏆\n\nSme tu vždy, keď máš otázky! 📨😉"
   },
   "uk": {
     "language_name": "Українська",
@@ -97,6 +107,7 @@
     "ban_message": "🚫 Ой! Виглядає так, що вас заблоковано. Зв’яжіться з підтримкою, якщо потрібна допомога.",
     "chose_action": "Що далі? 🤔 Оберіть опцію, щоб продовжити:",
     "get_keys_key": "🔑 Отримати ключі",
+    "get_safety_keys_key": "🏖️ It's coming soon...",
     "settings_key": "⚙️ Налаштування",
     "info_key": "ℹ️ Інфо",
     "settings_message": "⚙️ <i>Налаштування</i>\n\nВиберіть опцію нижче, щоб налаштувати бота відповідно до ваших уподобань.",
@@ -109,7 +120,8 @@
     "keys_generated_ok": "🎉 Готово! Ось ваші ключі (натисніть, щоб скопіювати):",
     "no_keys_for": "🚫 Ключі для гри",
     "no_keys_available": "наразі недоступні.",
-    "wait_time_message": "⏳ Зачекайте {minutes} хв {sec} сек перед наступною спробою.",
+    "wait_time_message_with_hours": "⏳ Зачекайте {hours} г {minutes} хв {sec} сек перед наступною спробою.",
+    "wait_time_message_no_hours": "⏳ Зачекайте {minutes} хв {sec} сек перед наступною спробою.",
     "daily_limit_reached": "🚧 Вау, сповільніться! Ви досягли денного ліміту. Повертайтесь завтра за новими враженнями. 😎",
     "not_admin_message": "🚫 Ой, а що це ми тут шукаємо? 😏 Немає чарівного ключа — немає доступу! 🔑 Думаєш, це помилка? Дуже сумніваюся...",
     "not_admin_message_second": "Захотілося відчути себе всесильним? 👑 Ну-ну, мрій далі...",
@@ -119,6 +131,7 @@
     "admin_users_key": "🚫🧑‍💻 Керування користувачами",
     "admin_notifications_key": "📢 Оголосити хаос",
     "admin_detail_info_key": "🔍 Дізнатися деталі",
-    "notification_text": " тут могла бути ваша реклама...\n<i>Але ви досі її не купили...!</i>"
+    "notification_text": " тут могла бути ваша реклама...\n<i>Але ви досі її не купили...!</i>",
+    "not_prem_message": "😎 <b>Привіт, друже!</b> 😎\n\nТи майже на фініші — <b>лістинг</b> вже зовсім близько, але є маленький секрет... 🕵️‍♂️\nТепер ти маєш шанс максимально убезпечити свій дроп з нашим ботом! 🏖️\nМи розробили новий алгоритм фарму ключів. Нові ключі не відрізнити від тих, що отримані через гру на мобільному! 🎉\n\nНе віриш і хочеш спробувати один раз безкоштовно? 😉\nТс-с-с... тільки між нами — напиши адміністратору, і він розповість, як це зробити. 🎁\n\nУяви собі: <b>26 вересня</b> — це може стати твоїм днем, коли все стане доступним! 🚀\nНе втрать свій шанс увійти в елітний клуб і отримувати <i>безпечні</i> ключі без жодних обмежень! 🔥\n\n🔐 <b>Активуй преміум просто зараз!</b> і стань частиною команди обраних! 😎\n➡️ Натискай на кнопку нижче і вперед до пригод! 🏆\n\nМи завжди на зв’язку і готові допомогти, якщо у тебе виникнуть питання! 📨😉"
   }
 }

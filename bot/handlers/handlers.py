@@ -5,16 +5,18 @@ import logging
 from aiogram import types, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import FSInputFile, Message, InlineKeyboardMarkup
-from datetime import datetime, timezone
-from config import bot, dp, BOT_ID, games, status_limits, set_commands, GROUP_CHAT_ID, SUPPORTED_LANGUAGES
+from config import bot, dp, BOT_ID, GAMES, STATUS_LIMITS, set_commands, GROUP_CHAT_ID, SUPPORTED_LANGUAGES
 from database.database import (get_session, get_or_create_user, update_user_language, log_user_action,
-                               reset_daily_keys_if_needed, get_user_language, get_oldest_keys, update_keys_generated,
+                               get_user_language, get_oldest_keys, update_keys_generated,
                                delete_keys, get_user_status_info, is_admin, get_admin_chat_ids,
                                get_keys_count_for_games, get_users_list_admin_panel, get_user_details,
-                               get_subscribed_users)
+                               get_subscribed_users, get_user_role_and_ban_info, update_safety_keys_generated,
+                               delete_safety_keys, get_safety_keys, check_user_limits, check_user_safety_limits)
 from keyboards.inline import (get_action_buttons, get_settings_menu, create_language_keyboard,
-                              get_main_from_info, get_admin_panel_keyboard, get_main_in_admin, get_detail_info_in_admin,
-                              notification_menu, confirmation_button_notification)
+                              back_to_main_menu_key, get_admin_panel_keyboard, get_main_in_admin,
+                              get_detail_info_in_admin,
+                              notification_menu, confirmation_button_notification,
+                              instruction_prem_button)
 from utils.helpers import load_translations, get_translation, escape_markdown, get_remaining_time
 from states.form import Form
 
@@ -229,21 +231,17 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
             await handle_banned_user(callback_query.message)
             return
 
-        current_date = datetime.now(timezone.utc).date()
-        if user_info.last_reset_date != current_date:
-            await reset_daily_keys_if_needed(session, user_id)
-            user_info = await get_user_status_info(session, user_id)
-
-        limit = status_limits.get(user_info.user_status, {}).get('daily_limit', 0)
-        if user_info.daily_requests_count >= limit:
+        # Checking the request limit
+        if not await check_user_limits(session, user_id, STATUS_LIMITS):
             await send_limit_reached_message(callback_query, user_id)
             return
 
-        interval_minutes = status_limits[user_info.user_status]['interval_minutes']
+        # Checking the interval between requests
+        interval_minutes = STATUS_LIMITS[user_info.user_status]['interval_minutes']
         minutes, seconds = get_remaining_time(user_info.last_request_time, interval_minutes)
         if minutes > 0 or seconds > 0:
-            translation = await get_translation(user_id, "wait_time_message")
-            wait_message = translation.format(minutes=minutes, sec=seconds)
+            wait_message_template = await get_translation(user_id, "wait_time_message_no_hours")
+            wait_message = wait_message_template.format(minutes=minutes, sec=seconds)
             await send_wait_time_message(callback_query, user_id, wait_message)
             return
 
@@ -254,14 +252,15 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
         )
 
         keys_list = []
-        for game in games:
+        for game in GAMES:
             keys = await get_oldest_keys(session, game)
             keys_list.append(keys)
 
-        response_text = f"{escape_markdown(await get_translation(user_id, 'keys_generated_ok'))}\n\n"
+        response_text_template = await get_translation(user_id, 'keys_generated_ok')
+        response_text = f"{escape_markdown(response_text_template)}\n\n"
         total_keys_in_request = 0
 
-        for game, keys in zip(games, keys_list):
+        for game, keys in zip(GAMES, keys_list):
             if keys:
                 total_keys_in_request += len(keys)
                 response_text += f"*{escape_markdown(game)}*:\n"
@@ -269,9 +268,10 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
                 response_text += "\n".join([f"`{escape_markdown(key)}`" for key in keys_to_delete]) + "\n\n"
                 await delete_keys(session, game, keys_to_delete)
             else:
+                no_keys_template = await get_translation(user_id, 'no_keys_available')
                 response_text += (
                     f"{escape_markdown(await get_translation(user_id, 'no_keys_for'))} *{escape_markdown(game)}* "
-                    f"{escape_markdown(await get_translation(user_id, 'no_keys_available'))} 😢\n\n")
+                    f"{escape_markdown(no_keys_template)} 😢\n\n")
 
         await bot.send_message(
             chat_id=callback_query.message.chat.id,
@@ -281,6 +281,112 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
 
         if total_keys_in_request > 0:
             await update_keys_generated(session, user_id, total_keys_in_request)
+
+        await send_keys_menu(callback_query.message, state)
+
+
+# Test handler 🚨
+# Handling of "get_safety_keys" button pressing
+@dp.callback_query(F.data == "get_safety_keys")
+async def send_safety_keys(callback_query: types.CallbackQuery, state: FSMContext):
+    async with (await get_session()) as session:
+        user_id = (
+            callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        )
+        await callback_query.answer("🤫 It's coming soon... ⏱️")
+        return
+
+        user_info = await get_user_status_info(session, user_id)
+        if user_info.is_banned:
+            await handle_banned_user(callback_query.message)
+            return
+
+        if user_info.user_status not in ['premium']:
+            not_prem_message = await get_translation(user_id, "not_prem_message")
+            image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "premium")
+            if os.path.exists(image_dir) and os.path.isdir(image_dir):
+                image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
+                if image_files:
+                    random_image = random.choice(image_files)
+                    image_path = os.path.join(image_dir, random_image)
+
+                    photo = FSInputFile(image_path)
+
+                    await bot.delete_message(
+                        chat_id=callback_query.message.chat.id,
+                        message_id=callback_query.message.message_id
+                    )
+                    await bot.send_photo(
+                        chat_id=callback_query.message.chat.id,
+                        photo=photo,
+                        caption=not_prem_message,
+                        parse_mode="HTML",
+                        reply_markup=await instruction_prem_button(session, user_id)
+                    )
+                    return
+            await bot.send_message(
+                chat_id=callback_query.message.chat.id,
+                text=not_prem_message,
+                reply_markup=await instruction_prem_button(session, user_id)
+            )
+
+        # Checking the limit of requests for safety keys
+        if not await check_user_safety_limits(session, user_id, STATUS_LIMITS):
+            await send_limit_reached_message(callback_query, user_id)
+            return
+
+        # Checking the interval between requests
+        interval_minutes = STATUS_LIMITS[user_info.user_status]['safety_interval_minutes']
+        minutes, seconds = get_remaining_time(user_info.last_safety_keys_request_time, interval_minutes)
+        if minutes > 59:
+            hours = minutes // 60
+            minutes = minutes % 60
+            wait_message_template = await get_translation(user_id, "wait_time_message_with_hours")
+            wait_message = wait_message_template.format(hours=hours, minutes=minutes, sec=seconds)
+        else:
+            wait_message_template = await get_translation(user_id, "wait_time_message_no_hours")
+            wait_message = wait_message_template.format(minutes=minutes, sec=seconds)
+
+        if minutes > 0 or seconds > 0:
+            await send_wait_time_message(callback_query, user_id, wait_message)
+            return
+
+        await bot.edit_message_reply_markup(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            reply_markup=None
+        )
+
+        keys_list = []
+        for game in GAMES:
+            keys = await get_safety_keys(session, game)
+            keys_list.append(keys)
+
+        response_text_template = await get_translation(user_id, 'safety_keys_generated_ok')
+        response_text = f"{escape_markdown(response_text_template)}\n\n"
+        total_keys_in_request = 0
+
+        for game, keys in zip(GAMES, keys_list):
+            if keys:
+                total_keys_in_request += len(keys)
+                response_text += f"*{escape_markdown(game)}*:\n"
+                keys_to_delete = [key[0] for key in keys]
+                response_text += "\n".join([f"`{escape_markdown(key)}`" for key in keys_to_delete]) + "\n\n"
+                await delete_safety_keys(session, game, keys_to_delete)
+            else:
+                no_keys_template = await get_translation(user_id, 'no_safety_keys_available')
+                response_text += (
+                    f"{escape_markdown(await get_translation(user_id, 'no_safety_keys_for'))} *{escape_markdown(game)}*"
+                    f"{escape_markdown(no_keys_template)} 😢\n\n")
+
+        await bot.send_message(
+            chat_id=callback_query.message.chat.id,
+            text=response_text.strip(),
+            parse_mode="MarkdownV2"
+        )
+
+        if total_keys_in_request > 0:
+            await update_safety_keys_generated(session, user_id, total_keys_in_request)
 
         await send_keys_menu(callback_query.message, state)
 
@@ -386,12 +492,12 @@ async def admin_panel_handler(message: types.Message, state: FSMContext):
         user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
 
         # Is user admin
-        user_info = await get_user_status_info(session, user_id)
+        user_info = await get_user_role_and_ban_info(session, user_id)
         if user_info.is_banned:
             await handle_banned_user(message)
             return
         # JOKE 🤡
-        if user_info.user_role != 'admin':
+        if user_info.user_role not in ['admin']:
             await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
             not_admin_message = await get_translation(user_id, "not_admin_message")
             message_sent = await bot.send_message(
@@ -431,7 +537,7 @@ async def admin_panel_handler(message: types.Message, state: FSMContext):
 async def keys_admin_panel(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.chat.id
-        keys_count_message = await get_keys_count_for_games(session, games)
+        keys_count_message = await get_keys_count_for_games(session, GAMES)
         await bot.edit_message_text(
             chat_id=callback_query.message.chat.id,
             message_id=callback_query.message.message_id,
@@ -447,7 +553,7 @@ async def users_admin_panel(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.chat.id
 
-        users_list_admin_panel_message = await get_users_list_admin_panel(session)
+        users_list_admin_panel_message = await get_users_list_admin_panel(session, GAMES)
 
         back_keyboard = await get_main_in_admin(session, user_id)
         detail_info_keyboard = await get_detail_info_in_admin(session, user_id)
@@ -827,7 +933,7 @@ async def show_info_message(callback_query: types.CallbackQuery, state: FSMConte
                 message_id=callback_query.message.message_id,
                 caption=info_message,
                 parse_mode="HTML",
-                reply_markup=await get_main_from_info(session, user_id)
+                reply_markup=await back_to_main_menu_key(session, user_id)
             )
         else:
             await bot.edit_message_text(
@@ -835,7 +941,7 @@ async def show_info_message(callback_query: types.CallbackQuery, state: FSMConte
                 message_id=callback_query.message.message_id,
                 text=info_message,
                 parse_mode="HTML",
-                reply_markup=await get_main_from_info(session, user_id)
+                reply_markup=await back_to_main_menu_key(session, user_id)
             )
 
 

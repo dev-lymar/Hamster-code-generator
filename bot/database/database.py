@@ -101,6 +101,26 @@ async def reset_daily_keys_if_needed(session: AsyncSession, user_id: int):
         await session.commit()
 
 
+# Resets daily safety keys if needed
+async def reset_daily_safety_keys_if_needed(session: AsyncSession, user_id: int):
+    current_date = datetime.now(timezone.utc).date()
+
+    result = await session.execute(
+        select(User).filter(User.user_id == user_id)
+    )
+    user = result.scalar_one_or_none()
+    if user and user.last_reset_date_safety_keys != current_date:
+        await session.execute(
+            update(User)
+            .where(User.user_id == user_id)
+            .values(
+                daily_safety_keys_requests_count=0,
+                last_reset_date_safety_keys=current_date,
+            )
+        )
+        await session.commit()
+
+
 # Logs user action
 async def log_user_action(session: AsyncSession, user_id: int, action: str):
     new_log = UserLog(user_id=user_id, action=action)
@@ -111,6 +131,17 @@ async def log_user_action(session: AsyncSession, user_id: int, action: str):
 # Getting oldest keys for the game
 async def get_oldest_keys(session: AsyncSession, game_name: str, limit: int = 4):
     table_name = game_name.replace(" ", "_").lower()
+    if table_name == "fluff_crusade":
+        limit = 8
+    query = text(f"SELECT promo_code FROM {table_name} ORDER BY created_at ASC LIMIT :limit")
+    result = await session.execute(query, {'limit': limit})
+    return result.fetchall()
+
+
+# TEST for handler !!! FROM OLD TABLE !!! ❌
+# Getting safety keys with new tables for the game
+async def get_safety_keys(session: AsyncSession, game_name: str, limit: int = 4):
+    table_name = game_name.replace(" ", "_").lower()
     query = text(f"SELECT promo_code FROM {table_name} ORDER BY created_at ASC LIMIT :limit")
     result = await session.execute(query, {'limit': limit})
     return result.fetchall()
@@ -118,6 +149,15 @@ async def get_oldest_keys(session: AsyncSession, game_name: str, limit: int = 4)
 
 # Deleting used keys
 async def delete_keys(session: AsyncSession, game_name: str, keys: list):
+    table_name = game_name.replace(" ", "_").lower()
+    query = text(f"DELETE FROM {table_name} WHERE promo_code = ANY(:keys)")
+    await session.execute(query, {'keys': keys})
+    await session.commit()
+
+
+# TEST for handler !!! FROM OLD TABLE !!! ❌
+# Deleting used safety keys
+async def delete_safety_keys(session: AsyncSession, game_name: str, keys: list):
     table_name = game_name.replace(" ", "_").lower()
     query = text(f"DELETE FROM {table_name} WHERE promo_code = ANY(:keys)")
     await session.execute(query, {'keys': keys})
@@ -137,6 +177,23 @@ async def update_keys_generated(session: AsyncSession, user_id: int, keys_genera
             daily_requests_count=User.daily_requests_count + 1,
             last_request_time=current_time,
             last_reset_date=current_time.date()
+        )
+    )
+    await session.commit()
+
+
+# Update safety key count and time of the last request
+async def update_safety_keys_generated(session: AsyncSession, user_id: int, keys_generated: int):
+    current_time = datetime.now(timezone.utc)
+
+    await session.execute(
+        update(User)
+        .where(User.user_id == user_id)
+        .values(
+            total_safety_keys_generated=User.total_safety_keys_generated + keys_generated,
+            daily_safety_keys_requests_count=User.daily_safety_keys_requests_count + 1,
+            last_safety_keys_request_time=current_time,
+            last_reset_date_safety_keys=current_time.date()
         )
     )
     await session.commit()
@@ -167,12 +224,52 @@ async def check_user_limits(session: AsyncSession, user_id: int, status_limits: 
     return True
 
 
+# Check user safety limits
+async def check_user_safety_limits(session: AsyncSession, user_id: int, status_limits: dict) -> bool:
+    result = await session.execute(
+        select(User.user_status, User.daily_safety_keys_requests_count, User.last_reset_date_safety_keys)
+        .filter(User.user_id == user_id)
+    )
+    user = result.one_or_none()
+
+    if user:
+        current_date = datetime.now(timezone.utc).date()
+
+        # Check if the counter needs to be reset
+        if user.last_reset_date_safety_keys != current_date:
+            await reset_daily_safety_keys_if_needed(session, user_id)
+            daily_safety_keys_requests_count = 0
+        else:
+            daily_safety_keys_requests_count = user.daily_safety_keys_requests_count
+
+        # Checking limits
+        limit = status_limits.get(user.user_status, {}).get('safety_daily_limit', 0)
+        if daily_safety_keys_requests_count >= limit:
+            return False  # Limit has been reached
+    return True
+
+
 # Check for ban, status, user limits
 async def get_user_status_info(session: AsyncSession, user_id: int):
     result = await session.execute(
-        select(User.is_banned, User.user_role, User.last_request_time, User.user_status,
-               User.daily_requests_count, User.last_reset_date)
-        .filter(User.user_id == user_id)
+        select(
+            User.is_banned,
+            User.last_request_time,
+            User.last_safety_keys_request_time,
+            User.user_status,
+            User.daily_requests_count,
+            User.daily_safety_keys_requests_count,
+            User.last_reset_date,
+            User.last_reset_date_safety_keys
+        ).filter(User.user_id == user_id)
+    )
+    return result.one_or_none()
+
+
+# Check for ban and role
+async def get_user_role_and_ban_info(session: AsyncSession, user_id: int):
+    result = await session.execute(
+        select(User.is_banned, User.user_role).filter(User.user_id == user_id)
     )
     return result.one_or_none()
 
@@ -212,7 +309,7 @@ async def get_keys_count_for_games(session: AsyncSession, games: list) -> list:
 
 
 # Get users list for admin panel
-async def get_users_list_admin_panel(session: AsyncSession):
+async def get_users_list_admin_panel(session: AsyncSession, games: list):
     today = datetime.utcnow().date()
 
     # Query to count the total number of users
@@ -235,7 +332,7 @@ async def get_users_list_admin_panel(session: AsyncSession):
         select(func.sum(User.daily_requests_count))
         .where(User.last_reset_date == today)
     )
-    keys_today = keys_today_result.scalar() or 0
+    keys_today = (keys_today_result.scalar() * len(games)*4) or 0
 
     user_list = [
         f"<i>Всего пользователей:  <b>{users_count}</b>\n(нажми ID что бы скопировать)</i>\n",

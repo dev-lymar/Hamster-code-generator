@@ -10,7 +10,8 @@ import coloredlogs
 from urllib.parse import urlparse
 from database import get_session
 from models.game_models import (ChainCube2048, TrainMiner, MergeAway,
-                                TwerkRace3D, Polysphere, MowAndTrim, CafeDash, Zoopolis, GangsWars)
+                                TwerkRace3D, Polysphere, MowAndTrim, CafeDash, Zoopolis,
+                                GangsWars, FluffCrusade)
 
 # Configuring logging
 log_directory = "logs"
@@ -21,7 +22,7 @@ log_file = os.path.join(log_directory, 'game_promo.log')
 
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format='%(asctime)s | %(name)s | %(levelname)s | %(message)s',
     handlers=[
         logging.StreamHandler(),
         logging.handlers.RotatingFileHandler(
@@ -34,7 +35,7 @@ logging.basicConfig(
 coloredlogs.install(
     level='INFO',
     logger=logging.getLogger(__name__),
-    fmt='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    fmt='%(asctime)s | %(name)s | %(levelname)s | %(message)s',
     level_styles={
         'info': {'color': 'green'},
         'warning': {'color': 'yellow'},
@@ -213,7 +214,8 @@ class GamePromo:
                 'Mow and Trim': MowAndTrim,
                 'Cafe Dash': CafeDash,
                 'Zoopolis': Zoopolis,
-                'Gangs Wars': GangsWars
+                'Gangs Wars': GangsWars,
+                'Fluff Crusade': FluffCrusade,
             }
             GameTable = table_mapping.get(game_name)
             if GameTable:

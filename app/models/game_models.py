@@ -73,3 +73,18 @@ class GangsWars(GameTableBase):
     __table_args__ = (
         Index('ix_gangs_wars_promo_code', 'promo_code'),
     )
+
+
+# was deleted 5.09 ❗️
+class TileTrio(GameTableBase):
+    __tablename__ = 'tile_trio'
+    __table_args__ = (
+        Index('ix_tile_trio_promo_code', 'promo_code'),
+    )
+
+
+class FluffCrusade(GameTableBase):
+    __tablename__ = 'fluff_crusade'
+    __table_args__ = (
+        Index('ix_fluff_crusade_promo_code', 'promo_code'),
+    )
