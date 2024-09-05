@@ -18,7 +18,7 @@ storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 
 # Supported languages
-SUPPORTED_LANGUAGES = ['ru', 'sk', 'en', 'uk']
+SUPPORTED_LANGUAGES = ['ru', 'sk', 'en', 'uk', 'es', 'fr', 'tr', 'ar']
 
 GAMES = [
     'Stone Age',
