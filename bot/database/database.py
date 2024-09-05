@@ -131,6 +131,8 @@ async def log_user_action(session: AsyncSession, user_id: int, action: str):
 # Getting oldest keys for the game
 async def get_oldest_keys(session: AsyncSession, game_name: str, limit: int = 4):
     table_name = game_name.replace(" ", "_").lower()
+    if table_name == "fluff_crusade":
+        limit = 8
     query = text(f"SELECT promo_code FROM {table_name} ORDER BY created_at ASC LIMIT :limit")
     result = await session.execute(query, {'limit': limit})
     return result.fetchall()

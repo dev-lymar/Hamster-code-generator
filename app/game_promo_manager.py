@@ -10,7 +10,8 @@ import coloredlogs
 from urllib.parse import urlparse
 from database import get_session
 from models.game_models import (ChainCube2048, TrainMiner, MergeAway,
-                                TwerkRace3D, Polysphere, MowAndTrim, CafeDash, Zoopolis, GangsWars)
+                                TwerkRace3D, Polysphere, MowAndTrim, CafeDash, Zoopolis,
+                                GangsWars, FluffCrusade)
 
 # Configuring logging
 log_directory = "logs"
@@ -213,7 +214,8 @@ class GamePromo:
                 'Mow and Trim': MowAndTrim,
                 'Cafe Dash': CafeDash,
                 'Zoopolis': Zoopolis,
-                'Gangs Wars': GangsWars
+                'Gangs Wars': GangsWars,
+                'Fluff Crusade': FluffCrusade,
             }
             GameTable = table_mapping.get(game_name)
             if GameTable:

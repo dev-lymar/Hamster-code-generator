@@ -21,14 +21,16 @@ SUPPORTED_LANGUAGES = ['ru', 'sk', 'en', 'uk']
 
 GAMES = [
     'Zoopolis',
-    'Gangs Wars',
-    'Cafe Dash',
+    # 'Gangs Wars',
+    # 'Cafe Dash',
     'Mow and Trim',
     'Chain Cube 2048',
     'Train Miner',
     'Merge Away',
     'Twerk Race 3D',
     'Polysphere',
+    # 'Tile Trio',
+    'FluffCrusade',
 ]
 
 STATUS_LIMITS = {

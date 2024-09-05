@@ -18,7 +18,7 @@ game_configs = [
         'promo_id': 'b4170868-cef0-424f-8eb9-be0622e8e8e3',
         'base_delay': 20,
         'attempts': 20,
-        'copies': 3,
+        'copies': 10,
     },
     {
         'name': 'Train Miner',
@@ -26,7 +26,7 @@ game_configs = [
         'promo_id': 'c4480ac7-e178-4973-8061-9ed5b2e17954',
         'base_delay': 20,
         'attempts': 15,
-        'copies': 5,
+        'copies': 20,
     },
     {
         'name': 'Merge Away',
@@ -34,7 +34,7 @@ game_configs = [
         'promo_id': 'dc128d28-c45b-411c-98ff-ac7726fbaea4',
         'base_delay': 20,
         'attempts': 30,
-        'copies': 10,
+        'copies': 30,
     },
     {
         'name': 'Twerk Race 3D',
@@ -42,7 +42,7 @@ game_configs = [
         'promo_id': '61308365-9d16-4040-8bb0-2f4a4c69074c',
         'base_delay': 20,
         'attempts': 20,
-        'copies': 10,
+        'copies': 30,
     },
     {
         'name': 'Polysphere',
@@ -50,7 +50,7 @@ game_configs = [
         'promo_id': '2aaf5aee-2cbc-47ec-8a3f-0962cc14bc71',
         'base_delay': 15,
         'attempts': 50,
-        'copies': 20,
+        'copies': 50,
     },
     {
         'name': 'Mow and Trim',
@@ -58,15 +58,7 @@ game_configs = [
         'promo_id': 'ef319a80-949a-492e-8ee0-424fb5fc20a6',
         'base_delay': 20,
         'attempts': 20,
-        'copies': 20,
-    },
-    {
-        'name': 'Cafe Dash',
-        'app_token': 'bc0971b8-04df-4e72-8a3e-ec4dc663cd11',
-        'promo_id': 'bc0971b8-04df-4e72-8a3e-ec4dc663cd11',
-        'base_delay': 20,
-        'attempts': 30,
-        'copies': 50,
+        'copies': 23,
     },
     {
         'name': 'Zoopolis',
@@ -77,12 +69,12 @@ game_configs = [
         'copies': 10,
     },
     {
-        'name': 'Gangs Wars',
-        'app_token': 'b6de60a0-e030-48bb-a551-548372493523',
-        'promo_id': 'c7821fa7-6632-482c-9635-2bd5798585f9',
-        'base_delay': 40,
+        'name': 'Fluff Crusade',
+        'appToken': '112887b0-a8af-4eb2-ac63-d82df78283d9',
+        'promoId': '112887b0-a8af-4eb2-ac63-d82df78283d9',
+        'base_delay': 30,
         'attempts': 35,
-        'copies': 50,
+        'copies': 5,
     }
 ]
 
