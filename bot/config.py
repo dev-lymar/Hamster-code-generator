@@ -29,7 +29,7 @@ GAMES = [
     'Merge Away',
     'Twerk Race 3D',
     'Polysphere',
-    # 'Tile Trio',
+    'Tile Trio',
     'Fluff Crusade',
 ]
 
