@@ -75,7 +75,6 @@ class GangsWars(GameTableBase):
     )
 
 
-# was deleted 5.09 ❗️
 class TileTrio(GameTableBase):
     __tablename__ = 'tile_trio'
     __table_args__ = (
@@ -87,4 +86,11 @@ class FluffCrusade(GameTableBase):
     __tablename__ = 'fluff_crusade'
     __table_args__ = (
         Index('ix_fluff_crusade_promo_code', 'promo_code'),
+    )
+
+
+class StoneAge(GameTableBase):
+    __tablename__ = 'stone_age'
+    __table_args__ = (
+        Index('ix_stone_age_promo_code', 'promo_code'),
     )

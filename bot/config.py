@@ -21,17 +21,16 @@ dp = Dispatcher(storage=storage)
 SUPPORTED_LANGUAGES = ['ru', 'sk', 'en', 'uk']
 
 GAMES = [
-    'Zoopolis',
-    # 'Gangs Wars',
-    # 'Cafe Dash',
+    'Stone Age',
+    'Fluff Crusade',
+    'Tile Trio',
     'Mow and Trim',
-    'Chain Cube 2048',
     'Train Miner',
+    'Chain Cube 2048',
     'Merge Away',
+    'Zoopolis',
     'Twerk Race 3D',
     'Polysphere',
-    'Tile Trio',
-    'Fluff Crusade',
 ]
 
 STATUS_LIMITS = {
