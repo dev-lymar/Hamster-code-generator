@@ -791,16 +791,17 @@ async def confirm_send_all_handler(callback_query: types.CallbackQuery):
 # Handler of other messages (including ban check)
 @dp.message(F.text)
 async def handle_message(message: types.Message, state: FSMContext):
-    async with await get_session() as session:
+    async with (await get_session() as session):
         user_id = message.from_user.id
 
         # Logging the receipt of a message
         logging.info(f"Received message from {message.from_user.username}: {message.text}")
 
-        # Check whether the message is a reply to a forwarded message
-        if message.reply_to_message and message.reply_to_message.message_id in message_user_mapping:
+        # Check: if the sender of the message is an admin, the message will be sent directly to the user
+        if (await is_admin(user_id) and message.reply_to_message and
+                message.reply_to_message.message_id in message_user_mapping):
             original_user_id = message_user_mapping[message.reply_to_message.message_id]
-            logging.info(f"Message is a reply from admin. Forwarding to user {original_user_id}.")
+            logging.info(f"Admin is replying to user {original_user_id}. Forwarding message.")
             await bot.send_message(chat_id=original_user_id, text=message.text)
             return
 
@@ -812,8 +813,7 @@ async def handle_message(message: types.Message, state: FSMContext):
         await log_user_action(session, user_id, f"User message: {message.text}")
 
         # Forwarding message to administrators
-        if not await is_admin(user_id):
-            await forward_message_to_admins(message)
+        await forward_message_to_admins(message)
 
         response_text = await get_translation(user_id, "default_response")
         await message.answer(response_text)
