@@ -50,7 +50,7 @@ jobs:
             alembic upgrade head || { echo "Alembic migration failed"; exit 1; }
             
             sudo systemctl restart telegram_bot.service
-            sudo systemctl restart farmer.service
+            sudo systemctl restart keys_farm.service
 
   create-release:
     runs-on: ubuntu-latest
@@ -62,8 +62,8 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.2.3
-          name: "Release v1.2.3"
+          tag: v1.2.4
+          name: "Release v1.2.4"
           body: |
-            Fixed issue migrations (part2)
+            Added new game. Added new button
           token: ${{ secrets.GITHUB_TOKEN }}

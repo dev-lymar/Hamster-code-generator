@@ -7,12 +7,11 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import FSInputFile, Message, InlineKeyboardMarkup
 from config import bot, dp, BOT_ID, GAMES, STATUS_LIMITS, set_commands, GROUP_CHAT_ID, SUPPORTED_LANGUAGES
 from database.database import (get_session, get_or_create_user, update_user_language, log_user_action,
-                               reset_daily_keys_if_needed, get_user_language, get_oldest_keys, update_keys_generated,
+                               get_user_language, get_oldest_keys, update_keys_generated,
                                delete_keys, get_user_status_info, is_admin, get_admin_chat_ids,
                                get_keys_count_for_games, get_users_list_admin_panel, get_user_details,
                                get_subscribed_users, get_user_role_and_ban_info, update_safety_keys_generated,
-                               delete_safety_keys, get_safety_keys, reset_daily_safety_keys_if_needed,
-                               check_user_limits, check_user_safety_limits)
+                               delete_safety_keys, get_safety_keys, check_user_limits, check_user_safety_limits)
 from keyboards.inline import (get_action_buttons, get_settings_menu, create_language_keyboard,
                               back_to_main_menu_key, get_admin_panel_keyboard, get_main_in_admin,
                               get_detail_info_in_admin,
@@ -294,7 +293,8 @@ async def send_safety_keys(callback_query: types.CallbackQuery, state: FSMContex
         user_id = (
             callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
         )
-        await callback_query.answer()
+        await callback_query.answer("🤫 It's coming soon... ⏱️")
+        return
 
         user_info = await get_user_status_info(session, user_id)
         if user_info.is_banned:
@@ -376,7 +376,8 @@ async def send_safety_keys(callback_query: types.CallbackQuery, state: FSMContex
             else:
                 no_keys_template = await get_translation(user_id, 'no_safety_keys_available')
                 response_text += (
-                    f"{escape_markdown(await get_translation(user_id, 'no_safety_keys_for'))} *{escape_markdown(game)}* "
+                    f"{escape_markdown(
+                        await get_translation(user_id, 'no_safety_keys_for'))} *{escape_markdown(game)}* "
                     f"{escape_markdown(no_keys_template)} 😢\n\n")
 
         await bot.send_message(

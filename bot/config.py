@@ -30,7 +30,7 @@ GAMES = [
     'Twerk Race 3D',
     'Polysphere',
     # 'Tile Trio',
-    'FluffCrusade',
+    'Fluff Crusade',
 ]
 
 STATUS_LIMITS = {
