@@ -24,7 +24,7 @@ services:
     volumes:
       - postgres_backups:/backups
     entrypoint: >
-      sh -c 'echo "0 0 * * * pg_dump -h postgres -U $${POSTGRES_USER} $${POSTGRES_DB} > /backups/db_backup_$(date +\%Y-\%m-\%d_%H-%M-%S).sql 2>> /backups/backup.log" > /etc/crontabs/root && crond -f'
+      sh -c 'mkdir -p /backups && echo "0 0 * * * pg_dump -h postgres -U \$POSTGRES_USER \$POSTGRES_DB > /backups/db_backup_\$(date +\%Y-\%m-\%d_%H-%M-%S).sql 2>> /backups/backup.log" > /etc/crontabs/root && crond -f'
 
 volumes:
   postgres_data:
