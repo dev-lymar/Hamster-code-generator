@@ -58,7 +58,7 @@ game_configs = [
         'promo_id': 'ef319a80-949a-492e-8ee0-424fb5fc20a6',
         'base_delay': 20,
         'attempts': 20,
-        'copies': 23,
+        'copies': 20,
     },
     {
         'name': 'Zoopolis',
@@ -75,6 +75,14 @@ game_configs = [
         'base_delay': 30,
         'attempts': 35,
         'copies': 5,
+    },
+    {
+        'name': 'Tile Trio',
+        'appToken': 'e68b39d2-4880-4a31-b3aa-0393e7df10c7',
+        'promoId': 'e68b39d2-4880-4a31-b3aa-0393e7df10c7',
+        'base_delay': 20,
+        'attempts': 35,
+        'copies': 3,
     }
 ]
 

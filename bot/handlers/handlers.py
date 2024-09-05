@@ -269,8 +269,7 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
                 await delete_keys(session, game, keys_to_delete)
             else:
                 no_keys_template = await get_translation(user_id, 'no_keys_available')
-                response_text += (
-                    f"{await get_translation(user_id, 'no_keys_for')} <b>{game}</b> {no_keys_template} 😢\n\n")
+                response_text += no_keys_template.format(game=game)
 
         await bot.send_message(
             chat_id=callback_query.message.chat.id,
@@ -373,9 +372,8 @@ async def send_safety_keys(callback_query: types.CallbackQuery, state: FSMContex
                 response_text += "\n".join([f"<code>{key}</code>" for key in keys_to_delete]) + "\n\n"
                 await delete_safety_keys(session, game, keys_to_delete)
             else:
-                no_keys_template = await get_translation(user_id, 'no_safety_keys_available')
-                response_text += (
-                    f"{await get_translation(user_id, 'no_keys_for')} <b>{game}</b> {no_keys_template} 😢\n\n")
+                no_keys_template = await get_translation(user_id, 'no_keys_available')
+                response_text += no_keys_template.format(game=game)
 
         await bot.send_message(
             chat_id=callback_query.message.chat.id,
