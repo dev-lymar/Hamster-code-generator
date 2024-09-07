@@ -62,8 +62,8 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.3.2
-          name: "Release v1.3.2"
+          tag: v1.4.0
+          name: "Release v1.4.0"
           body: |
-            Update admin display keys
+            Sending a message with a picture by ID
           token: ${{ secrets.GITHUB_TOKEN }}
