@@ -297,15 +297,26 @@ async def get_admin_chat_ids():
 
 # Get count games keys in DB
 async def get_keys_count_for_games(session: AsyncSession, games: list) -> list:
-    results = ["<i>Кол-во</i>....<b>Игра</b>\n"]
+    regular_results = ["<i>Кол-во</i>....<b>Игра</b>\n"]
+    safety_results = ["\n<i>Кол-во</i>....<b>Игра (safety)</b>\n"]
+
     for game in games:
         table_name = game.replace(" ", "_").lower()
         query = text(f"SELECT COUNT(*) FROM {table_name}")
         result = await session.execute(query)
         keys_count = result.scalar()
-        results.append(f"<i>{keys_count}</i>......<b>{game}</b>")
+        regular_results.append(f"<i>{keys_count}</i>......<b>{game}</b>")
+        safety_table_name = f"safety.{table_name}"
+        safety_query = text(f"SELECT COUNT(*) FROM {safety_table_name}")
+        try:
+            safety_result = await session.execute(safety_query)
+            safety_keys_count = safety_result.scalar()
+            safety_results.append(f"<i>{safety_keys_count}</i>......<b>{game} (safety)</b>")
+        except Exception as e:
+            safety_results.append(f"<i>Таблица не найдена</i>......<b>{game} (safety)</b>")
 
-    return "\n".join(results)
+    return "\n".join(regular_results + safety_results)
+
 
 
 # Get users list for admin panel
@@ -329,7 +340,7 @@ async def get_users_list_admin_panel(session: AsyncSession, games: list):
 
     # Query to count the number of keys taken today
     keys_today_result = await session.execute(
-        select(func.sum(User.daily_requests_count))
+        select(func.sum(User.daily_requests_count, User.daily_safety_keys_requests_count))
         .where(User.last_reset_date == today)
     )
     keys_today = (keys_today_result.scalar() * len(games)*4) or 0

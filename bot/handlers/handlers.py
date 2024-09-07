@@ -287,6 +287,7 @@ async def send_safety_keys(callback_query: types.CallbackQuery, state: FSMContex
         )
         await callback_query.answer()
 
+        logging.info(f"User {user_id} press prem keys")
         user_info = await get_user_status_info(session, user_id)
         if user_info.is_banned:
             await handle_banned_user(callback_query.message)
@@ -688,7 +689,6 @@ async def send_to_myself_handler(callback_query: types.CallbackQuery):
 
         # Notification text
         notification_texts = {
-            "en": translations.get("en", {}).get("notification_text"),
             "ru": translations.get("ru", {}).get("notification_text"),
         }
 
