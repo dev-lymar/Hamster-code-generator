@@ -798,31 +798,47 @@ async def confirm_send_all_handler(callback_query: types.CallbackQuery):
 # Button for requesting user ID
 @dp.callback_query(F.data == "send_message_to_user")
 async def request_user_id_for_message(callback_query: types.CallbackQuery, state: FSMContext):
-    await callback_query.message.answer("Enter ID of the user to whom you want to send the message:")
+    await callback_query.message.answer(
+        "Enter <b>ID</b> of the user to whom you want to send the message(or <i>'отмена'/'cancel'</i> to exit):"
+    )
+    await callback_query.answer()
     await state.set_state(FormSendToUser.waiting_for_user_id_for_message)
 
 
 # Getting user ID
 @dp.message(FormSendToUser.waiting_for_user_id_for_message)
 async def get_user_id_for_message(message: types.Message, state: FSMContext):
-    user_id = message.text.strip()
+    user_input = message.text.strip()
+
+    if user_input.strip().lower() in ['cancel', 'отмена']:
+        await message.answer("Process <i>canceled.</i> Return to the admin panel.")
+        await state.clear()
+        await admin_panel_handler(message, state)
+        return
 
     try:
         # Try to convert the entered ID into a number
-        user_id = int(user_id)
+        user_id = int(user_input)
         await state.update_data(user_id=user_id)  # Save the user ID to a state
-        await message.answer("Enter the text of the message:")
+        await message.answer("Enter <b>message text</b> (or <i>'отмена'/'cancel'</i> to exit)")
         await state.set_state(FormSendToUser.waiting_for_message_text)  # Switch to text query
     except ValueError:
-        await message.answer("User ID should be a number. Try again.")
+        await message.answer("<b>User ID <i>should be a number.</i> Try again.</b>")
 
 
 # Receive message text
 @dp.message(FormSendToUser.waiting_for_message_text)
 async def get_message_text(message: types.Message, state: FSMContext):
     message_text = message.text.strip()
+
+    if message_text in ['cancel', 'отмена']:
+        await message.answer("Process <b>canceled.</b> Return to the admin panel.")
+        await state.clear()
+        await admin_panel_handler(message, state)
+        return
+
     await state.update_data(message_text=message_text)  # Save the message text to a state
-    await message.answer("Now send the picture (or enter 'нет'/'no', if no picture is required):")
+    await message.answer("Now send the <b>picture</b> (or enter <i>'нет'/'no'</i>, if no picture is required):")
     await state.set_state(FormSendToUser.waiting_for_image)  # Go to picture request
 
 
@@ -837,7 +853,7 @@ async def get_image_and_send_message(message: types.Message, state: FSMContext):
         # If a picture is not required
         try:
             await bot.send_message(chat_id=user_id, text=message_text)
-            await message.answer(f"Message successfully sent to user with ID {user_id}.")
+            await message.answer(f"Message <b>successfully sent</b> to user with ID <i>{user_id}</i>.")
         except Exception as e:
             await message.answer(f"Failed to send a message to user ID {user_id}. Error: {e}")
     elif message.photo:
@@ -853,6 +869,9 @@ async def get_image_and_send_message(message: types.Message, state: FSMContext):
 
     # Resetting state
     await state.clear()
+
+    # Back to the admin panel
+    await admin_panel_handler(message, state)
 
 
 # Handler of other messages (including ban check)
