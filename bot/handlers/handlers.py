@@ -18,7 +18,7 @@ from keyboards.inline import (get_action_buttons, get_settings_menu, create_lang
                               notification_menu, confirmation_button_notification,
                               instruction_prem_button)
 from utils.helpers import load_translations, get_translation, get_remaining_time
-from states.form import Form
+from states.form import Form, FormSendToUser
 
 # Mapping between forwarded message IDs and user IDs
 message_user_mapping = {}
@@ -793,6 +793,66 @@ async def confirm_send_all_handler(callback_query: types.CallbackQuery):
             text="📬 <i>The mailing has been successfully <b>completed</b>!!</i> 📭",  # Add translation ‼️
             reply_markup=await get_admin_panel_keyboard(session, user_id)
         )
+
+
+# Button for requesting user ID
+@dp.callback_query(F.data == "send_message_to_user")
+async def request_user_id_for_message(callback_query: types.CallbackQuery, state: FSMContext):
+    await callback_query.message.answer("Enter ID of the user to whom you want to send the message:")
+    await state.set_state(FormSendToUser.waiting_for_user_id_for_message)
+
+
+# Getting user ID
+@dp.message(FormSendToUser.waiting_for_user_id_for_message)
+async def get_user_id_for_message(message: types.Message, state: FSMContext):
+    user_id = message.text.strip()
+
+    try:
+        # Try to convert the entered ID into a number
+        user_id = int(user_id)
+        await state.update_data(user_id=user_id)  # Save the user ID to a state
+        await message.answer("Enter the text of the message:")
+        await state.set_state(FormSendToUser.waiting_for_message_text)  # Switch to text query
+    except ValueError:
+        await message.answer("User ID should be a number. Try again.")
+
+
+# Receive message text
+@dp.message(FormSendToUser.waiting_for_message_text)
+async def get_message_text(message: types.Message, state: FSMContext):
+    message_text = message.text.strip()
+    await state.update_data(message_text=message_text)  # Save the message text to a state
+    await message.answer("Now send the picture (or enter 'нет'/'no', if no picture is required):")
+    await state.set_state(FormSendToUser.waiting_for_image)  # Go to picture request
+
+
+# Receiving a picture and sending a message
+@dp.message(FormSendToUser.waiting_for_image)
+async def get_image_and_send_message(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    user_id = data.get("user_id")
+    message_text = data.get("message_text")
+
+    if message.text and message.text.strip().lower() in ['нет', 'no']:
+        # If a picture is not required
+        try:
+            await bot.send_message(chat_id=user_id, text=message_text)
+            await message.answer(f"Message successfully sent to user with ID {user_id}.")
+        except Exception as e:
+            await message.answer(f"Failed to send a message to user ID {user_id}. Error: {e}")
+    elif message.photo:
+        # If a picture is sent
+        photo = message.photo[-1].file_id  # Take the last one (quality most of all)
+        try:
+            await bot.send_photo(chat_id=user_id, photo=photo, caption=message_text)
+            await message.answer(f"Message with picture was successfully sent to user with ID {user_id}.")
+        except Exception as e:
+            await message.answer(f"Failed to send a picture message to user with ID {user_id}. Error: {e}")
+    else:
+        await message.answer("Please send a picture or enter 'нет'/'no' if you don't need one.")
+
+    # Resetting state
+    await state.clear()
 
 
 # Handler of other messages (including ban check)

@@ -45,6 +45,8 @@ async def get_admin_panel_keyboard(session, user_id):
          InlineKeyboardButton(
              text=await get_translation(user_id, "admin_users_key"), callback_data="users_admin_panel")],
         [InlineKeyboardButton(
+            text=await get_translation(user_id, "send_message_to_user"), callback_data="send_message_to_user")],
+        [InlineKeyboardButton(
             text=await get_translation(user_id, "admin_notifications_key"), callback_data="notifications_admin_panel")],
         [InlineKeyboardButton(text="Key selection menu 🔄 ", callback_data="back_to_main")]  # Add translation ‼️
     ])
