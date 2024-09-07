@@ -138,10 +138,11 @@ async def get_oldest_keys(session: AsyncSession, game_name: str, limit: int = 4)
     return result.fetchall()
 
 
-# TEST for handler !!! FROM OLD TABLE !!! ❌
 # Getting safety keys with new tables for the game
 async def get_safety_keys(session: AsyncSession, game_name: str, limit: int = 4):
-    table_name = game_name.replace(" ", "_").lower()
+    table_name = f"safety.{game_name.replace(' ', '_').lower()}"
+    if table_name == "safety.fluff_crusade":
+        limit = 8
     query = text(f"SELECT promo_code FROM {table_name} ORDER BY created_at ASC LIMIT :limit")
     result = await session.execute(query, {'limit': limit})
     return result.fetchall()
@@ -155,10 +156,9 @@ async def delete_keys(session: AsyncSession, game_name: str, keys: list):
     await session.commit()
 
 
-# TEST for handler !!! FROM OLD TABLE !!! ❌
 # Deleting used safety keys
 async def delete_safety_keys(session: AsyncSession, game_name: str, keys: list):
-    table_name = game_name.replace(" ", "_").lower()
+    table_name = f"safety.{game_name.replace(' ', '_').lower()}"
     query = text(f"DELETE FROM {table_name} WHERE promo_code = ANY(:keys)")
     await session.execute(query, {'keys': keys})
     await session.commit()

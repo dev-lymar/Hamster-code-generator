@@ -278,7 +278,6 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
         await send_keys_menu(callback_query.message, state)
 
 
-# Test handler 🚨
 # Handling of "get_safety_keys" button pressing
 @dp.callback_query(F.data == "get_safety_keys")
 async def send_safety_keys(callback_query: types.CallbackQuery, state: FSMContext):
@@ -286,8 +285,7 @@ async def send_safety_keys(callback_query: types.CallbackQuery, state: FSMContex
         user_id = (
             callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
         )
-        await callback_query.answer("🤫 It's coming soon... ⏱️")
-        return
+        await callback_query.answer()
 
         user_info = await get_user_status_info(session, user_id)
         if user_info.is_banned:
@@ -324,7 +322,33 @@ async def send_safety_keys(callback_query: types.CallbackQuery, state: FSMContex
 
         # Checking the limit of requests for safety keys
         if not await check_user_safety_limits(session, user_id, STATUS_LIMITS):
-            await send_limit_reached_message(callback_query, user_id)
+            message_to_update = await send_limit_reached_message(callback_query, user_id)
+
+            await asyncio.sleep(1.5)
+
+            support_message = await get_translation(user_id, "support_project_message")
+            image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "premium")
+
+            if os.path.exists(image_dir) and os.path.isdir(image_dir):
+                image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
+                if image_files:
+                    random_image = random.choice(image_files)
+                    image_path = os.path.join(image_dir, random_image)
+                    photo = FSInputFile(image_path)
+
+                    await bot.edit_message_media(
+                        chat_id=callback_query.message.chat.id,
+                        message_id=message_to_update.message_id,
+                        media=types.InputMediaPhoto(media=photo, caption=support_message),
+                        reply_markup=await get_action_buttons(session, user_id)
+                    )
+                else:
+                    await bot.edit_message_text(
+                        chat_id=callback_query.message.chat.id,
+                        message_id=message_to_update.message_id,
+                        text=support_message,
+                        reply_markup=await get_action_buttons(session, user_id)
+                    )
             return
 
         # Checking the interval between requests
@@ -390,28 +414,30 @@ async def send_limit_reached_message(callback_query: types.CallbackQuery, user_i
             if image_files:
                 random_image = random.choice(image_files)
                 image_path = os.path.join(image_dir, random_image)
-
                 photo = FSInputFile(image_path)
                 if callback_query.message.photo:
-                    await bot.send_photo(
+                    await bot.delete_message(
+                        chat_id=callback_query.message.chat.id,
+                        message_id=callback_query.message.message_id
+                    )
+                    return await bot.send_photo(
                         chat_id=callback_query.message.chat.id,
                         photo=photo,
                         caption=limit_message,
                         reply_markup=await get_action_buttons(session, user_id)
                     )
-                    return
                 else:
                     await bot.delete_message(
                         chat_id=callback_query.message.chat.id,
                         message_id=callback_query.message.message_id
                     )
-                    await bot.send_photo(
+                    return await bot.send_photo(
                         chat_id=callback_query.message.chat.id,
                         photo=photo,
                         caption=limit_message,
                         reply_markup=await get_action_buttons(session, user_id)
                     )
-        await bot.send_message(
+        return await bot.send_message(
             chat_id=callback_query.message.chat.id,
             text=limit_message,
             reply_markup=await get_action_buttons(session, user_id)
