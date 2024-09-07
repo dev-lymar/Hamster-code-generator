@@ -44,7 +44,7 @@ coloredlogs.install(
     },
     field_styles={
         'asctime': {'color': 220},
-        'name': {'color': 'blue'},
+        'name': {'color': 208},
         'levelname': {'color': 'white', 'bold': True},
 
     }

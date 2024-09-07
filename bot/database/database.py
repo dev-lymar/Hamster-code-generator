@@ -333,19 +333,19 @@ async def get_users_list_admin_panel(session: AsyncSession, games: list):
     user_list_last = await session.execute(
         select(User.user_id, User.username, User.first_name)
         .order_by(User.registration_date.desc())
-        .limit(90)
+        .limit(50)
     )
     users = user_list_last.fetchall()
 
     # Query to count the number of keys taken today
     keys_today_result = await session.execute(
-        select(func.sum(User.daily_requests_count, User.daily_safety_keys_requests_count))
+        select(func.sum(func.coalesce(User.daily_requests_count, 0)))
         .where(User.last_reset_date == today)
     )
     keys_today = (keys_today_result.scalar() * len(games)*4) or 0
 
     prem_keys_today_result = await session.execute(
-        select(func.sum(User.daily_safety_keys_requests_count))
+        select(func.sum(func.coalesce(User.daily_safety_keys_requests_count, 0)))
         .where(User.last_reset_date == today)
     )
     prem_keys_today = (prem_keys_today_result.scalar() * len(games)*4) or 0
@@ -353,8 +353,8 @@ async def get_users_list_admin_panel(session: AsyncSession, games: list):
     user_list = [
         f"<i>Всего пользователей:  <b>{users_count}</b>\n(нажми ID что бы скопировать)</i>\n",
         f"<i>Сегодня забрали ключей:  <b>{keys_today}</b></i>\n",
-        f"<i>Сегодня прем забрали ключей:  <b>{prem_keys_today}</b></i>\n",
-        "<u>Последние 90 пользователей. Новые вверху:</u>"
+        f"<i>Сегодня забрали прем ключей:  <b>{prem_keys_today}</b></i>\n",
+        "<u>Последние 50 пользователей. Новые вверху:</u>"
     ]
     for user in users:
         user_id = f"<code>{user.user_id}</code>"
