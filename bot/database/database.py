@@ -313,10 +313,9 @@ async def get_keys_count_for_games(session: AsyncSession, games: list) -> list:
             safety_keys_count = safety_result.scalar()
             safety_results.append(f"<i>{safety_keys_count}</i>......<b>{game} (safety)</b>")
         except Exception as e:
-            safety_results.append(f"<i>Таблица не найдена</i>......<b>{game} (safety)</b>")
+            safety_results.append(f"<i>Таблица не найдена</i>......<b>{game} (safety). Ошибка: {e}</b>")
 
     return "\n".join(regular_results + safety_results)
-
 
 
 # Get users list for admin panel
@@ -345,9 +344,16 @@ async def get_users_list_admin_panel(session: AsyncSession, games: list):
     )
     keys_today = (keys_today_result.scalar() * len(games)*4) or 0
 
+    prem_keys_today_result = await session.execute(
+        select(func.sum(User.daily_safety_keys_requests_count))
+        .where(User.last_reset_date == today)
+    )
+    prem_keys_today = (prem_keys_today_result.scalar() * len(games)*4) or 0
+
     user_list = [
         f"<i>Всего пользователей:  <b>{users_count}</b>\n(нажми ID что бы скопировать)</i>\n",
         f"<i>Сегодня забрали ключей:  <b>{keys_today}</b></i>\n",
+        f"<i>Сегодня прем забрали ключей:  <b>{prem_keys_today}</b></i>\n",
         "<u>Последние 90 пользователей. Новые вверху:</u>"
     ]
     for user in users:
