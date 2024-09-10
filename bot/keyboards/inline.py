@@ -13,7 +13,9 @@ async def get_action_buttons(session, user_id):
         [InlineKeyboardButton(
             text=await get_translation(user_id, "ref_links_button_label"), callback_data="referral_links")],
         [InlineKeyboardButton(text=await get_translation(user_id, "settings_key"), callback_data="settings"),
-         InlineKeyboardButton(text=await get_translation(user_id, "info_key"), callback_data="info")],
+         InlineKeyboardButton(
+             text=await get_translation(user_id, "user_stats_button_label"), callback_data="user_stats")],
+        [InlineKeyboardButton(text=await get_translation(user_id, "info_key"), callback_data="info")],
     ])
 
 

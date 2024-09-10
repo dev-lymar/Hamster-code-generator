@@ -62,8 +62,8 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.4.2
-          name: "Release v1.4.2"
+          tag: v1.4.3
+          name: "Release v1.4.3"
           body: |
-            Added referral links keyboard | 🏖️
+            Added user static | 🏖️
           token: ${{ secrets.GITHUB_TOKEN }}
