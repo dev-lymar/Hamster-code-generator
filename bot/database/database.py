@@ -404,6 +404,21 @@ async def get_subscribed_users(session):
     return users
 
 
+# Get users list for admin panel
+async def get_keys_count_main_menu(session: AsyncSession, games: list):
+    keys_today = await get_daily_requests_count(session)
+    premium_keys_today = await get_daily_safety_requests_count(session)
+    POPULARITY_COEFFICIENT = int(os.getenv('POPULARITY_COEFFICIENT', 1))
+
+    keys_today_total = keys_today * len(games) * 4 * POPULARITY_COEFFICIENT
+    premium_keys_today_total = premium_keys_today * len(games) * 4 * POPULARITY_COEFFICIENT
+    keys_dict = {
+        'keys_today': keys_today_total,
+        'premium_keys_today': premium_keys_today_total
+    }
+    return keys_dict
+
+
 # Get daily requests count for regular keys
 async def get_daily_requests_count(session: AsyncSession) -> int:
     today = datetime.utcnow().date()

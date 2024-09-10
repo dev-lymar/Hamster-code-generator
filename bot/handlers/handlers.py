@@ -11,7 +11,8 @@ from database.database import (get_session, get_or_create_user, update_user_lang
                                delete_keys, get_user_status_info, is_admin, get_admin_chat_ids,
                                get_keys_count_for_games, get_users_list_admin_panel, get_user_details,
                                get_subscribed_users, get_user_role_and_ban_info, update_safety_keys_generated,
-                               delete_safety_keys, get_safety_keys, check_user_limits, check_user_safety_limits)
+                               delete_safety_keys, get_safety_keys, check_user_limits, check_user_safety_limits,
+                               get_keys_count_main_menu)
 
 from keyboards.back_to_main_kb import get_back_to_main_menu_button
 from keyboards.referral_links_kb import referral_links_keyboard
@@ -99,6 +100,8 @@ async def send_keys_menu(message: types.Message, state: FSMContext):
 
         # Use the function to get the buttons
         buttons = await get_action_buttons(session, user_id)
+        caption = await get_translation(user_id, "chose_action")
+        keys_data = await get_keys_count_main_menu(session, GAMES)
 
         # Check if the directory exists and contains files
         image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "key_generated")
@@ -111,13 +114,15 @@ async def send_keys_menu(message: types.Message, state: FSMContext):
                 await bot.send_photo(
                     chat_id,
                     photo=photo,
-                    caption=await get_translation(user_id, "chose_action"),
+                    caption=caption.format(keys_today=keys_data['keys_today'],
+                                           premium_keys_today=keys_data['premium_keys_today']),
                     reply_markup=buttons
                 )
                 return
         await bot.send_message(
-            chat_id,
-            await get_translation(user_id, "chose_action"),
+            chat_id=chat_id,
+            text=caption.format(keys_today=keys_data['keys_today'],
+                                premium_keys_today=keys_data['premium_keys_today']),
             reply_markup=buttons
         )
 
@@ -1048,7 +1053,10 @@ async def back_to_main_menu(callback_query: types.CallbackQuery):
         )
 
         await log_user_action(session, user_id, "Return to main menu")
-        main_menu_text = await get_translation(user_id, "chose_action")
+        caption = await get_translation(user_id, "chose_action")
+        keys_data = await get_keys_count_main_menu(session, GAMES)
+        main_menu_text = caption.format(keys_today=keys_data['keys_today'],
+                                        premium_keys_today=keys_data['premium_keys_today'])
 
         image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "key_generated")
         if os.path.exists(image_dir) and os.path.isdir(image_dir):
