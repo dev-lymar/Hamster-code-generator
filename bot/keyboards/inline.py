@@ -2,7 +2,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from config import REFERRAL_LINKS
 from utils.helpers import get_translation
-from .back_to_main import get_back_to_main_menu_button
+from .back_to_main_kb import get_back_to_main_menu_button
 
 
 # Buttons that returns the button bar
@@ -12,7 +12,7 @@ async def get_action_buttons(session, user_id):
             text=await get_translation(user_id, key="get_safety_keys_key"), callback_data="get_safety_keys")],
         [InlineKeyboardButton(text=await get_translation(user_id, "get_keys_key"), callback_data="get_keys")],
         [InlineKeyboardButton(
-            text=await get_translation(user_id, "ref_links_button_label"), callback_data="my_referral_links")],
+            text=await get_translation(user_id, "ref_links_button_label"), callback_data="referral_links")],
         [InlineKeyboardButton(text=await get_translation(user_id, "settings_key"), callback_data="settings"),
          InlineKeyboardButton(text=await get_translation(user_id, "info_key"), callback_data="info")],
     ])
@@ -102,16 +102,5 @@ def create_language_keyboard(translations):
         )
     keyboard_markup = InlineKeyboardMarkup(
         inline_keyboard=[language_buttons[i:i + 2] for i in range(0, len(language_buttons), 2)]
-    )
-    return keyboard_markup
-
-
-def referral_links_keyboard():
-    buttons = []
-    for game_name, game_url in REFERRAL_LINKS.items():
-        buttons.append(
-            InlineKeyboardButton(text=game_name, url=game_url))
-    keyboard_markup = InlineKeyboardMarkup(
-        inline_keyboard=[buttons[i:i + 3] for i in range(0, len(buttons), 3)]
     )
     return keyboard_markup
