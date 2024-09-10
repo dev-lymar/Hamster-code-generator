@@ -1,4 +1,3 @@
-import logging
 import os
 from sqlalchemy import update, text, func
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine

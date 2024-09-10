@@ -1,6 +1,5 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from config import REFERRAL_LINKS
 from utils.helpers import get_translation
 from .back_to_main_kb import get_back_to_main_menu_button
 
@@ -25,14 +24,6 @@ async def get_settings_menu(session, user_id):
         [InlineKeyboardButton(
             text=await get_translation(user_id, "choose_language_key"), callback_data="choose_language")],
         main_menu_back.inline_keyboard[0],
-    ])
-
-
-# УДАЛИТЬ !! ❌
-# Button that returns main from info
-async def back_to_main_menu_key(session, user_id):
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=await get_translation(user_id, "back_key"), callback_data="back_to_main")],
     ])
 
 

@@ -16,7 +16,7 @@ from database.database import (get_session, get_or_create_user, update_user_lang
 from keyboards.back_to_main_kb import get_back_to_main_menu_button
 from keyboards.referral_links_kb import referral_links_keyboard
 from keyboards.inline import (get_action_buttons, get_settings_menu, create_language_keyboard,
-                              back_to_main_menu_key, get_admin_panel_keyboard, get_main_in_admin,
+                              get_admin_panel_keyboard, get_main_in_admin,
                               get_detail_info_in_admin,
                               notification_menu, confirmation_button_notification,
                               instruction_prem_button)
@@ -124,40 +124,39 @@ async def send_keys_menu(message: types.Message, state: FSMContext):
 
 @dp.callback_query(F.data == "referral_links")
 async def referral_links_handler(callback_query: types.CallbackQuery):
-    async with await get_session() as session:
-        user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.chat.id
-        image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "premium")
-        if os.path.exists(image_dir) and os.path.isdir(image_dir):
-            image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
-            if image_files:
-                random_image = random.choice(image_files)
-                image_path = os.path.join(image_dir, random_image)
+    user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.chat.id
+    image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "premium")
+    if os.path.exists(image_dir) and os.path.isdir(image_dir):
+        image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
+        if image_files:
+            random_image = random.choice(image_files)
+            image_path = os.path.join(image_dir, random_image)
 
-                photo = FSInputFile(image_path)
-                caption_ref_link = await get_translation(user_id, "referral_links_description")
-                new_media = types.InputMediaPhoto(media=photo, caption=caption_ref_link)
-                chat_id=callback_query.message.chat.id
-                message_id = callback_query.message.message_id
-                keyboard = await referral_links_keyboard(user_id)
+            photo = FSInputFile(image_path)
+            caption_ref_link = await get_translation(user_id, "referral_links_description")
+            new_media = types.InputMediaPhoto(media=photo, caption=caption_ref_link)
+            chat_id = callback_query.message.chat.id
+            message_id = callback_query.message.message_id
+            keyboard = await referral_links_keyboard(user_id)
 
-                if callback_query.message.photo:
-                    await bot.edit_message_media(
-                        chat_id=chat_id,
-                        message_id=message_id,
-                        media=new_media,
-                        reply_markup=keyboard
-                    )
-                else:
-                    await bot.delete_message(
-                        chat_id=chat_id,
-                        message_id=message_id
-                    )
-                    await bot.send_photo(
-                        chat_id=chat_id,
-                        photo=photo,
-                        caption=caption_ref_link,
-                        reply_markup=keyboard
-                    )
+            if callback_query.message.photo:
+                await bot.edit_message_media(
+                    chat_id=chat_id,
+                    message_id=message_id,
+                    media=new_media,
+                    reply_markup=keyboard
+                )
+            else:
+                await bot.delete_message(
+                    chat_id=chat_id,
+                    message_id=message_id
+                )
+                await bot.send_photo(
+                    chat_id=chat_id,
+                    photo=photo,
+                    caption=caption_ref_link,
+                    reply_markup=keyboard
+                )
 
 
 async def execute_change_language_logic(message: types.Message, user_id: int, state: FSMContext):
