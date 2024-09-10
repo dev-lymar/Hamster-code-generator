@@ -1,5 +1,7 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
 from utils.helpers import get_translation
+from .back_to_main_kb import get_back_to_main_menu_button
 
 
 # Buttons that returns the button bar
@@ -8,6 +10,8 @@ async def get_action_buttons(session, user_id):
         [InlineKeyboardButton(
             text=await get_translation(user_id, key="get_safety_keys_key"), callback_data="get_safety_keys")],
         [InlineKeyboardButton(text=await get_translation(user_id, "get_keys_key"), callback_data="get_keys")],
+        [InlineKeyboardButton(
+            text=await get_translation(user_id, "ref_links_button_label"), callback_data="referral_links")],
         [InlineKeyboardButton(text=await get_translation(user_id, "settings_key"), callback_data="settings"),
          InlineKeyboardButton(text=await get_translation(user_id, "info_key"), callback_data="info")],
     ])
@@ -15,17 +19,11 @@ async def get_action_buttons(session, user_id):
 
 # Buttons that returns settings menu
 async def get_settings_menu(session, user_id):
+    main_menu_back = await get_back_to_main_menu_button(user_id)
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
             text=await get_translation(user_id, "choose_language_key"), callback_data="choose_language")],
-        [InlineKeyboardButton(text=await get_translation(user_id, "back_key"), callback_data="back_to_main")],
-    ])
-
-
-# Button that returns main from info
-async def back_to_main_menu_key(session, user_id):
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=await get_translation(user_id, "back_key"), callback_data="back_to_main")],
+        main_menu_back.inline_keyboard[0],
     ])
 
 
@@ -40,6 +38,7 @@ async def instruction_prem_button(session, user_id):
 
 # Function that returns admin panel
 async def get_admin_panel_keyboard(session, user_id):
+    main_menu_back = await get_back_to_main_menu_button(user_id)
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=await get_translation(user_id, "admin_keys_key"), callback_data="keys_admin_panel"),
          InlineKeyboardButton(
@@ -48,7 +47,7 @@ async def get_admin_panel_keyboard(session, user_id):
             text=await get_translation(user_id, "send_message_to_user"), callback_data="send_message_to_user")],
         [InlineKeyboardButton(
             text=await get_translation(user_id, "admin_notifications_key"), callback_data="notifications_admin_panel")],
-        [InlineKeyboardButton(text="Key selection menu 🔄 ", callback_data="back_to_main")]  # Add translation ‼️
+        main_menu_back.inline_keyboard[0]
     ])
 
 

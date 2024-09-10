@@ -12,8 +12,11 @@ from database.database import (get_session, get_or_create_user, update_user_lang
                                get_keys_count_for_games, get_users_list_admin_panel, get_user_details,
                                get_subscribed_users, get_user_role_and_ban_info, update_safety_keys_generated,
                                delete_safety_keys, get_safety_keys, check_user_limits, check_user_safety_limits)
+
+from keyboards.back_to_main_kb import get_back_to_main_menu_button
+from keyboards.referral_links_kb import referral_links_keyboard
 from keyboards.inline import (get_action_buttons, get_settings_menu, create_language_keyboard,
-                              back_to_main_menu_key, get_admin_panel_keyboard, get_main_in_admin,
+                              get_admin_panel_keyboard, get_main_in_admin,
                               get_detail_info_in_admin,
                               notification_menu, confirmation_button_notification,
                               instruction_prem_button)
@@ -117,6 +120,43 @@ async def send_keys_menu(message: types.Message, state: FSMContext):
             await get_translation(user_id, "chose_action"),
             reply_markup=buttons
         )
+
+
+@dp.callback_query(F.data == "referral_links")
+async def referral_links_handler(callback_query: types.CallbackQuery):
+    user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.chat.id
+    image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "premium")
+    if os.path.exists(image_dir) and os.path.isdir(image_dir):
+        image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
+        if image_files:
+            random_image = random.choice(image_files)
+            image_path = os.path.join(image_dir, random_image)
+
+            photo = FSInputFile(image_path)
+            caption_ref_link = await get_translation(user_id, "referral_links_description")
+            new_media = types.InputMediaPhoto(media=photo, caption=caption_ref_link)
+            chat_id = callback_query.message.chat.id
+            message_id = callback_query.message.message_id
+            keyboard = await referral_links_keyboard(user_id)
+
+            if callback_query.message.photo:
+                await bot.edit_message_media(
+                    chat_id=chat_id,
+                    message_id=message_id,
+                    media=new_media,
+                    reply_markup=keyboard
+                )
+            else:
+                await bot.delete_message(
+                    chat_id=chat_id,
+                    message_id=message_id
+                )
+                await bot.send_photo(
+                    chat_id=chat_id,
+                    photo=photo,
+                    caption=caption_ref_link,
+                    reply_markup=keyboard
+                )
 
 
 async def execute_change_language_logic(message: types.Message, user_id: int, state: FSMContext):
@@ -416,28 +456,16 @@ async def send_limit_reached_message(callback_query: types.CallbackQuery, user_i
                 random_image = random.choice(image_files)
                 image_path = os.path.join(image_dir, random_image)
                 photo = FSInputFile(image_path)
-                if callback_query.message.photo:
-                    await bot.delete_message(
-                        chat_id=callback_query.message.chat.id,
-                        message_id=callback_query.message.message_id
-                    )
-                    return await bot.send_photo(
-                        chat_id=callback_query.message.chat.id,
-                        photo=photo,
-                        caption=limit_message,
-                        reply_markup=await get_action_buttons(session, user_id)
-                    )
-                else:
-                    await bot.delete_message(
-                        chat_id=callback_query.message.chat.id,
-                        message_id=callback_query.message.message_id
-                    )
-                    return await bot.send_photo(
-                        chat_id=callback_query.message.chat.id,
-                        photo=photo,
-                        caption=limit_message,
-                        reply_markup=await get_action_buttons(session, user_id)
-                    )
+                await bot.delete_message(
+                    chat_id=callback_query.message.chat.id,
+                    message_id=callback_query.message.message_id
+                )
+                return await bot.send_photo(
+                    chat_id=callback_query.message.chat.id,
+                    photo=photo,
+                    caption=limit_message,
+                    reply_markup=await get_action_buttons(session, user_id)
+                )
         return await bot.send_message(
             chat_id=callback_query.message.chat.id,
             text=limit_message,
@@ -482,21 +510,16 @@ async def send_wait_time_message(callback_query: types.CallbackQuery, user_id: i
                         caption=wait_message,
                         reply_markup=await get_action_buttons(session, user_id)
                     )
-
-        # If image directory is missing or empty, update text or send a new text message
-        if callback_query.message.text:
-            await bot.edit_message_text(
-                chat_id=chat_id,
-                message_id=message_id,
-                text=wait_message,
-                reply_markup=await get_action_buttons(session, user_id)
-            )
-        else:
-            await bot.send_message(
-                chat_id=chat_id,
-                text=wait_message,
-                reply_markup=await get_action_buttons(session, user_id)
-            )
+        # If image directory is missing or empty
+        await bot.delete_message(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id
+        )
+        await bot.send_message(
+            chat_id=chat_id,
+            text=wait_message,
+            reply_markup=await get_action_buttons(session, user_id)
+        )
 
 
 # Admin panel handler
@@ -956,23 +979,15 @@ async def show_settings_menu(callback_query: types.CallbackQuery):
                 random_image = random.choice(image_files)
                 image_path = os.path.join(image_dir, random_image)
                 photo = FSInputFile(image_path)
-
+                new_media = types.InputMediaPhoto(media=photo, caption=settings_message)
                 if callback_query.message.photo:
-                    # If the previous message had a photo, update it
-                    new_media = types.InputMediaPhoto(media=photo)
                     await bot.edit_message_media(
                         chat_id=callback_query.message.chat.id,
                         message_id=callback_query.message.message_id,
                         media=new_media,
-                    )
-                    await bot.edit_message_caption(
-                        chat_id=callback_query.message.chat.id,
-                        message_id=callback_query.message.message_id,
-                        caption=settings_message,
                         reply_markup=await get_settings_menu(session, user_id)
                     )
                 else:
-                    # Delete the old message without a photo and send a new one
                     await bot.delete_message(
                         chat_id=callback_query.message.chat.id,
                         message_id=callback_query.message.message_id
@@ -985,7 +1000,6 @@ async def show_settings_menu(callback_query: types.CallbackQuery):
                     )
             return
 
-        # If no image directory or files, just edit the text message
         if callback_query.message.text:
             await bot.edit_message_text(
                 chat_id=callback_query.message.chat.id,
@@ -996,7 +1010,7 @@ async def show_settings_menu(callback_query: types.CallbackQuery):
 
 
 @dp.callback_query(F.data == "info")
-async def show_info_message(callback_query: types.CallbackQuery, state: FSMContext):
+async def show_info_message(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
             callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
@@ -1004,26 +1018,29 @@ async def show_info_message(callback_query: types.CallbackQuery, state: FSMConte
 
         await log_user_action(session, user_id, "Info opened")
 
-        info_message = await get_translation(user_id, "info_message")
+        chat_id = callback_query.message.chat.id
+        message_id = callback_query.message.message_id
+        info_caption = await get_translation(user_id, "info_message")
+        keyboard = await get_back_to_main_menu_button(user_id)
 
         if callback_query.message.photo:
             await bot.edit_message_caption(
-                chat_id=callback_query.message.chat.id,
-                message_id=callback_query.message.message_id,
-                caption=info_message,
-                reply_markup=await back_to_main_menu_key(session, user_id)
+                chat_id=chat_id,
+                message_id=message_id,
+                caption=info_caption,
+                reply_markup=keyboard
             )
         else:
             await bot.edit_message_text(
-                chat_id=callback_query.message.chat.id,
-                message_id=callback_query.message.message_id,
-                text=info_message,
-                reply_markup=await back_to_main_menu_key(session, user_id)
+                chat_id=chat_id,
+                message_id=message_id,
+                text=info_caption,
+                reply_markup=keyboard
             )
 
 
 # Back to main menu(for settings)
-@dp.callback_query(F.data == "back_to_main")
+@dp.callback_query(F.data == "main_menu_back")
 async def back_to_main_menu(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
@@ -1042,17 +1059,12 @@ async def back_to_main_menu(callback_query: types.CallbackQuery):
 
                 # Create a new image object
                 photo = FSInputFile(image_path)
-                new_media = types.InputMediaPhoto(media=photo)
+                new_media = types.InputMediaPhoto(media=photo, caption=main_menu_text)
                 if callback_query.message.photo:
                     await bot.edit_message_media(
                         chat_id=callback_query.message.chat.id,
                         message_id=callback_query.message.message_id,
                         media=new_media,
-                    )
-                    await bot.edit_message_caption(
-                        chat_id=callback_query.message.chat.id,
-                        message_id=callback_query.message.message_id,
-                        caption=main_menu_text,
                         reply_markup=await get_action_buttons(session, user_id)
                     )
                 else:
