@@ -1,3 +1,4 @@
+import logging
 import os
 from sqlalchemy import update, text, func
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -320,13 +321,11 @@ async def get_keys_count_for_games(session: AsyncSession, games: list) -> list:
 
 # Get users list for admin panel
 async def get_users_list_admin_panel(session: AsyncSession, games: list):
-    today = datetime.utcnow().date()
 
     # Query to count the total number of users
     user_count_result = await session.execute(
         select(func.count(User.user_id))
     )
-
     users_count = user_count_result.scalar()
 
     # Query to retrieve the last 90 users by registration date
@@ -337,23 +336,16 @@ async def get_users_list_admin_panel(session: AsyncSession, games: list):
     )
     users = user_list_last.fetchall()
 
-    # Query to count the number of keys taken today
-    keys_today_result = await session.execute(
-        select(func.sum(func.coalesce(User.daily_requests_count, 0)))
-        .where(User.last_reset_date == today)
-    )
-    keys_today = (keys_today_result.scalar() * len(games)*4) or 0
+    keys_today = await get_daily_requests_count(session)
+    premium_keys_today = await get_daily_safety_requests_count(session)
 
-    prem_keys_today_result = await session.execute(
-        select(func.sum(func.coalesce(User.daily_safety_keys_requests_count, 0)))
-        .where(User.last_reset_date == today)
-    )
-    prem_keys_today = (prem_keys_today_result.scalar() * len(games)*4) or 0
+    keys_today_total = keys_today * len(games) * 4
+    premium_keys_today_total = premium_keys_today * len(games) * 4
 
     user_list = [
         f"<i>Всего пользователей:  <b>{users_count}</b>\n(нажми ID что бы скопировать)</i>\n",
-        f"<i>Сегодня забрали ключей:  <b>{keys_today}</b></i>\n",
-        f"<i>Сегодня забрали прем ключей:  <b>{prem_keys_today}</b></i>\n",
+        f"<i>Сегодня забрали ключей:  <b>{keys_today_total}</b></i>\n",
+        f"<i>Сегодня забрали прем ключей:  <b>{premium_keys_today_total}</b></i>\n",
         "<u>Последние 50 пользователей. Новые вверху:</u>"
     ]
     for user in users:
@@ -411,3 +403,23 @@ async def get_subscribed_users(session):
     result = await session.execute(stmt)
     users = result.fetchall()
     return users
+
+
+# Get daily requests count for regular keys
+async def get_daily_requests_count(session: AsyncSession) -> int:
+    today = datetime.utcnow().date()
+    result = await session.execute(
+        select(func.sum(func.coalesce(User.daily_requests_count, 0)))
+        .where(User.last_reset_date == today)
+    )
+    return result.scalar() or 0
+
+
+# Get daily requests count for safety (premium) keys
+async def get_daily_safety_requests_count(session: AsyncSession) -> int:
+    today = datetime.utcnow().date()
+    result = await session.execute(
+        select(func.sum(func.coalesce(User.daily_safety_keys_requests_count, 0)))
+        .where(User.last_reset_date_safety_keys == today)
+    )
+    return result.scalar() or 0
