@@ -12,11 +12,13 @@ from database.database import (get_session, get_or_create_user, update_user_lang
                                get_keys_count_for_games, get_users_list_admin_panel, get_user_details,
                                get_subscribed_users, get_user_role_and_ban_info, update_safety_keys_generated,
                                delete_safety_keys, get_safety_keys, check_user_limits, check_user_safety_limits)
+
+from keyboards.back_to_main import get_back_to_main_menu_button
 from keyboards.inline import (get_action_buttons, get_settings_menu, create_language_keyboard,
                               back_to_main_menu_key, get_admin_panel_keyboard, get_main_in_admin,
                               get_detail_info_in_admin,
                               notification_menu, confirmation_button_notification,
-                              instruction_prem_button)
+                              instruction_prem_button, referral_links_keyboard)
 from utils.helpers import load_translations, get_translation, get_remaining_time
 from states.form import Form, FormSendToUser
 
@@ -117,6 +119,43 @@ async def send_keys_menu(message: types.Message, state: FSMContext):
             await get_translation(user_id, "chose_action"),
             reply_markup=buttons
         )
+
+
+@dp.callback_query(F.data == "my_referral_links")
+async def get_my_referral_links(callback_query: types.CallbackQuery):
+    async with await get_session() as session:
+        user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.chat.id
+        image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "premium")
+        if os.path.exists(image_dir) and os.path.isdir(image_dir):
+            image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
+            if image_files:
+                random_image = random.choice(image_files)
+                image_path = os.path.join(image_dir, random_image)
+
+                photo = FSInputFile(image_path)
+                caption_ref_link = await get_translation(user_id, "referral_links_description")
+                new_media = types.InputMediaPhoto(media=photo, caption=caption_ref_link)
+
+                if callback_query.message.photo:
+                    await bot.edit_message_media(
+                        chat_id=callback_query.message.chat.id,
+                        message_id=callback_query.message.message_id,
+                        media=new_media,
+                        reply_markup=referral_links_keyboard()
+                    )
+                else:
+                    await bot.delete_message(
+                        chat_id=callback_query.message.chat.id,
+                        message_id=callback_query.message.message_id
+                    )
+                    await bot.send_photo(
+                        chat_id=callback_query.message.chat.id,
+                        photo=photo,
+                        caption=caption_ref_link,
+                        reply_markup=referral_links_keyboard()
+                    )
+
+
 
 
 async def execute_change_language_logic(message: types.Message, user_id: int, state: FSMContext):
@@ -978,26 +1017,29 @@ async def show_info_message(callback_query: types.CallbackQuery):
 
         await log_user_action(session, user_id, "Info opened")
 
-        info_message = await get_translation(user_id, "info_message")
+        chat_id = callback_query.message.chat.id
+        message_id = callback_query.message.message_id
+        info_caption = await get_translation(user_id, "info_message")
+        main_menu_back = await get_back_to_main_menu_button(user_id)
 
         if callback_query.message.photo:
             await bot.edit_message_caption(
-                chat_id=callback_query.message.chat.id,
-                message_id=callback_query.message.message_id,
-                caption=info_message,
-                reply_markup=await back_to_main_menu_key(session, user_id)
+                chat_id=chat_id,
+                message_id=message_id,
+                caption=info_caption,
+                reply_markup=main_menu_back
             )
         else:
             await bot.edit_message_text(
-                chat_id=callback_query.message.chat.id,
-                message_id=callback_query.message.message_id,
-                text=info_message,
-                reply_markup=await back_to_main_menu_key(session, user_id)
+                chat_id=chat_id,
+                message_id=message_id,
+                text=info_caption,
+                reply_markup=main_menu_back
             )
 
 
 # Back to main menu(for settings)
-@dp.callback_query(F.data == "back_to_main")
+@dp.callback_query(F.data == "main_menu_back")
 async def back_to_main_menu(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (

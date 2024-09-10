@@ -1,5 +1,8 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+from config import REFERRAL_LINKS
 from utils.helpers import get_translation
+from .back_to_main import get_back_to_main_menu_button
 
 
 # Buttons that returns the button bar
@@ -8,6 +11,8 @@ async def get_action_buttons(session, user_id):
         [InlineKeyboardButton(
             text=await get_translation(user_id, key="get_safety_keys_key"), callback_data="get_safety_keys")],
         [InlineKeyboardButton(text=await get_translation(user_id, "get_keys_key"), callback_data="get_keys")],
+        [InlineKeyboardButton(
+            text=await get_translation(user_id, "ref_links_button_label"), callback_data="my_referral_links")],
         [InlineKeyboardButton(text=await get_translation(user_id, "settings_key"), callback_data="settings"),
          InlineKeyboardButton(text=await get_translation(user_id, "info_key"), callback_data="info")],
     ])
@@ -15,13 +20,15 @@ async def get_action_buttons(session, user_id):
 
 # Buttons that returns settings menu
 async def get_settings_menu(session, user_id):
+    main_menu_back = await get_back_to_main_menu_button(user_id)
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
             text=await get_translation(user_id, "choose_language_key"), callback_data="choose_language")],
-        [InlineKeyboardButton(text=await get_translation(user_id, "back_key"), callback_data="back_to_main")],
+        main_menu_back.inline_keyboard[0],
     ])
 
 
+# УДАЛИТЬ !! ❌
 # Button that returns main from info
 async def back_to_main_menu_key(session, user_id):
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -40,6 +47,7 @@ async def instruction_prem_button(session, user_id):
 
 # Function that returns admin panel
 async def get_admin_panel_keyboard(session, user_id):
+    main_menu_back = await get_back_to_main_menu_button(user_id)
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=await get_translation(user_id, "admin_keys_key"), callback_data="keys_admin_panel"),
          InlineKeyboardButton(
@@ -48,7 +56,7 @@ async def get_admin_panel_keyboard(session, user_id):
             text=await get_translation(user_id, "send_message_to_user"), callback_data="send_message_to_user")],
         [InlineKeyboardButton(
             text=await get_translation(user_id, "admin_notifications_key"), callback_data="notifications_admin_panel")],
-        [InlineKeyboardButton(text="Key selection menu 🔄 ", callback_data="back_to_main")]  # Add translation ‼️
+        main_menu_back.inline_keyboard[0]
     ])
 
 
@@ -94,5 +102,16 @@ def create_language_keyboard(translations):
         )
     keyboard_markup = InlineKeyboardMarkup(
         inline_keyboard=[language_buttons[i:i + 2] for i in range(0, len(language_buttons), 2)]
+    )
+    return keyboard_markup
+
+
+def referral_links_keyboard():
+    buttons = []
+    for game_name, game_url in REFERRAL_LINKS.items():
+        buttons.append(
+            InlineKeyboardButton(text=game_name, url=game_url))
+    keyboard_markup = InlineKeyboardMarkup(
+        inline_keyboard=[buttons[i:i + 3] for i in range(0, len(buttons), 3)]
     )
     return keyboard_markup
