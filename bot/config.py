@@ -24,10 +24,10 @@ REFERRAL_LINKS = {
     '🐕 Lost Dogs: The Way': 'https://t.me/lost_dogs_bot/lodoapp?startapp=ref-u_452792586__s_629960',
     'Cats 🐈‍⬛': 'https://t.me/catsgang_bot/join?startapp=Lv39AXNhcBvwK6ZWcoGpD',
     '😺 Catizen': 'https://t.me/catizenbot/gameapp?startapp=r_2779_5703457',
-    '🏠 City Holder': 'https://t.me/blum/app?startapp=ref_8U6nYohQav',
+    '🏠 City Holder': 'https://t.me/cityholder/game?startapp=452792586',
     '🤖 TapSwap': 'https://t.me/tapswap_mirror_2_bot?start=r_452792586',
     '⭐ Major': 'https://t.me/major/start?startapp=452792586',
-    '🪙 Blum': 'https://t.me/cityholder/game?startapp=452792586',
+    '🪙 Blum': 'https://t.me/blum/app?startapp=ref_8U6nYohQav',
     '🐸 Frog Trader': 'https://t.me/xkucoinbot/kucoinminiapp?startapp'
                      '=cm91dGU9JTJGdGFwLWdhbWUlM0ZpbnZpdGVyVXNlcklkJTNENDUyNzkyNTg2JTI2cmNvZGUlM0Q=',
     '🔥 HOT Wallet': 'https://t.me/herewalletbot/app?startapp=9477477'

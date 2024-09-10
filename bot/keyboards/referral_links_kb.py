@@ -10,7 +10,7 @@ async def referral_links_keyboard(user_id):
         buttons.append(
             InlineKeyboardButton(text=game_name, url=game_url))
     keyboard_markup = InlineKeyboardMarkup(
-        inline_keyboard=[buttons[i:i + 3] for i in range(0, len(buttons), 3)]
+        inline_keyboard=[buttons[i:i + 2] for i in range(0, len(buttons), 2)]
     )
     keyboard_markup.inline_keyboard.append(main_menu_back.inline_keyboard[0])
     return keyboard_markup

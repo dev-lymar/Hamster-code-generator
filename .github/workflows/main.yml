@@ -62,8 +62,8 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.4.1
-          name: "Release v1.4.1"
+          tag: v1.4.2
+          name: "Release v1.4.2"
           body: |
-            Fixes in sending message to user by ID
+            Added referral links keyboard | 🏖️
           token: ${{ secrets.GITHUB_TOKEN }}
