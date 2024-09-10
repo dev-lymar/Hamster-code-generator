@@ -404,6 +404,21 @@ async def get_subscribed_users(session):
     return users
 
 
+# Get users list for admin panel
+async def get_keys_count_main_menu(session: AsyncSession, games: list):
+    keys_today = await get_daily_requests_count(session)
+    premium_keys_today = await get_daily_safety_requests_count(session)
+    POPULARITY_COEFFICIENT = int(os.getenv('POPULARITY_COEFFICIENT', 1))
+
+    keys_today_total = keys_today * len(games) * 4 * POPULARITY_COEFFICIENT
+    premium_keys_today_total = premium_keys_today * len(games) * 4 * POPULARITY_COEFFICIENT
+    keys_dict = {
+        'keys_today': keys_today_total,
+        'premium_keys_today': premium_keys_today_total
+    }
+    return keys_dict
+
+
 # Get daily requests count for regular keys
 async def get_daily_requests_count(session: AsyncSession) -> int:
     today = datetime.utcnow().date()
@@ -422,3 +437,30 @@ async def get_daily_safety_requests_count(session: AsyncSession) -> int:
         .where(User.last_reset_date_safety_keys == today)
     )
     return result.scalar() or 0
+
+
+# Get user stats for statistic function
+async def get_user_stats(session: AsyncSession, user_id: int, games: list) -> dict:
+    result = await session.execute(
+        select(
+            User.registration_date,
+            User.user_status,
+            User.daily_requests_count,
+            User.daily_safety_keys_requests_count,
+            User.total_keys_generated,
+            User.total_safety_keys_generated,
+        ).filter(User.user_id == user_id)
+    )
+    user_data = result.fetchone()
+    if not user_data:
+        raise KeyError(f"User with ID {user_id} not found or missing data.")
+    keys_today = user_data[2] * (len(games) * 4 + 4)
+    premium_keys_today = user_data[3] * (len(games) * 4 + 4)
+    return {
+        "registration_date": user_data[0],
+        "user_status": user_data[1],
+        "keys_today": keys_today,
+        "premium_keys_today": premium_keys_today,
+        "total_keys_generated": user_data[4],
+        "total_safety_keys_generated": user_data[5],
+    }

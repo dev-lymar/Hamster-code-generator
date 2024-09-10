@@ -5,13 +5,14 @@ import logging
 from aiogram import types, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import FSInputFile, Message, InlineKeyboardMarkup
-from config import bot, dp, BOT_ID, GAMES, STATUS_LIMITS, set_commands, GROUP_CHAT_ID, SUPPORTED_LANGUAGES
+from config import bot, dp, BOT_ID, GAMES, STATUS_LIMITS, set_commands, GROUP_CHAT_ID, SUPPORTED_LANGUAGES, STATUSES
 from database.database import (get_session, get_or_create_user, update_user_language, log_user_action,
                                get_user_language, get_oldest_keys, update_keys_generated,
                                delete_keys, get_user_status_info, is_admin, get_admin_chat_ids,
                                get_keys_count_for_games, get_users_list_admin_panel, get_user_details,
                                get_subscribed_users, get_user_role_and_ban_info, update_safety_keys_generated,
-                               delete_safety_keys, get_safety_keys, check_user_limits, check_user_safety_limits)
+                               delete_safety_keys, get_safety_keys, check_user_limits, check_user_safety_limits,
+                               get_keys_count_main_menu, get_user_stats)
 
 from keyboards.back_to_main_kb import get_back_to_main_menu_button
 from keyboards.referral_links_kb import referral_links_keyboard
@@ -22,6 +23,7 @@ from keyboards.inline import (get_action_buttons, get_settings_menu, create_lang
                               instruction_prem_button)
 from utils.helpers import load_translations, get_translation, get_remaining_time
 from states.form import Form, FormSendToUser
+from utils.services import generate_user_stats
 
 # Mapping between forwarded message IDs and user IDs
 message_user_mapping = {}
@@ -99,6 +101,8 @@ async def send_keys_menu(message: types.Message, state: FSMContext):
 
         # Use the function to get the buttons
         buttons = await get_action_buttons(session, user_id)
+        caption = await get_translation(user_id, "chose_action")
+        keys_data = await get_keys_count_main_menu(session, GAMES)
 
         # Check if the directory exists and contains files
         image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "key_generated")
@@ -111,13 +115,15 @@ async def send_keys_menu(message: types.Message, state: FSMContext):
                 await bot.send_photo(
                     chat_id,
                     photo=photo,
-                    caption=await get_translation(user_id, "chose_action"),
+                    caption=caption.format(keys_today=keys_data['keys_today'],
+                                           premium_keys_today=keys_data['premium_keys_today']),
                     reply_markup=buttons
                 )
                 return
         await bot.send_message(
-            chat_id,
-            await get_translation(user_id, "chose_action"),
+            chat_id=chat_id,
+            text=caption.format(keys_today=keys_data['keys_today'],
+                                premium_keys_today=keys_data['premium_keys_today']),
             reply_markup=buttons
         )
 
@@ -1009,6 +1015,49 @@ async def show_settings_menu(callback_query: types.CallbackQuery):
             )
 
 
+# User statistic
+@dp.callback_query(F.data == "user_stats")
+async def show_user_stats_message(callback_query: types.CallbackQuery):
+    async with await get_session() as session:
+        user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.chat.id
+
+        await log_user_action(session, user_id, "User checked stats")
+
+        user_data = await get_user_stats(session, user_id, GAMES)
+        if not user_data:
+            await callback_query.answer("User not found!")
+
+        user_stats = await generate_user_stats(user_data)
+
+        chat_id = callback_query.message.chat.id
+        message_id = callback_query.message.message_id
+        stats_translation = await get_translation(user_id, "user_stats_description")
+        info_caption = stats_translation.format(
+            achievement_name=user_stats['achievement_name'],
+            keys_today=user_stats['keys_today'],
+            premium_keys_today=user_stats['premium_keys_today'],
+            keys_total=user_stats['keys_total'],
+            premium_keys_total=user_stats['premium_keys_total'],
+            user_status=STATUSES[user_stats['user_status']],
+        )
+        keyboard = await get_back_to_main_menu_button(user_id)
+
+        if callback_query.message.photo:
+            await bot.edit_message_caption(
+                chat_id=chat_id,
+                message_id=message_id,
+                caption=info_caption,
+                reply_markup=keyboard
+            )
+        else:
+            await bot.edit_message_text(
+                chat_id=chat_id,
+                message_id=message_id,
+                text=info_caption,
+                reply_markup=keyboard
+            )
+
+
 @dp.callback_query(F.data == "info")
 async def show_info_message(callback_query: types.CallbackQuery):
     async with await get_session() as session:
@@ -1048,7 +1097,10 @@ async def back_to_main_menu(callback_query: types.CallbackQuery):
         )
 
         await log_user_action(session, user_id, "Return to main menu")
-        main_menu_text = await get_translation(user_id, "chose_action")
+        caption = await get_translation(user_id, "chose_action")
+        keys_data = await get_keys_count_main_menu(session, GAMES)
+        main_menu_text = caption.format(keys_today=keys_data['keys_today'],
+                                        premium_keys_today=keys_data['premium_keys_today'])
 
         image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "key_generated")
         if os.path.exists(image_dir) and os.path.isdir(image_dir):
