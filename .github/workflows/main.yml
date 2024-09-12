@@ -62,8 +62,8 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.4.4
-          name: "Release v1.4.4"
+          tag: v1.4.5
+          name: "Release v1.4.5"
           body: |
-            Added new game Bouncemasters | 🏖️
+            Added new notification | 🏖️
           token: ${{ secrets.GITHUB_TOKEN }}
