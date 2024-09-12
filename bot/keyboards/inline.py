@@ -34,7 +34,7 @@ async def instruction_prem_button(session, user_id):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
             text=await get_translation(user_id, "prem_support_button"), url="https://t.me/bot_support_hamster")],
-        [InlineKeyboardButton(text=await get_translation(user_id, "back_key"), callback_data="back_to_main")]
+        [InlineKeyboardButton(text=await get_translation(user_id, "back_key"), callback_data="main_menu_back")]
     ])
 
 
