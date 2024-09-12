@@ -4,6 +4,7 @@ import os
 from config import bot, dp
 from database.database import init_db, close_db
 from handlers import handlers  # noqa: F401
+from handlers.payment import payment_router
 
 # Set up logging configuration
 log_directory = os.path.join(os.path.dirname(__file__), 'logs')
@@ -22,6 +23,8 @@ logging.basicConfig(
 )
 # Reduce the logging level of SQLAlchemy to WARNING
 logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
+
+dp.include_router(payment_router)
 
 
 async def main():

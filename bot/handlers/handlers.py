@@ -15,6 +15,7 @@ from database.database import (get_session, get_or_create_user, update_user_lang
                                get_keys_count_main_menu, get_user_stats)
 
 from keyboards.back_to_main_kb import get_back_to_main_menu_button
+from keyboards.donate_kb import get_donation_keyboard
 from keyboards.referral_links_kb import referral_links_keyboard
 from keyboards.inline import (get_action_buttons, get_settings_menu, create_language_keyboard,
                               get_admin_panel_keyboard, get_main_in_admin,
@@ -1070,7 +1071,7 @@ async def show_info_message(callback_query: types.CallbackQuery):
         chat_id = callback_query.message.chat.id
         message_id = callback_query.message.message_id
         info_caption = await get_translation(user_id, "info_message")
-        keyboard = await get_back_to_main_menu_button(user_id)
+        keyboard = await get_donation_keyboard(user_id)
 
         if callback_query.message.photo:
             await bot.edit_message_caption(
