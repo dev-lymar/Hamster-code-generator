@@ -1,5 +1,4 @@
 import asyncio
-import datetime
 
 from aiogram import types, F, Router
 from aiogram.fsm.context import FSMContext
@@ -7,6 +6,7 @@ from aiogram.exceptions import TelegramBadRequest
 
 from config import BOT_ID
 from handlers.handlers import send_keys_menu, show_info_message
+from keyboards.back_to_main_kb import get_back_to_main_menu_button
 
 from keyboards.donate_kb import get_payment_keyboard, get_cancel_donation_keyboard
 
@@ -31,7 +31,6 @@ async def donate_custom_handler(callback: types.CallbackQuery, state: FSMContext
     # Save the message ID for deletion
     await state.update_data(message_to_delete=message.message_id)
     await state.set_state(DonationState.waiting_for_amount)
-    await state.set_state_timeout(DonationState.waiting_for_amount, datetime.timedelta(minutes=5))
     await callback.answer()
 
 
@@ -164,9 +163,11 @@ async def refund_stars_command_handler(message: types.Message, state: FSMContext
 @payment_router.message(F.text == "/paysupport")
 async def paysupport_handler(message: types.Message):
     user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
+    await message.delete()
     paysupport_prompt_text = await get_translation(user_id, "paysupport_prompt_message")
+    keyboard = await get_back_to_main_menu_button(user_id)
 
-    await message.answer(text=paysupport_prompt_text)
+    await message.answer(text=paysupport_prompt_text, reply_markup=keyboard)
 
 
 async def send_invoice_message(callback_or_message, amount: int, state: FSMContext):

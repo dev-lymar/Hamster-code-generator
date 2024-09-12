@@ -2,10 +2,10 @@ import asyncio
 import os
 import random
 import logging
-from aiogram import types, F
+from aiogram import types, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import FSInputFile, Message, InlineKeyboardMarkup
-from config import bot, dp, BOT_ID, GAMES, STATUS_LIMITS, set_commands, GROUP_CHAT_ID, SUPPORTED_LANGUAGES, STATUSES
+from config import bot, BOT_ID, GAMES, STATUS_LIMITS, set_commands, GROUP_CHAT_ID, SUPPORTED_LANGUAGES, STATUSES
 from database.database import (get_session, get_or_create_user, update_user_language, log_user_action,
                                get_user_language, get_oldest_keys, update_keys_generated,
                                delete_keys, get_user_status_info, is_admin, get_admin_chat_ids,
@@ -31,9 +31,11 @@ message_user_mapping = {}
 
 translations = load_translations()
 
+handlers_router = Router()
+
 
 # Command handler /start
-@dp.message(F.text == "/start")
+@handlers_router.message(F.text == "/start")
 async def send_welcome(message: types.Message, state: FSMContext):
     async with await get_session() as session:
         user = message.from_user
@@ -129,7 +131,7 @@ async def send_keys_menu(message: types.Message, state: FSMContext):
         )
 
 
-@dp.callback_query(F.data == "referral_links")
+@handlers_router.callback_query(F.data == "referral_links")
 async def referral_links_handler(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.chat.id
     image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "premium")
@@ -194,14 +196,14 @@ async def execute_change_language_logic(message: types.Message, user_id: int, st
 
 
 # Change language command
-@dp.message(F.text == "/change_lang")
+@handlers_router.message(F.text == "/change_lang")
 async def change_language(message: types.Message, state: FSMContext):
     async with await get_session() as _:
         user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
         await execute_change_language_logic(message, user_id, state)
 
 
-@dp.callback_query(F.data == "choose_language")
+@handlers_router.callback_query(F.data == "choose_language")
 async def change_language_via_button(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.answer()
     async with await get_session() as _:
@@ -212,7 +214,7 @@ async def change_language_via_button(callback_query: types.CallbackQuery, state:
 
 
 # Language selection processing
-@dp.callback_query(F.data.in_(translations.keys()))
+@handlers_router.callback_query(F.data.in_(translations.keys()))
 async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
     async with await get_session() as session:
         user_id = (
@@ -261,7 +263,7 @@ async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
 
 
 # Handling of "get_keys" button pressing
-@dp.callback_query(F.data == "get_keys")
+@handlers_router.callback_query(F.data == "get_keys")
 async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
     async with (await get_session()) as session:
         user_id = (
@@ -326,7 +328,7 @@ async def send_keys(callback_query: types.CallbackQuery, state: FSMContext):
 
 
 # Handling of "get_safety_keys" button pressing
-@dp.callback_query(F.data == "get_safety_keys")
+@handlers_router.callback_query(F.data == "get_safety_keys")
 async def send_safety_keys(callback_query: types.CallbackQuery, state: FSMContext):
     async with (await get_session()) as session:
         user_id = (
@@ -530,7 +532,7 @@ async def send_wait_time_message(callback_query: types.CallbackQuery, user_id: i
 
 
 # Admin panel handler
-@dp.message(F.text == "/admin")
+@handlers_router.message(F.text == "/admin")
 async def admin_panel_handler(message: types.Message, state: FSMContext):
     async with await get_session() as session:
         user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
@@ -577,7 +579,7 @@ async def admin_panel_handler(message: types.Message, state: FSMContext):
 
 
 # Get keys button admin panel
-@dp.callback_query(F.data == "keys_admin_panel")
+@handlers_router.callback_query(F.data == "keys_admin_panel")
 async def keys_admin_panel(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.chat.id
@@ -591,7 +593,7 @@ async def keys_admin_panel(callback_query: types.CallbackQuery):
 
 
 # Get users button admin panel
-@dp.callback_query(F.data == "users_admin_panel")
+@handlers_router.callback_query(F.data == "users_admin_panel")
 async def users_admin_panel(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.chat.id
@@ -613,7 +615,7 @@ async def users_admin_panel(callback_query: types.CallbackQuery):
         )
 
 
-@dp.callback_query(F.data == "detail_info_in_admin")
+@handlers_router.callback_query(F.data == "detail_info_in_admin")
 async def request_user_id(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.answer()
 
@@ -626,7 +628,7 @@ async def request_user_id(callback_query: types.CallbackQuery, state: FSMContext
 
 
 # Get user detail button admin panel
-@dp.message(Form.waiting_for_user_id)
+@handlers_router.message(Form.waiting_for_user_id)
 async def user_detail_admin_panel(message: types.Message, state: FSMContext):
     user_detail_id = message.text.strip()
 
@@ -652,7 +654,7 @@ async def user_detail_admin_panel(message: types.Message, state: FSMContext):
 
 
 # Back to main menu(for admin)
-@dp.callback_query(F.data == "back_to_admin_main")
+@handlers_router.callback_query(F.data == "back_to_admin_main")
 async def back_to_admin_main_menu(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
@@ -670,7 +672,7 @@ async def back_to_admin_main_menu(callback_query: types.CallbackQuery):
         )
 
 
-@dp.callback_query(F.data == "notifications_admin_panel")
+@handlers_router.callback_query(F.data == "notifications_admin_panel")
 async def notification_menu_handler(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
@@ -687,7 +689,7 @@ async def notification_menu_handler(callback_query: types.CallbackQuery):
         )
 
 
-@dp.callback_query(F.data == "send_all")
+@handlers_router.callback_query(F.data == "send_all")
 async def confirmation_menu_handler(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
@@ -704,7 +706,7 @@ async def confirmation_menu_handler(callback_query: types.CallbackQuery):
         )
 
 
-@dp.callback_query(F.data == "send_to_myself")
+@handlers_router.callback_query(F.data == "send_to_myself")
 async def send_to_myself_handler(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
@@ -766,7 +768,7 @@ async def send_to_myself_handler(callback_query: types.CallbackQuery):
         )
 
 
-@dp.callback_query(F.data == "confirm_send")
+@handlers_router.callback_query(F.data == "confirm_send")
 async def confirm_send_all_handler(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
@@ -834,7 +836,7 @@ async def confirm_send_all_handler(callback_query: types.CallbackQuery):
 
 
 # Button for requesting user ID
-@dp.callback_query(F.data == "send_message_to_user")
+@handlers_router.callback_query(F.data == "send_message_to_user")
 async def request_user_id_for_message(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.message.answer(
         "Enter <b>ID</b> of the user to whom you want to send the message(or <i>'отмена'/'cancel'</i> to exit):"
@@ -844,7 +846,7 @@ async def request_user_id_for_message(callback_query: types.CallbackQuery, state
 
 
 # Getting user ID
-@dp.message(FormSendToUser.waiting_for_user_id_for_message)
+@handlers_router.message(FormSendToUser.waiting_for_user_id_for_message)
 async def get_user_id_for_message(message: types.Message, state: FSMContext):
     user_input = message.text.strip()
 
@@ -865,7 +867,7 @@ async def get_user_id_for_message(message: types.Message, state: FSMContext):
 
 
 # Receive message text
-@dp.message(FormSendToUser.waiting_for_message_text)
+@handlers_router.message(FormSendToUser.waiting_for_message_text)
 async def get_message_text(message: types.Message, state: FSMContext):
     message_text = message.text.strip()
 
@@ -881,7 +883,7 @@ async def get_message_text(message: types.Message, state: FSMContext):
 
 
 # Receiving a picture and sending a message
-@dp.message(FormSendToUser.waiting_for_image)
+@handlers_router.message(FormSendToUser.waiting_for_image)
 async def get_image_and_send_message(message: types.Message, state: FSMContext):
     data = await state.get_data()
     user_id = data.get("user_id")
@@ -913,12 +915,11 @@ async def get_image_and_send_message(message: types.Message, state: FSMContext):
 
 
 # Handler of other messages (including ban check)
-@dp.message(F.text)
+@handlers_router.message(F.text, ~F.state)
 async def handle_message(message: types.Message, state: FSMContext):
     async with (await get_session() as session):
-        user_id = message.from_user.id
+        user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
 
-        # Logging the receipt of a message
         logging.info(f"Received message from {message.from_user.username}: {message.text}")
 
         # Check: if the sender of the message is an admin, the message will be sent directly to the user
@@ -931,7 +932,7 @@ async def handle_message(message: types.Message, state: FSMContext):
 
         # If the message came from a group, skip it
         if message.chat.id == GROUP_CHAT_ID:
-            logging.info("Message received from the group chat, skipping response_text.")
+            logging.info("Message received from the group chat, skipping response.")
             return
 
         await log_user_action(session, user_id, f"User message: {message.text}")
@@ -971,7 +972,7 @@ async def handle_banned_user(message: types.Message):
 
 
 # Settings button
-@dp.callback_query(F.data == "settings")
+@handlers_router.callback_query(F.data == "settings")
 async def show_settings_menu(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
@@ -1025,7 +1026,7 @@ async def show_settings_menu(callback_query: types.CallbackQuery):
 
 
 # User statistic
-@dp.callback_query(F.data == "user_stats")
+@handlers_router.callback_query(F.data == "user_stats")
 async def show_user_stats_message(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.chat.id
@@ -1067,7 +1068,7 @@ async def show_user_stats_message(callback_query: types.CallbackQuery):
             )
 
 
-@dp.callback_query(F.data == "info")
+@handlers_router.callback_query(F.data == "info")
 async def show_info_message(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
@@ -1098,7 +1099,7 @@ async def show_info_message(callback_query: types.CallbackQuery):
 
 
 # Back to main menu(for settings)
-@dp.callback_query(F.data == "main_menu_back")
+@handlers_router.callback_query(F.data == "main_menu_back")
 async def back_to_main_menu(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
