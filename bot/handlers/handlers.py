@@ -733,7 +733,7 @@ async def send_to_myself_handler(callback_query: types.CallbackQuery):
         if os.path.exists(image_dir) and os.path.isdir(image_dir):
             image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
             if image_files:
-                random_image = random.choice(image_files)
+                # random_image = random.choice(image_files)
                 image_path = os.path.join(image_dir, specific_image_filename)
 
                 # Create a new image object
@@ -801,7 +801,7 @@ async def confirm_send_all_handler(callback_query: types.CallbackQuery):
 
             # If there are images, send a message with the image
             if image_files:
-                random_image = random.choice(image_files)
+                # random_image = random.choice(image_files)
                 # If need one particular image -> specific_image_filename to image_path
                 image_path = os.path.join(image_dir, specific_image_filename)
                 photo = FSInputFile(image_path)
