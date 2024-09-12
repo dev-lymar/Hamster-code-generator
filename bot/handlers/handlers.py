@@ -719,7 +719,7 @@ async def send_to_myself_handler(callback_query: types.CallbackQuery):
 
         # Notification text
         notification_texts = {
-            "ru": translations.get("ru", {}).get("notification_text"),
+            "ru": translations.get("ru", {}).get("second_notification_text"),
         }
 
         # Merge all texts into one line
@@ -728,11 +728,14 @@ async def send_to_myself_handler(callback_query: types.CallbackQuery):
         # ℹ️ Test sending an advertising message to yourself and deleting it ℹ️
         # Image path (if available)
         image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "notification")
+
+        specific_image_filename = "notificate-Bouncemasters.png"
+
         if os.path.exists(image_dir) and os.path.isdir(image_dir):
             image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
             if image_files:
-                random_image = random.choice(image_files)
-                image_path = os.path.join(image_dir, random_image)
+                # random_image = random.choice(image_files)
+                image_path = os.path.join(image_dir, specific_image_filename)
 
                 # Create a new image object
                 photo = FSInputFile(image_path)
@@ -781,6 +784,10 @@ async def confirm_send_all_handler(callback_query: types.CallbackQuery):
 
         # Image path (if available)
         image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "notification")
+
+        # This should be the specific filename you're expecting
+        specific_image_filename = "notificate-Bouncemasters.png"
+
         image_files = []
         if os.path.exists(image_dir) and os.path.isdir(image_dir):
             image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
@@ -790,13 +797,14 @@ async def confirm_send_all_handler(callback_query: types.CallbackQuery):
             first_name = user.first_name
 
             # Notification text
-            notification_text = await get_translation(chat_id, "notification_text")
+            notification_text = await get_translation(chat_id, "second_notification_text")
             personalized_text = f"{first_name}, {notification_text}"
 
             # If there are images, send a message with the image
             if image_files:
-                random_image = random.choice(image_files)
-                image_path = os.path.join(image_dir, random_image)
+                # random_image = random.choice(image_files)
+                # If need one particular image -> specific_image_filename to image_path
+                image_path = os.path.join(image_dir, specific_image_filename)
                 photo = FSInputFile(image_path)
                 try:
                     await bot.send_photo(
