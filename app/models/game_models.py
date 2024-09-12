@@ -106,3 +106,11 @@ class StoneAge(GameTableBase):
         Index('ix_stone_age_promo_code', 'promo_code'),
         Index('ix_stone_age_created_at', 'created_at')
     )
+
+
+class Bouncemasters(GameTableBase):
+    __tablename__ = 'bouncemasters'
+    __table_args__ = (
+        Index('ix_bouncemasters_promo_code', 'promo_code'),
+        Index('ix_bouncemasters_created_at', 'created_at')
+    )
