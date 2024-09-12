@@ -60,16 +60,17 @@ ACHIEVEMENTS = {
 
 
 GAMES = [
-    'Stone Age',
-    'Fluff Crusade',
-    'Tile Trio',
-    'Mow and Trim',
-    'Train Miner',
-    'Chain Cube 2048',
+    'Bouncemasters',
     'Merge Away',
-    'Zoopolis',
-    'Twerk Race 3D',
+    'Stone Age',
+    'Train Miner',
+    'Mow and Trim',
+    'Chain Cube 2048',
+    'Fluff Crusade',
     'Polysphere',
+    'Twerk Race 3D',
+    'Zoopolis',
+    'Tile Trio',
 ]
 
 STATUS_LIMITS = {
