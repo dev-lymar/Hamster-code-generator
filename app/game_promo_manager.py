@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 from database import get_session
 from models.game_models import (ChainCube2048, TrainMiner, MergeAway,
                                 TwerkRace3D, Polysphere, MowAndTrim, CafeDash, Zoopolis,
-                                GangsWars, FluffCrusade, TileTrio, StoneAge)
+                                GangsWars, FluffCrusade, TileTrio, StoneAge, Bouncemasters)
 
 # Configuring logging
 log_directory = "logs"
@@ -218,6 +218,7 @@ class GamePromo:
                 'Fluff Crusade': FluffCrusade,
                 'Tile Trio': TileTrio,
                 'Stone Age': StoneAge,
+                'Bouncemasters': Bouncemasters,
             }
             GameTable = table_mapping.get(game_name)
             if GameTable:
