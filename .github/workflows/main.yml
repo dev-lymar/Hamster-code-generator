@@ -62,8 +62,8 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.4.5
-          name: "Release v1.4.5"
+          tag: v1.5.0
+          name: "Release v1.5.0"
           body: |
-            Added new notification | 🏖️
+            Payment with Telegram ⭐️(XTR) | 🏖️
           token: ${{ secrets.GITHUB_TOKEN }}
