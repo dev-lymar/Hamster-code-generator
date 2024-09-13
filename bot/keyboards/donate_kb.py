@@ -19,7 +19,7 @@ async def get_payment_keyboard(user_id: int):
 
 async def get_donation_keyboard(user_id: int):
     main_menu_back = await get_back_to_main_menu_button(user_id)
-    amount_button = await get_translation(user_id, "donate_custom_amount_button")
+    # amount_button = await get_translation(user_id, "donate_custom_amount_button")
     builder = InlineKeyboardBuilder()
 
     builder.row(

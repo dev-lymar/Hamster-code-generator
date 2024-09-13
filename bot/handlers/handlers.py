@@ -5,7 +5,7 @@ import logging
 from aiogram import types, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import FSInputFile, Message, InlineKeyboardMarkup
-from config import bot, BOT_ID, GAMES, STATUS_LIMITS, set_commands, GROUP_CHAT_ID, SUPPORTED_LANGUAGES, STATUSES
+from config import bot, BOT_ID, GAMES, STATUS_LIMITS, set_commands, GROUP_CHAT_ID, SUPPORTED_LANGUAGES
 from database.database import (get_session, get_or_create_user, update_user_language, log_user_action,
                                get_user_language, get_oldest_keys, update_keys_generated,
                                delete_keys, get_user_status_info, is_admin, get_admin_chat_ids,
@@ -1042,13 +1042,16 @@ async def show_user_stats_message(callback_query: types.CallbackQuery):
         chat_id = callback_query.message.chat.id
         message_id = callback_query.message.message_id
         stats_translation = await get_translation(user_id, "user_stats_description")
+        user_status = await get_translation(user_id, f"{user_stats['user_status']}_status")
+        achievement_name = await get_translation(user_id, f"{user_stats['achievement_name']}_achievement")
+
         info_caption = stats_translation.format(
-            achievement_name=user_stats['achievement_name'],
+            achievement_name=achievement_name,
             keys_today=user_stats['keys_today'],
             premium_keys_today=user_stats['premium_keys_today'],
             keys_total=user_stats['keys_total'],
             premium_keys_total=user_stats['premium_keys_total'],
-            user_status=STATUSES[user_stats['user_status']],
+            user_status=user_status,
         )
         keyboard = await get_back_to_main_menu_button(user_id)
 
