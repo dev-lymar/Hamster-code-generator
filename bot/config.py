@@ -17,7 +17,7 @@ storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 
 # Supported languages
-SUPPORTED_LANGUAGES = ['ru', 'sk', 'en', 'uk', 'es', 'fr', 'tr', 'ar']
+SUPPORTED_LANGUAGES = ['ru', 'sk', 'en', 'uk', 'es', 'fr', 'tr', 'ar', 'de', 'fa', 'ur', 'hi']
 
 REFERRAL_LINKS = {
     'Cats 🐈‍⬛': 'https://t.me/catsgang_bot/join?startapp=Lv39AXNhcBvwK6ZWcoGpD',
