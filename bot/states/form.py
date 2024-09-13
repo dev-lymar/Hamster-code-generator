@@ -10,3 +10,7 @@ class FormSendToUser(StatesGroup):
     waiting_for_user_id_for_message = State()
     waiting_for_message_text = State()
     waiting_for_image = State()
+
+
+class DonationState(StatesGroup):
+    waiting_for_amount = State()

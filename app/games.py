@@ -18,7 +18,7 @@ game_configs = [
         'promo_id': 'b4170868-cef0-424f-8eb9-be0622e8e8e3',
         'base_delay': 20,
         'attempts': 20,
-        'copies': 0,
+        'copies': 7,
     },
     {
         'name': 'Train Miner',
@@ -26,7 +26,7 @@ game_configs = [
         'promo_id': 'c4480ac7-e178-4973-8061-9ed5b2e17954',
         'base_delay': 20,
         'attempts': 15,
-        'copies': 0,
+        'copies': 20,
     },
     {
         'name': 'Merge Away',
@@ -34,15 +34,15 @@ game_configs = [
         'promo_id': 'dc128d28-c45b-411c-98ff-ac7726fbaea4',
         'base_delay': 20,
         'attempts': 30,
-        'copies': 0,
+        'copies': 23,
     },
     {
         'name': 'Twerk Race 3D',
         'app_token': '61308365-9d16-4040-8bb0-2f4a4c69074c',
         'promo_id': '61308365-9d16-4040-8bb0-2f4a4c69074c',
         'base_delay': 20,
-        'attempts': 20,
-        'copies': 0,
+        'attempts': 45,
+        'copies': 31,
     },
     {
         'name': 'Polysphere',
@@ -50,7 +50,7 @@ game_configs = [
         'promo_id': '2aaf5aee-2cbc-47ec-8a3f-0962cc14bc71',
         'base_delay': 15,
         'attempts': 50,
-        'copies': 0,
+        'copies': 32,
     },
     {
         'name': 'Mow and Trim',
@@ -58,7 +58,7 @@ game_configs = [
         'promo_id': 'ef319a80-949a-492e-8ee0-424fb5fc20a6',
         'base_delay': 20,
         'attempts': 20,
-        'copies': 0,
+        'copies': 28,
     },
     {
         'name': 'Zoopolis',
@@ -66,7 +66,7 @@ game_configs = [
         'promo_id': 'b2436c89-e0aa-4aed-8046-9b0515e1c46b',
         'base_delay': 20,
         'attempts': 35,
-        'copies': 0,
+        'copies': 10,
     },
     {
         'name': 'Fluff Crusade',
@@ -74,7 +74,7 @@ game_configs = [
         'promo_id': '112887b0-a8af-4eb2-ac63-d82df78283d9',
         'base_delay': 30,
         'attempts': 35,
-        'copies': 0,
+        'copies': 1,
     },
     {
         'name': 'Tile Trio',
@@ -82,7 +82,7 @@ game_configs = [
         'promo_id': 'e68b39d2-4880-4a31-b3aa-0393e7df10c7',
         'base_delay': 20,
         'attempts': 35,
-        'copies': 0,
+        'copies': 7,
     },
     {
         'name': 'Stone Age',
@@ -90,7 +90,7 @@ game_configs = [
         'promo_id': '04ebd6de-69b7-43d1-9c4b-04a6ca3305af',
         'base_delay': 20,
         'attempts': 40,
-        'copies': 0,
+        'copies': 21,
     },
     {
         'name': 'Bouncemasters',
@@ -98,7 +98,7 @@ game_configs = [
         'promo_id': 'bc72d3b9-8e91-4884-9c33-f72482f0db37',
         'base_delay': 20,
         'attempts': 35,
-        'copies': 180,
+        'copies': 0,
     }
 ]
 

@@ -1,20 +1,21 @@
+# Hamster Keys Generator
+
 [![Python](https://img.shields.io/badge/Python-3.12.2-3776AB?style=flat&logo=Python&logoColor=yellow)](https://www.python.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16.3-336791?style=flat&logo=PostgreSQL&logoColor=white)](https://www.postgresql.org/)
 [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-D71F00?style=flat&logo=sqlalchemy&logoColor=white)](https://www.sqlalchemy.org/)
 [![aiogram](https://img.shields.io/badge/aiogram-3.10.0-3776AB?style=flat&logo=telegram&logoColor=white")](https://aiogram.dev/)
 [![Flake8](https://img.shields.io/badge/flake8-checked-blueviolet?style=flat)](https://flake8.pycqa.org/en/latest/)
 
-# Hamster-code-generator
-
 ![Hamster code](./img/image.png)
 
 ## Table of Contents
 
 - [Project Description](#project-description)
-- [Features](#features)
+- [Main Features](#main-features)
 - [Installation](#installation)
 - [Environment Configuration](#environment-configuration)
 - [Running with Docker](#running-with-docker)
+- [Commands](#commands)
 - [Continuous Integration/Continuous Deployment (CI/CD)](#continuous-integrationcontinuous-deployment-cicd)
 - [Project Structure](#project-structure)
 - [Contributing](#contributing)
@@ -22,23 +23,47 @@
 
 
 ## Project Description
-[Hamster-Code-Generator](https://t.me/hamster_keys_xbot) is a bot designed to automatically farm promo codes for various games. 
-The bot uses proxy servers to send requests to game APIs, saves the generated codes in a database, and provides them to users through a Telegram bot interface. 
-The project utilizes aiogram for working with the Telegram API, asyncpg for PostgreSQL database interactions, and aiohttp for performing asynchronous HTTP requests.
+The [Hamster Keys Generator](https://t.me/hamster_keys_xbot) project is a system that automatically generates promo codes for various games.
+User interaction is handled through a Telegram bot, while code generation and management, 
+using proxy servers to send requests to game APIs, ensure seamless integration with game platforms.
+A `PostgresSQL` database is used for storing promo codes, and sessions and requests are processed asynchronously with the `aiohttp` library.
 
-## Features
+#### The project utilizes:
+- `Alembic` for database migrations,
+- `SQLAlchemy` for database interaction,
+- `Aiogram` for working with the Telegram API,
+- `Docker` for containerization.
+
+## Main Features:
 
 ### Farmer
-- ***Promo Code Generation:*** The farmer automatically generates promo codes for games specified in the configuration.
-- ***Error Handling:*** In case of errors during promo code generation, the farmer automatically restarts the process.
-- ***Logging:*** All information about the generation process and errors is logged to a file.
-- ***Database Interaction:*** Generated promo codes are stored in PostgreSQL.
+- **Automatic promo code generation and database storage for games**.
+  - Easily generate promo codes for multiple games and automatically save them in the database.
+- **Detailed logging and error handling**.
+  - All stages of the generation process are logged for transparency, and in case of errors, the farmer automatically restarts on a timed schedule.
+- **Proxy support for API requests**.
+  - Ensures reliable API access even when geographical restrictions or rate limits are in place.
 
-### Bot
-- ***Promo Code Distribution:*** Users can request promo codes through the Telegram bot.
-- ***Language Switching:*** The bot supports multiple languages and allows users to change the interface language.
-- ***Admin Notifications:*** The bot sends notifications to administrators, including error messages if there’s a failure in sending messages to the group.
-- ***Limits and Waiting:*** The bot implements daily limits on promo code distribution and a mechanism for waiting between requests.
+### Telegram Bot
+- **Key distribution**.
+  - Quick access for users to claim keys via a multilingual interface.
+- **Admin commands**.
+  - Manage users and bot settings with powerful admin tools.
+- **Request rate-limiting**.
+  - Controls the number of promo code requests per user to prevent abuse.
+- **Boosted key counts (`POPULARITY_COEFFICIENT`)**.
+  - Displays inflated key counts to attract more users.
+- **Multilingual support**.
+  - Easy switching between languages for a global audience.
+  - **Supported languages**: `en`, `ru`, `uk`, `sk`, `es`, `fr`, `tr`, `ar`
+- **Donation system (XTR stars)**.
+  - Users can donate using fixed or custom amounts of Telegram stars.
+  - Includes payment confirmation, cancellation, and refund options.
+- **Referral links**.
+  - **Add your referral links**: Promote your projects by adding referral links. 
+  Encourage users to invite others and get bonuses in return.
+- **Achievement system**.
+  - **Track user progress**: Users can unlock achievements based on their activity and receive special rewards as they progress.
 
 ## Installation
 
@@ -64,8 +89,8 @@ DATABASE_HOST=your_database_host
 DATABASE_PORT=your_database_port
 
 BOT_TOKEN=your_telegram_bot_token
-
 GROUP_CHAT_ID=your_group_chat_id
+POPULARITY_COEFFICIENT=1
 ```
 
 ## Running with Docker
@@ -94,13 +119,24 @@ python app/main.py
 Logs are saved in the `logs` directory. 
 Log files are rotated when they reach 10 MB, with up to 5 backup copies retained.
 
-## Continuous Integration/Continuous Deployment (CI/CD)
-The project includes **CI/CD** setup using **GitHub Actions**. 
-The pipeline performs the following tasks:
 
-- ***Linting:*** Ensures code quality by running Flake8 on each push.
-- ***Build and Deploy:*** Deploys the application to a remote server when changes are pushed to the main branch.
-- ***Release:*** Automatically creates a GitHub Release when a new version is tagged.
+## Commands
+
+### User Commands
+- `/start` – Start the bot
+- `/change_lang` – Change the language
+- `/paysupport` – Support via donations
+
+### Admin Commands
+- `/admin` – Open admin panel
+
+
+## Continuous Integration/Continuous Deployment (CI/CD)
+This project uses **GitHub Actions** for:
+
+- **Linting** with Flake8 on every push,
+- **Building** and deploying when changes are pushed to the main branch,
+- **Auto-release** creation for new tags.
 
 ### Configuration
 Make sure to configure the following ***GitHub Secrets*** for deployment:
@@ -114,25 +150,27 @@ Make sure to configure the following ***GitHub Secrets*** for deployment:
 ## Project Structure
 ```commandline
 .
-├── .env.example
-├── LICENSE
-├── README.md
-├── alembic
-├── app
-│   ├── __init__.py
+├── app                  # Logic of generating promo codes
+│   ├── main.py
 │   ├── game_promo_manager.py
 │   ├── games.py
-│   ├── logs
-│   │  └── game_promo.log
-│   ├── main.py
+│   ├── database.py
+│   ├── models/
 │   └── proxies.txt
-├── bot
-│   ├── config.py
-│   ├── handlers.py
+├── bot                  # Telegram bot
 │   ├── main.py
-│   └── utils
-├── docker-compose.yml
-└── requirements.txt
+│   ├── config.py
+│   ├── handlers/
+│   ├── translations/
+│   └── keyboards/
+├── alembic              # Database migrations
+│   ├── versions/
+│   └── env.py
+├── backups              # Database backups
+├── docker-compose.yml   # Docker configuration
+├── requirements.txt     # Project dependencies
+├── .env                 # Environment Configuration
+└── README.md            # Project Description
 ```
 ## Contributing
 We welcome contributions to Hamster-code-generator. To contribute:

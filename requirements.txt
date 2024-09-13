@@ -3,6 +3,7 @@ alembic==1.13.2
 asyncpg==0.29.0
 coloredlogs==15.0.1
 flake8==7.1.1
+redis==5.0.8
 python-dotenv==1.0.1
 psycopg2-binary==2.9.9
 sqlalchemy==2.0.32

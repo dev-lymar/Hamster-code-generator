@@ -6,7 +6,6 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from dotenv import load_dotenv
 from utils.helpers import load_translations
 
-
 load_dotenv()
 
 translations = load_translations()
@@ -21,7 +20,6 @@ dp = Dispatcher(storage=storage)
 SUPPORTED_LANGUAGES = ['ru', 'sk', 'en', 'uk', 'es', 'fr', 'tr', 'ar']
 
 REFERRAL_LINKS = {
-    '🐕 Lost Dogs: The Way': 'https://t.me/lost_dogs_bot/lodoapp?startapp=ref-u_452792586__s_629960',
     'Cats 🐈‍⬛': 'https://t.me/catsgang_bot/join?startapp=Lv39AXNhcBvwK6ZWcoGpD',
     '😺 Catizen': 'https://t.me/catizenbot/gameapp?startapp=r_2779_5703457',
     '🏠 City Holder': 'https://t.me/cityholder/game?startapp=452792586',
@@ -33,30 +31,13 @@ REFERRAL_LINKS = {
     '🔥 HOT Wallet': 'https://t.me/herewalletbot/app?startapp=9477477'
 }
 
-STATUSES = {
-    "free": "🎮 <b>Обычный игрок</b> — Получай ключи и открывай двери, чтобы стать сильнее. 🚀",
-    "friend": "🤝 <b>Друг проекта</b> — Тебе доступны эксклюзивные возможности, но впереди ещё больше! 🔥",
-    "premium": "👑 <b>Элитный игрок!</b> Используй все свои привилегии и наслаждайся эксклюзивным контентом. ✨",
-}
 
-ACHIEVEMENTS = {
-    "newcomer":
-        "🌱 <b>Новичок</b> — <i>Ты только начал свой путь! Продолжай, впереди много возможностей!</i> 🚀",
-    "key_seeker":
-        "🔑 <b>Искатель ключей</b> — <i>Ты уже открыл несколько дверей, но впереди ждут более ценные ключи.</i> 💎",
-    "bonus_hunter":
-        "🎯 <b>Охотник за бонусами</b> — <i>С каждым новым ключом ты становишься сильнее. Открывай бонусы!</i> 🎁",
-    "code_expert":
-        "🧠 <b>Знаток кодов</b> — <i>Ты уже знаешь, как работает система. Продолжай улучшаться!</i> 📈",
-    "key_master":
-        "🏆 <b>Мастер ключей</b> — <i>Твои навыки восхищают! Достигай новых вершин!</i> 🗝️",
-    "elite_player":
-        "🚀 <b>Элитный игрок</b> — <i>Ты среди лучших. Элитные ключи открывают перед тобой новые возможности!</i> 💥",
-    "game_legend":
-        "🌟 <b>Легенда игр</b> — <i>Ты достиг почти всего! Оставайся в топе и собери все ключи!</i> 🏅",
-    "absolute_leader":
-        "👑 <b>Абсолютный лидер</b> — <i>Ты на вершине! Все ключи в твоем распоряжении, и ты пример для всех!</i> 🌍",
-}
+ACHIEVEMENTS = [
+    "newcomer", "key_seeker",
+    "bonus_hunter", "code_expert",
+    "key_master", "elite_player",
+    "game_legend", "absolute_leader"
+]
 
 
 GAMES = [
@@ -94,6 +75,6 @@ async def set_commands(bot: Bot, user_id: int, language_code: str):
     commands = [
         BotCommand(command="/start", description=start_command_description),
         BotCommand(command="/change_lang", description=change_lang_command_description),
-        BotCommand(command="/admin", description=admin_command_description)
+        BotCommand(command="/admin", description=admin_command_description),
     ]
     await bot.set_my_commands(commands, scope=BotCommandScopeChat(chat_id=user_id))
