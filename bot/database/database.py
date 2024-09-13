@@ -297,8 +297,8 @@ async def get_admin_chat_ids():
 
 # Get count games keys in DB
 async def get_keys_count_for_games(session: AsyncSession, games: list) -> list:
-    regular_results = ["<i>Кол-во</i>....<b>Игра</b>\n"]
-    safety_results = ["\n<i>Кол-во</i>....<b>Игра (safety)</b>\n"]
+    regular_results = ["<i>Quantity</i>....<b>Game</b>\n"]
+    safety_results = ["\n<i>Quantity</i>....<b>Game (safety)</b>\n"]
 
     for game in games:
         table_name = game.replace(" ", "_").lower()
@@ -313,7 +313,7 @@ async def get_keys_count_for_games(session: AsyncSession, games: list) -> list:
             safety_keys_count = safety_result.scalar()
             safety_results.append(f"<i>{safety_keys_count}</i>......<b>{game} (safety)</b>")
         except Exception as e:
-            safety_results.append(f"<i>Таблица не найдена</i>......<b>{game} (safety). Ошибка: {e}</b>")
+            safety_results.append(f"<i>Table not found</i>......<b>{game} (safety). Error: {e}</b>")
 
     return "\n".join(regular_results + safety_results)
 
@@ -327,14 +327,6 @@ async def get_users_list_admin_panel(session: AsyncSession, games: list):
     )
     users_count = user_count_result.scalar()
 
-    # Query to retrieve the last 90 users by registration date
-    user_list_last = await session.execute(
-        select(User.user_id, User.username, User.first_name)
-        .order_by(User.registration_date.desc())
-        .limit(50)
-    )
-    users = user_list_last.fetchall()
-
     keys_today = await get_daily_requests_count(session)
     premium_keys_today = await get_daily_safety_requests_count(session)
 
@@ -345,15 +337,7 @@ async def get_users_list_admin_panel(session: AsyncSession, games: list):
         f"<i>Всего пользователей:  <b>{users_count}</b>\n(нажми ID что бы скопировать)</i>\n",
         f"<i>Сегодня забрали ключей:  <b>{keys_today_total}</b></i>\n",
         f"<i>Сегодня забрали прем ключей:  <b>{premium_keys_today_total}</b></i>\n",
-        "<u>Последние 50 пользователей. Новые вверху:</u>"
     ]
-    for user in users:
-        user_id = f"<code>{user.user_id}</code>"
-        username = f"<b>{user.username}</b>" if user.username else "<i>no username</i>"
-        first_name = f"<b>{user.first_name}</b>" if user.first_name else "<i>no first name</i>"
-
-        user_info = f"{user_id}  {username}  {first_name}"
-        user_list.append(user_info)
 
     return "\n".join(user_list)
 
