@@ -63,7 +63,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: v1.5.0
-          name: "Release v1.5.0"
+          name: "Release v1.5.1"
           body: |
-            Payment with Telegram ⭐️(XTR) | 🏖️
+            Added new languages and added a new game Hide Ball | 🏖️
           token: ${{ secrets.GITHUB_TOKEN }}

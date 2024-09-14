@@ -41,6 +41,7 @@ ACHIEVEMENTS = [
 
 
 GAMES = [
+    'Hide Ball',
     'Bouncemasters',
     'Merge Away',
     'Stone Age',
