@@ -114,3 +114,11 @@ class Bouncemasters(GameTableBase):
         Index('ix_bouncemasters_promo_code', 'promo_code'),
         Index('ix_bouncemasters_created_at', 'created_at')
     )
+
+
+class HideBall(GameTableBase):
+    __tablename__ = 'hide_ball'
+    __table_args__ = (
+        Index('ix_hide_ball_promo_code', 'promo_code'),
+        Index('ix_hide_ball_created_at', 'created_at')
+    )
