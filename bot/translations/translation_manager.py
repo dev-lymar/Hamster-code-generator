@@ -32,3 +32,7 @@ class TranslationManager:
         """Получение перевода по ключу и категории"""
         translations = self.load_translations(language_code)
         return translations.get(category, {}).get(key, key)
+
+    def get_available_languages(self):
+        """Getting a list of available languages from files"""
+        return [filename.split('.')[0] for filename in os.listdir(self.translations_dir) if filename.endswith('.json')]
