@@ -788,7 +788,7 @@ async def confirm_send_all_handler(callback_query: types.CallbackQuery):
         image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "notification")
 
         # This should be the specific filename you're expecting
-        specific_image_filename = "notificate-Bouncemasters.png"
+        specific_image_filename = "notificate-hide_ball.png"
 
         image_files = []
         if os.path.exists(image_dir) and os.path.isdir(image_dir):
