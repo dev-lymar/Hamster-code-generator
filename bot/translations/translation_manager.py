@@ -29,7 +29,7 @@ class TranslationManager:
         return {}
 
     def get_translation(self, language_code, category, key):
-        """Получение перевода по ключу и категории"""
+        """Getting translation by key and category"""
         translations = self.load_translations(language_code)
         return translations.get(category, {}).get(key, key)
 

@@ -2,13 +2,13 @@ from aiogram import types
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from keyboards.back_to_main_kb import get_back_to_main_menu_button
-from utils.helpers import get_translation
+from utils import get_translation
 
 
 async def get_payment_keyboard(user_id: int):
     builder = InlineKeyboardBuilder()
-    payment_button_text = await get_translation(user_id, "pay_button")
-    cancel_button_text = await get_translation(user_id, "cancel_donation_button")
+    payment_button_text = await get_translation(user_id, "buttons", "pay")
+    cancel_button_text = await get_translation(user_id, "buttons", "cancel_donation")
 
     builder.row(
         types.InlineKeyboardButton(text=payment_button_text, pay=True))
@@ -19,7 +19,7 @@ async def get_payment_keyboard(user_id: int):
 
 async def get_donation_keyboard(user_id: int):
     main_menu_back = await get_back_to_main_menu_button(user_id)
-    # amount_button = await get_translation(user_id, "donate_custom_amount_button")
+    # amount_button = await get_translation(user_id, "buttons", "custom_donate_amount")
     builder = InlineKeyboardBuilder()
 
     builder.row(
@@ -38,7 +38,7 @@ async def get_donation_keyboard(user_id: int):
 
 async def get_cancel_donation_keyboard(user_id):
     builder = InlineKeyboardBuilder()
-    cancel_button_text = await get_translation(user_id, "cancel_donation_button")
+    cancel_button_text = await get_translation(user_id, "buttons", "cancel_donation")
 
     builder.button(text=cancel_button_text, callback_data="cancel_custom_donation")
 
