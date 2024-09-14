@@ -4,11 +4,10 @@ from aiogram.client.bot import DefaultBotProperties
 from aiogram.types import BotCommand, BotCommandScopeChat
 from aiogram.fsm.storage.memory import MemoryStorage
 from dotenv import load_dotenv
-from utils.helpers import load_translations
+from utils import get_translation
 
 load_dotenv()
 
-translations = load_translations()
 
 API_TOKEN = os.getenv('BOT_TOKEN')
 BOT_ID = int(API_TOKEN.split(':')[0])
@@ -64,14 +63,14 @@ STATUS_LIMITS = {
     }
 }
 
-# Forwarding message to group
+# Forwarding message to group§
 GROUP_CHAT_ID = int(os.getenv("GROUP_CHAT_ID", 0))
 
 
 async def set_commands(bot: Bot, user_id: int, language_code: str):
-    start_command_description = translations[language_code]["get_keys_key"]
-    change_lang_command_description = translations[language_code]["choose_language"]
-    admin_command_description = translations[language_code]["admin_command_description"]
+    start_command_description = await get_translation(user_id, "commands", "start")
+    change_lang_command_description = await get_translation(user_id, "commands", "change_lang")
+    admin_command_description = await get_translation(user_id, "commands", "admin")
 
     commands = [
         BotCommand(command="/start", description=start_command_description),
