@@ -68,9 +68,9 @@ GROUP_CHAT_ID = int(os.getenv("GROUP_CHAT_ID", 0))
 
 
 async def set_commands(bot: Bot, user_id: int, language_code: str):
-    start_command_description = await get_translation(user_id, "commands", "start")
-    change_lang_command_description = await get_translation(user_id, "commands", "change_lang")
-    admin_command_description = await get_translation(user_id, "commands", "admin")
+    start_command_description = await get_translation(user_id, "commands", "start_bot")
+    change_lang_command_description = await get_translation(user_id, "commands", "change_language")
+    admin_command_description = await get_translation(user_id, "commands", "admin_panel")
 
     commands = [
         BotCommand(command="/start", description=start_command_description),
