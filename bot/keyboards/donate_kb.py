@@ -19,7 +19,7 @@ async def get_payment_keyboard(user_id: int):
 
 async def get_donation_keyboard(user_id: int):
     main_menu_back = await get_back_to_main_menu_button(user_id)
-    # amount_button = await get_translation(user_id, "buttons", "custom_donate_amount")
+    amount_button = await get_translation(user_id, "buttons", "custom_donate_amount")
     builder = InlineKeyboardBuilder()
 
     builder.row(
@@ -27,8 +27,7 @@ async def get_donation_keyboard(user_id: int):
         types.InlineKeyboardButton(text="10 🌟", callback_data="donate_10"),
         types.InlineKeyboardButton(text="50 ✨", callback_data="donate_50"),
     )
-    # Temporarily limited functionality ❌
-    # builder.row(types.InlineKeyboardButton(text=amount_button, callback_data="donate_custom"))
+    builder.row(types.InlineKeyboardButton(text=amount_button, callback_data="donate_custom"))
 
     # Add a button to the main menu
     builder.row(*main_menu_back.inline_keyboard[0])
