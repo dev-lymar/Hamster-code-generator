@@ -1,0 +1,363 @@
+import asyncio
+import os
+import logging
+from aiogram import types, F, Router
+from aiogram.fsm.context import FSMContext
+from aiogram.types import FSInputFile, InlineKeyboardMarkup
+from config import bot, BOT_ID, GAMES
+from database.database import (get_session, log_user_action, get_user_status_info, get_admin_chat_ids,
+                               get_keys_count_for_games, get_users_list_admin_panel, get_user_details,
+                               get_subscribed_users, get_user_role_and_ban_info)
+from handlers.handlers import send_menu_handler, handle_banned_user
+from keyboards.inline import (get_action_buttons, get_admin_panel_keyboard, get_main_in_admin, get_detail_info_in_admin,
+                              notification_menu, confirmation_button_notification)
+from utils import get_translation
+from states.form import Form, FormSendToUser
+from utils import load_image
+
+router = Router()
+
+
+# Admin panel handler
+@router.message(F.text == "/admin")
+async def admin_panel_handler(message: types.Message):
+    async with await get_session() as session:
+        user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
+
+        # Is user admin
+        user_info = await get_user_role_and_ban_info(session, user_id)
+        if user_info.is_banned:
+            await handle_banned_user(message)
+            return
+        if user_info.user_role not in ['admin']:
+            await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+            not_admin_message = await get_translation(user_id, "admin", "no_access")
+            message_sent = await bot.send_message(
+                chat_id=message.chat.id,
+                text=not_admin_message,
+            )
+            await asyncio.sleep(1)
+            await bot.delete_message(
+                chat_id=message.chat.id,
+                message_id=message_sent.message_id,
+            )
+
+            await send_menu_handler(message)
+            return
+
+        admin_text = await get_translation(user_id, "admin", "panel_description")
+        await bot.send_message(
+            chat_id=message.chat.id,
+            text=admin_text,
+            reply_markup=await get_admin_panel_keyboard(session, user_id)
+        )
+
+
+# Get keys button admin panel
+@router.callback_query(F.data == "keys_admin_panel")
+async def keys_admin_panel(callback_query: types.CallbackQuery):
+    async with await get_session() as session:
+        user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.chat.id
+        keys_count_message = await get_keys_count_for_games(session, GAMES)
+        await bot.edit_message_text(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            text=keys_count_message,
+            reply_markup=await get_main_in_admin(session, user_id)
+        )
+
+
+# Get users button admin panel
+@router.callback_query(F.data == "users_admin_panel")
+async def users_admin_panel(callback_query: types.CallbackQuery):
+    async with await get_session() as session:
+        user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.chat.id
+
+        users_list_admin_panel_message = await get_users_list_admin_panel(session, GAMES)
+
+        back_keyboard = await get_main_in_admin(session, user_id)
+        detail_info_keyboard = await get_detail_info_in_admin(session, user_id)
+
+        combined_keyboard = InlineKeyboardMarkup(
+            inline_keyboard=detail_info_keyboard.inline_keyboard + back_keyboard.inline_keyboard
+        )
+
+        await bot.edit_message_text(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            text=users_list_admin_panel_message,
+            reply_markup=combined_keyboard
+        )
+
+
+@router.callback_query(F.data == "detail_info_in_admin")
+async def request_user_id(callback_query: types.CallbackQuery, state: FSMContext):
+    await callback_query.answer()
+
+    await bot.send_message(
+        chat_id=callback_query.message.chat.id,
+        text="Please enter the user ID of the user whose information you wish to retrieve:"  # Add translation ‼️
+    )
+
+    await state.set_state(Form.user_id_entry)
+
+
+# Get user detail button admin panel
+@router.message(Form.user_id_entry)
+async def user_detail_admin_panel(message: types.Message, state: FSMContext):
+    user_detail_id = message.text.strip()
+
+    async with await get_session() as session:
+        user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
+        back_keyboard = await get_main_in_admin(session, user_id)
+
+        try:
+            user_detail_id = int(user_detail_id)
+        except ValueError:
+            text = "<i><b>ID</b> must be an integer. Please do it again!</i>"  # Add translation ‼️
+            await message.answer(text, reply_markup=back_keyboard)
+            return
+        user_details = await get_user_details(session, user_detail_id)
+
+        if "not_found" in user_details:
+            text = "<i>User with this <b>ID</b> not found!</i>"  # Add translation ‼️
+            await message.answer(text, reply_markup=back_keyboard)
+        else:
+            await message.answer(user_details, reply_markup=back_keyboard)
+
+    await state.clear()
+
+
+# Back to main menu(for admin)
+@router.callback_query(F.data == "back_to_admin_main")
+async def back_to_admin_main_menu(callback_query: types.CallbackQuery):
+    async with await get_session() as session:
+        user_id = (
+            callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        )
+
+        await log_user_action(session, user_id, "Return to main admin menu")
+
+        admin_text = await get_translation(user_id, "admin", "panel_description")
+        await bot.edit_message_text(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            text=admin_text,
+            reply_markup=await get_admin_panel_keyboard(session, user_id)
+        )
+
+
+@router.callback_query(F.data == "notifications_admin_panel")
+async def notification_menu_handler(callback_query: types.CallbackQuery):
+    async with await get_session() as session:
+        user_id = (
+            callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        )
+
+        await log_user_action(session, user_id, "Send notification menu")
+
+        await bot.edit_message_text(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            text="🚨 Watch out! The panel for sending notifications to users 📤",  # Add translation ‼️
+            reply_markup=await notification_menu(session, user_id)
+        )
+
+
+@router.callback_query(F.data == "send_all")
+async def confirmation_menu_handler(callback_query: types.CallbackQuery):
+    async with await get_session() as session:
+        user_id = (
+            callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        )
+
+        await log_user_action(session, user_id, "Confirmation send notification")
+
+        await bot.edit_message_text(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            text="‼️ <i>Send a notification to <b>ALL</b> users ?</i> ‼️",  # Add translation ‼️
+            reply_markup=await confirmation_button_notification(session, user_id)
+        )
+
+
+@router.callback_query(F.data == "send_to_myself")
+async def send_to_myself_handler(callback_query: types.CallbackQuery):
+    async with await get_session() as session:
+        user_id = (
+            callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        )
+        await bot.delete_message(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id
+        )
+
+        await log_user_action(session, user_id, "Sent ad to themselves")
+
+        notification_text = await get_translation(user_id, "notifications", "second_notification")
+
+        # Let's use a function to load an image, specific or random
+        photo = await load_image("notification", specific_image="notificate-Bouncemasters.png")
+
+        if photo:
+            test_message = await bot.send_photo(
+                chat_id=callback_query.message.chat.id,
+                photo=photo,
+                caption=notification_text,
+                reply_markup=await get_action_buttons(session, user_id)
+            )
+        else:
+            test_message = await bot.send_message(
+                chat_id=callback_query.message.chat.id,
+                text=notification_text,
+                reply_markup=await get_action_buttons(session, user_id)
+            )
+
+        await asyncio.sleep(7)
+
+        await bot.delete_message(
+            chat_id=callback_query.message.chat.id,
+            message_id=test_message.message_id
+        )
+        await bot.send_message(
+            chat_id=callback_query.message.chat.id,
+            text="🚨 Watch out! The panel for sending notifications to users 📤",
+            reply_markup=await notification_menu(session, user_id)
+        )
+
+
+@router.callback_query(F.data == "confirm_send")
+async def confirm_send_all_handler(callback_query: types.CallbackQuery):
+    async with await get_session() as session:
+        user_id = (
+            callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+        )
+        await bot.delete_message(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id
+        )
+
+        await log_user_action(session, user_id, "Started sending notifications to all users")
+
+        # Getting a list of users for mailing
+        users = await get_subscribed_users(session)
+
+        # Image path (if available)
+        photo = await load_image("notification", specific_image="notificate-Bouncemasters.png")
+
+        for user in users:
+            chat_id = user.chat_id
+            first_name = user.first_name
+
+            # Notification text
+            notification_text = await get_translation(chat_id, "notifications", "second_notification_text")
+            personalized_text = f"{first_name}, {notification_text}"
+
+            if photo:
+                try:
+                    await bot.send_photo(
+                        chat_id=chat_id,
+                        photo=photo,
+                        caption=personalized_text,
+                        reply_markup=await get_action_buttons(session, chat_id)
+                    )
+                except Exception as e:
+                    logging.error(f"Failed to send photo notification to {chat_id}: {e}")
+            else:
+                try:
+                    await bot.send_message(
+                        chat_id=chat_id,
+                        text=personalized_text,
+                        reply_markup=await get_action_buttons(session, chat_id)
+                    )
+                except Exception as e:
+                    logging.error(f"Failed to send text notification to {chat_id}: {e}")
+
+        await bot.send_message(
+            chat_id=callback_query.message.chat.id,
+            text="📬 <i>The mailing has been successfully <b>completed</b>!!</i> 📭",  # Add translation ‼️
+            reply_markup=await get_admin_panel_keyboard(session, user_id)
+        )
+
+
+# Button for requesting user ID
+@router.callback_query(F.data == "send_message_to_user")
+async def request_user_id_for_message(callback_query: types.CallbackQuery, state: FSMContext):
+    await callback_query.message.answer(
+        "Enter <b>ID</b> of the user to whom you want to send the message(or <i>'отмена'/'cancel'</i> to exit):"
+    )
+    await callback_query.answer()
+    await state.set_state(FormSendToUser.user_id_entry)
+
+
+# Getting user ID
+@router.message(FormSendToUser.user_id_entry)
+async def get_user_id_for_message(message: types.Message, state: FSMContext):
+    user_input = message.text.strip()
+
+    if user_input.strip().lower() in ['cancel', 'отмена']:
+        await message.answer("Process <i>canceled.</i> Return to the admin panel.")
+        await state.clear()
+        await admin_panel_handler(message)
+        return
+
+    try:
+        # Try to convert the entered ID into a number
+        user_id = int(user_input)
+        await state.update_data(user_id=user_id)  # Save the user ID to a state
+        await message.answer("Enter <b>message text</b> (or <i>'отмена'/'cancel'</i> to exit)")
+        await state.set_state(FormSendToUser.message_text_entry)  # Switch to text query
+    except ValueError:
+        await message.answer("<b>User ID <i>should be a number.</i> Try again.</b>")
+
+
+# Receive message text
+@router.message(FormSendToUser.message_text_entry)
+async def get_message_text(message: types.Message, state: FSMContext):
+    message_text = message.text.strip()
+
+    if message_text in ['cancel', 'отмена']:
+        await message.answer("Process <b>canceled.</b> Return to the admin panel.")
+        await state.clear()
+        await admin_panel_handler(message)
+        return
+
+    await state.update_data(message_text=message_text)  # Save the message text to a state
+    await message.answer("Now send the <b>picture</b> (or enter <i>'нет'/'no'</i>, if no picture is required):")
+    await state.set_state(FormSendToUser.image_entry)  # Go to picture request
+
+
+# Receiving a picture and sending a message
+@router.message(FormSendToUser.image_entry)
+async def process_image_and_send_message(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    user_id = data.get("user_id")
+    message_text = data.get("message_text")
+
+    if message.text and message.text.strip().lower() in ['нет', 'no']:
+        # If a picture is not required
+        try:
+            await bot.send_message(chat_id=user_id, text=message_text)
+            await message.answer(f"Message <b>successfully sent</b> to user with ID <i>{user_id}</i>.")
+        except Exception as e:
+            await message.answer(f"Failed to send a message to user ID {user_id}. Error: {e}")
+    elif message.photo:
+        # If a picture is sent
+        photo = message.photo[-1].file_id  # Take the last one (quality most of all)
+        try:
+            await bot.send_photo(chat_id=user_id, photo=photo, caption=message_text)
+            await message.answer(f"Message with picture was successfully sent to user with ID {user_id}.")
+        except Exception as e:
+            await message.answer(f"Failed to send a picture message to user with ID {user_id}. Error: {e}")
+    else:
+        await message.answer("Please send a picture or enter 'нет'/'no' if you don't need one.")
+
+    # Resetting state
+    await state.clear()
+
+    # Back to the admin panel
+    await admin_panel_handler(message)
+
+
+def register_admin_handlers(dp):
+    dp.include_router(router)
