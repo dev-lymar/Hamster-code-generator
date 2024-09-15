@@ -13,7 +13,7 @@ class BanCheckMiddleware(BaseMiddleware):
             # Ban check
             async with await get_session() as session:
                 user_info = await get_user_status_info(session, user_id)
-                if user_info.is_banned:
+                if user_info and user_info.is_banned:
                     await banned_user_handler(event.callback_query.message)
                     return
 
@@ -24,7 +24,7 @@ class BanCheckMiddleware(BaseMiddleware):
             # Ban check
             async with await get_session() as session:
                 user_info = await get_user_status_info(session, user_id)
-                if user_info.is_banned:
+                if user_info and user_info.is_banned:
                     await banned_user_handler(event.message)
                     return
 
