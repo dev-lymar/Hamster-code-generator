@@ -5,7 +5,7 @@ import logging
 from aiogram import types, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import FSInputFile, Message, InlineKeyboardMarkup
-from config import bot, BOT_ID, GAMES, STATUS_LIMITS, set_commands, GROUP_CHAT_ID, SUPPORTED_LANGUAGES
+from config import bot, BOT_ID, GAMES, STATUS_LIMITS, GROUP_CHAT_ID, SUPPORTED_LANGUAGES
 from database.database import (get_session, get_or_create_user, update_user_language, log_user_action,
                                get_user_language, get_oldest_keys, update_keys_generated,
                                delete_keys, get_user_status_info, is_admin, get_admin_chat_ids,
@@ -14,6 +14,7 @@ from database.database import (get_session, get_or_create_user, update_user_lang
                                delete_safety_keys, get_safety_keys, check_user_limits, check_user_safety_limits,
                                get_keys_count_main_menu, get_user_stats)
 
+from handlers.command_setup import set_user_commands
 from keyboards.back_to_main_kb import get_back_to_main_menu_button
 from keyboards.donate_kb import get_donation_keyboard
 from keyboards.referral_links_kb import referral_links_keyboard
@@ -31,73 +32,62 @@ from utils.services import generate_user_stats
 # Mapping between forwarded message IDs and user IDs
 message_user_mapping = {}
 
-handlers_router = Router()
+router = Router()
 
 
 # Command handler /start
-@handlers_router.message(F.text == "/start")
-async def send_welcome(message: types.Message):
-    async with await get_session() as session:
-        user = message.from_user
-        user_id = user.id if user.id != BOT_ID else message.chat.id
-        chat_id = message.chat.id
+async def welcome_command_handler(session, message, user_id, chat_id, user):
+    # Define the user language, if it is not supported - set English
+    user_language_code = user.language_code if user.language_code in SUPPORTED_LANGUAGES else 'en'
 
-        # Define user language, if not supported, set to English
-        user_language_code = user.language_code if user.language_code in SUPPORTED_LANGUAGES else 'en'
+    user_data = {
+        'chat_id': chat_id,
+        'user_id': user_id,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'username': user.username,
+        'language_code': user_language_code
+    }
 
-        user_data = {
-            'chat_id': chat_id,
-            'user_id': user_id,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'username': user.username,
-            'language_code': user_language_code
-        }
+    await log_user_action(session, user_id, "/start command used")
 
-        # Log user action
-        await log_user_action(session, user_id, "/start command used")
+    user_record = await get_or_create_user(session, chat_id, user_data)
 
-        # Get or create user in DB
-        user_record = await get_or_create_user(session, chat_id, user_data)
+    if user_record is None:
+        await message.answer("Error creating user.")
+        return
 
-        if user_record is None:
-            await message.answer("Error creating user.")
+    # Update user language if necessary
+    if user_record.language_code != user_data['language_code']:
+        await update_user_language(session, user_id, user_data['language_code'])
+
+    translation = await get_translation(user_id, "common", "welcome")
+    welcome_text = translation.format(first_name=user.first_name)
+
+    image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "welcome")
+    if os.path.exists(image_dir) and os.path.isdir(image_dir):
+        image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
+        if image_files:
+            random_image = random.choice(image_files)
+            image_path = os.path.join(image_dir, random_image)
+            photo = FSInputFile(image_path)
+            await bot.send_photo(
+                chat_id=chat_id,
+                photo=photo,
+                caption=welcome_text,
+                reply_markup=await get_action_buttons(session, user_id)
+            )
             return
 
-        # Update user language if necessary
-        if user_record.language_code != user_data['language_code']:
-            await update_user_language(session, user_id, user_data['language_code'])
-
-        # Receiving the translation
-        translation = await get_translation(user_id, "common", "welcome")
-        welcome_text = translation.format(first_name=user.first_name)
-
-        # Sending welcome message with photo
-        image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "welcome")
-        if os.path.exists(image_dir) and os.path.isdir(image_dir):
-            image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
-            if image_files:
-                random_image = random.choice(image_files)
-                image_path = os.path.join(image_dir, random_image)
-                photo = FSInputFile(image_path)
-                await bot.send_photo(
-                    chat_id=chat_id,
-                    photo=photo,
-                    caption=welcome_text,
-                    reply_markup=await get_action_buttons(session, user_id)
-                )
-                return
-
-        # Sending welcome message without photo
-        await bot.send_message(
-            chat_id=chat_id,
-            text=welcome_text,
-            reply_markup=await get_action_buttons(session, user_id)
-        )
+    await bot.send_message(
+        chat_id=chat_id,
+        text=welcome_text,
+        reply_markup=await get_action_buttons(session, user_id)
+    )
 
 
 # Function to send keys menu after generating keys
-async def send_keys_menu(message: types.Message):
+async def send_menu_handler(message: types.Message):
     async with await get_session() as session:
         user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
         chat_id = message.chat.id
@@ -131,8 +121,8 @@ async def send_keys_menu(message: types.Message):
         )
 
 
-@handlers_router.callback_query(F.data == "referral_links")
-async def referral_links_handler(callback_query: types.CallbackQuery):
+@router.callback_query(F.data == "referral_links")
+async def referral_links_callback_handler(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.chat.id
     image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "premium")
     if os.path.exists(image_dir) and os.path.isdir(image_dir):
@@ -187,26 +177,18 @@ async def execute_change_language_logic(message: types.Message, user_id: int, st
         # Sending a message with the keypad
         lang_message = await bot.send_message(
             chat_id=message.chat.id,
-            text=await get_translation(user_id, "buttons", "choose_language"),
+            text=await get_translation(user_id, "common", "choose_language"),
             reply_markup=keyboard_markup
         )
 
         # Saving message IDs in the state
         await state.update_data(lang_message_id=lang_message.message_id, prev_message_id=message.message_id)
 
-        await state.set_state(Form.choosing_language)
+        await state.set_state(Form.language_selection)
 
 
-# Change language command
-@handlers_router.message(F.text == "/change_lang")
-async def change_language(message: types.Message, state: FSMContext):
-    async with await get_session() as _:
-        user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
-        await execute_change_language_logic(message, user_id, state)
-
-
-@handlers_router.callback_query(F.data == "choose_language")
-async def change_language_via_button(callback_query: types.CallbackQuery, state: FSMContext):
+@router.callback_query(F.data == "choose_language")
+async def language_button_handler(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.answer()
     async with await get_session() as _:
         user_id = (
@@ -216,7 +198,7 @@ async def change_language_via_button(callback_query: types.CallbackQuery, state:
 
 
 # Language selection processing
-@handlers_router.callback_query(F.data.in_(get_available_languages().keys()))
+@router.callback_query(F.data.in_(get_available_languages().keys()))
 async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
     async with await get_session() as session:
         user_id = (
@@ -233,7 +215,9 @@ async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
 
         # Updating the language in the database
         await update_user_language(session, user_id, selected_language)
-        await set_commands(bot, user_id, selected_language)
+
+        # Set commands for the selected language
+        await set_user_commands(bot, user_id)
 
         # Forcibly query the language from the database again
         new_language = await get_user_language(session, user_id)
@@ -258,15 +242,15 @@ async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
         )
 
         # Displaying the updated action menu
-        await send_keys_menu(callback_query.message)
+        await send_menu_handler(callback_query.message)
 
         # Resetting the state
         await state.clear()
 
 
 # Handling of "get_keys" button pressing
-@handlers_router.callback_query(F.data == "get_keys")
-async def send_keys(callback_query: types.CallbackQuery):
+@router.callback_query(F.data == "get_keys")
+async def send_keys_callback_handler(callback_query: types.CallbackQuery):
     async with (await get_session()) as session:
         user_id = (
             callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
@@ -280,7 +264,7 @@ async def send_keys(callback_query: types.CallbackQuery):
 
         # Checking the request limit
         if not await check_user_limits(session, user_id, STATUS_LIMITS):
-            await send_limit_reached_message(callback_query, user_id)
+            await send_daily_limit_reached_message(callback_query, user_id)
             return
 
         # Checking the interval between requests
@@ -326,12 +310,12 @@ async def send_keys(callback_query: types.CallbackQuery):
         if total_keys_in_request > 0:
             await update_keys_generated(session, user_id, total_keys_in_request)
 
-        await send_keys_menu(callback_query.message)
+        await send_menu_handler(callback_query.message)
 
 
 # Handling of "get_safety_keys" button pressing
-@handlers_router.callback_query(F.data == "get_safety_keys")
-async def send_safety_keys(callback_query: types.CallbackQuery):
+@router.callback_query(F.data == "get_safety_keys")
+async def send_safety_keys_callback_handler(callback_query: types.CallbackQuery):
     async with (await get_session()) as session:
         user_id = (
             callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
@@ -374,7 +358,7 @@ async def send_safety_keys(callback_query: types.CallbackQuery):
 
         # Checking the limit of requests for safety keys
         if not await check_user_safety_limits(session, user_id, STATUS_LIMITS):
-            message_to_update = await send_limit_reached_message(callback_query, user_id)
+            message_to_update = await send_daily_limit_reached_message(callback_query, user_id)
 
             await asyncio.sleep(1.5)
 
@@ -453,11 +437,11 @@ async def send_safety_keys(callback_query: types.CallbackQuery):
         if total_keys_in_request > 0:
             await update_safety_keys_generated(session, user_id, total_keys_in_request)
 
-        await send_keys_menu(callback_query.message)
+        await send_menu_handler(callback_query.message)
 
 
 # Function for sending a message when the daily limit is reached
-async def send_limit_reached_message(callback_query: types.CallbackQuery, user_id: int):
+async def send_daily_limit_reached_message(callback_query: types.CallbackQuery, user_id: int):
     async with await get_session() as session:
         limit_message = await get_translation(user_id, "messages", "daily_limit_exceeded")
         image_dir = os.path.join(os.path.dirname(__file__), "..", "images", "wait")
@@ -534,7 +518,7 @@ async def send_wait_time_message(callback_query: types.CallbackQuery, user_id: i
 
 
 # Admin panel handler
-@handlers_router.message(F.text == "/admin")
+@router.message(F.text == "/admin")
 async def admin_panel_handler(message: types.Message):
     async with await get_session() as session:
         user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
@@ -557,7 +541,7 @@ async def admin_panel_handler(message: types.Message):
                 message_id=message_sent.message_id,
             )
 
-            await send_keys_menu(message)
+            await send_menu_handler(message)
             return
 
         admin_text = await get_translation(user_id, "admin", "panel_description")
@@ -569,7 +553,7 @@ async def admin_panel_handler(message: types.Message):
 
 
 # Get keys button admin panel
-@handlers_router.callback_query(F.data == "keys_admin_panel")
+@router.callback_query(F.data == "keys_admin_panel")
 async def keys_admin_panel(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.chat.id
@@ -583,7 +567,7 @@ async def keys_admin_panel(callback_query: types.CallbackQuery):
 
 
 # Get users button admin panel
-@handlers_router.callback_query(F.data == "users_admin_panel")
+@router.callback_query(F.data == "users_admin_panel")
 async def users_admin_panel(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.chat.id
@@ -605,7 +589,7 @@ async def users_admin_panel(callback_query: types.CallbackQuery):
         )
 
 
-@handlers_router.callback_query(F.data == "detail_info_in_admin")
+@router.callback_query(F.data == "detail_info_in_admin")
 async def request_user_id(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.answer()
 
@@ -614,11 +598,11 @@ async def request_user_id(callback_query: types.CallbackQuery, state: FSMContext
         text="Please enter the user ID of the user whose information you wish to retrieve:"  # Add translation ‼️
     )
 
-    await state.set_state(Form.waiting_for_user_id)
+    await state.set_state(Form.user_id_entry)
 
 
 # Get user detail button admin panel
-@handlers_router.message(Form.waiting_for_user_id)
+@router.message(Form.user_id_entry)
 async def user_detail_admin_panel(message: types.Message, state: FSMContext):
     user_detail_id = message.text.strip()
 
@@ -644,7 +628,7 @@ async def user_detail_admin_panel(message: types.Message, state: FSMContext):
 
 
 # Back to main menu(for admin)
-@handlers_router.callback_query(F.data == "back_to_admin_main")
+@router.callback_query(F.data == "back_to_admin_main")
 async def back_to_admin_main_menu(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
@@ -662,7 +646,7 @@ async def back_to_admin_main_menu(callback_query: types.CallbackQuery):
         )
 
 
-@handlers_router.callback_query(F.data == "notifications_admin_panel")
+@router.callback_query(F.data == "notifications_admin_panel")
 async def notification_menu_handler(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
@@ -679,7 +663,7 @@ async def notification_menu_handler(callback_query: types.CallbackQuery):
         )
 
 
-@handlers_router.callback_query(F.data == "send_all")
+@router.callback_query(F.data == "send_all")
 async def confirmation_menu_handler(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
@@ -696,7 +680,7 @@ async def confirmation_menu_handler(callback_query: types.CallbackQuery):
         )
 
 
-@handlers_router.callback_query(F.data == "send_to_myself")
+@router.callback_query(F.data == "send_to_myself")
 async def send_to_myself_handler(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
@@ -753,7 +737,7 @@ async def send_to_myself_handler(callback_query: types.CallbackQuery):
         )
 
 
-@handlers_router.callback_query(F.data == "confirm_send")
+@router.callback_query(F.data == "confirm_send")
 async def confirm_send_all_handler(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
@@ -821,17 +805,17 @@ async def confirm_send_all_handler(callback_query: types.CallbackQuery):
 
 
 # Button for requesting user ID
-@handlers_router.callback_query(F.data == "send_message_to_user")
+@router.callback_query(F.data == "send_message_to_user")
 async def request_user_id_for_message(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.message.answer(
         "Enter <b>ID</b> of the user to whom you want to send the message(or <i>'отмена'/'cancel'</i> to exit):"
     )
     await callback_query.answer()
-    await state.set_state(FormSendToUser.waiting_for_user_id_for_message)
+    await state.set_state(FormSendToUser.user_id_entry)
 
 
 # Getting user ID
-@handlers_router.message(FormSendToUser.waiting_for_user_id_for_message)
+@router.message(FormSendToUser.user_id_entry)
 async def get_user_id_for_message(message: types.Message, state: FSMContext):
     user_input = message.text.strip()
 
@@ -846,13 +830,13 @@ async def get_user_id_for_message(message: types.Message, state: FSMContext):
         user_id = int(user_input)
         await state.update_data(user_id=user_id)  # Save the user ID to a state
         await message.answer("Enter <b>message text</b> (or <i>'отмена'/'cancel'</i> to exit)")
-        await state.set_state(FormSendToUser.waiting_for_message_text)  # Switch to text query
+        await state.set_state(FormSendToUser.message_text_entry)  # Switch to text query
     except ValueError:
         await message.answer("<b>User ID <i>should be a number.</i> Try again.</b>")
 
 
 # Receive message text
-@handlers_router.message(FormSendToUser.waiting_for_message_text)
+@router.message(FormSendToUser.message_text_entry)
 async def get_message_text(message: types.Message, state: FSMContext):
     message_text = message.text.strip()
 
@@ -864,12 +848,12 @@ async def get_message_text(message: types.Message, state: FSMContext):
 
     await state.update_data(message_text=message_text)  # Save the message text to a state
     await message.answer("Now send the <b>picture</b> (or enter <i>'нет'/'no'</i>, if no picture is required):")
-    await state.set_state(FormSendToUser.waiting_for_image)  # Go to picture request
+    await state.set_state(FormSendToUser.image_entry)  # Go to picture request
 
 
 # Receiving a picture and sending a message
-@handlers_router.message(FormSendToUser.waiting_for_image)
-async def get_image_and_send_message(message: types.Message, state: FSMContext):
+@router.message(FormSendToUser.image_entry)
+async def process_image_and_send_message(message: types.Message, state: FSMContext):
     data = await state.get_data()
     user_id = data.get("user_id")
     message_text = data.get("message_text")
@@ -900,7 +884,7 @@ async def get_image_and_send_message(message: types.Message, state: FSMContext):
 
 
 # Handler of other messages (including ban check)
-@handlers_router.message(F.text, ~F.state)
+@router.message(F.text, ~F.state)
 async def handle_message(message: types.Message):
     async with (await get_session() as session):
         user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
@@ -924,8 +908,9 @@ async def handle_message(message: types.Message):
 
         # Forwarding message to administrators
         await forward_message_to_admins(message)
+        emoji = types.ReactionTypeEmoji(emoji='👀')
 
-        await message.reply("👍")
+        await message.react([emoji])
 
 
 # Handling banned users
@@ -956,7 +941,7 @@ async def handle_banned_user(message: types.Message):
 
 
 # Settings button
-@handlers_router.callback_query(F.data == "settings")
+@router.callback_query(F.data == "settings")
 async def show_settings_menu(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
@@ -1010,7 +995,7 @@ async def show_settings_menu(callback_query: types.CallbackQuery):
 
 
 # User statistic
-@handlers_router.callback_query(F.data == "user_stats")
+@router.callback_query(F.data == "user_stats")
 async def show_user_stats_message(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.chat.id
@@ -1055,7 +1040,7 @@ async def show_user_stats_message(callback_query: types.CallbackQuery):
             )
 
 
-@handlers_router.callback_query(F.data == "info")
+@router.callback_query(F.data == "info")
 async def show_info_message(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
@@ -1086,7 +1071,7 @@ async def show_info_message(callback_query: types.CallbackQuery):
 
 
 # Back to main menu(for settings)
-@handlers_router.callback_query(F.data == "main_menu_back")
+@router.callback_query(F.data == "main_menu_back")
 async def back_to_main_menu(callback_query: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
@@ -1183,3 +1168,7 @@ async def send_error_to_admins(admin_chat_ids: list[int], error_message: str) ->
         for admin_chat_id in admin_chat_ids
     ]
     await asyncio.gather(*tasks)
+
+
+def register_all_handlers(dp):
+    dp.include_router(router)
