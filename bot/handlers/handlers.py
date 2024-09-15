@@ -6,7 +6,7 @@ from config import bot, BOT_ID, GAMES, STATUS_LIMITS, SUPPORTED_LANGUAGES
 from database.database import (
     get_session, get_or_create_user, update_user_language, log_user_action,
     get_user_language, get_oldest_keys, update_keys_generated,
-    delete_keys, get_user_status_info, get_subscribed_users,
+    delete_keys, get_user_status_info,
     check_user_limits, check_user_safety_limits,
     get_keys_count_main_menu, get_user_stats, update_safety_keys_generated,
     delete_safety_keys, get_safety_keys

@@ -28,7 +28,8 @@ async def get_settings_menu(session, user_id):
     main_menu_back = await get_back_to_main_menu_button(user_id)
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
-            text=await get_translation(user_id, "common", "choose_language"), callback_data="settings_choose_language")],
+            text=await get_translation(
+                user_id, "common", "choose_language"), callback_data="settings_choose_language")],
         main_menu_back.inline_keyboard[0],
     ])
 
@@ -51,7 +52,8 @@ async def get_admin_panel_keyboard(session, user_id):
          InlineKeyboardButton(
              text=await get_translation(user_id, "admin", "manage_users"), callback_data="users_admin_panel")],
         [InlineKeyboardButton(
-            text=await get_translation(user_id, "admin", "manage_notifications"), callback_data="notifications_admin_panel")],
+            text=await get_translation(
+                user_id, "admin", "manage_notifications"), callback_data="notifications_admin_panel")],
         [InlineKeyboardButton(
             text=await get_translation(user_id, "admin", "message_user"), callback_data="send_message_to_user")],
         main_menu_back.inline_keyboard[0]

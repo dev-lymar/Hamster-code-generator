@@ -4,9 +4,8 @@ from aiogram import types, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, Message
 from config import bot, BOT_ID, GAMES, GROUP_CHAT_ID
-from database.database import (get_session, log_user_action, get_user_status_info, get_admin_chat_ids,
-                               get_keys_count_for_games, get_users_list_admin_panel, get_user_details,
-                               get_subscribed_users, get_user_role_and_ban_info)
+from database.database import (get_session, log_user_action, get_admin_chat_ids, get_keys_count_for_games,
+                               get_users_list_admin_panel, get_user_details, get_subscribed_users)
 from keyboards.inline import (get_action_buttons, get_admin_panel_keyboard, get_main_in_admin, get_detail_info_in_admin,
                               notification_menu, confirmation_button_notification)
 from utils import get_translation
@@ -35,10 +34,8 @@ async def handle_admin_command_handler(session, message, user_id):
 @router.callback_query(F.data == "keys_admin_panel")
 async def keys_admin_panel_handler(callback: types.CallbackQuery):
     async with await get_session() as session:
-        
         user_id = callback.from_user.id if callback.from_user.id != BOT_ID else callback.chat.id
         keys_count_message = await get_keys_count_for_games(session, GAMES)
-        
         await bot.edit_message_text(
             chat_id=callback.message.chat.id,
             message_id=callback.message.message_id,
