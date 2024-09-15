@@ -28,7 +28,7 @@ async def get_settings_menu(session, user_id):
     main_menu_back = await get_back_to_main_menu_button(user_id)
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
-            text=await get_translation(user_id, "buttons", "choose_language"), callback_data="choose_language")],
+            text=await get_translation(user_id, "common", "choose_language"), callback_data="choose_language")],
         main_menu_back.inline_keyboard[0],
     ])
 

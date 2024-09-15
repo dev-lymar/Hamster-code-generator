@@ -3,7 +3,7 @@ import logging.handlers
 import os
 from config import bot, dp
 from database.database import init_db, close_db
-from handlers import setup_routers
+from handlers import register_handlers
 
 # Set up logging configuration
 log_directory = os.path.join(os.path.dirname(__file__), 'logs')
@@ -28,7 +28,7 @@ async def main():
     await init_db()
     try:
         logging.info("✅ | Starting the bot and initialising the database")
-        setup_routers(dp)
+        register_handlers(dp)
         await dp.start_polling(bot)
     finally:
         logging.info("📁 Closing the database connection")
