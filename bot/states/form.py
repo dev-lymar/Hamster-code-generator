@@ -2,15 +2,15 @@ from aiogram.fsm.state import StatesGroup, State
 
 
 class Form(StatesGroup):
-    choosing_language = State()
-    waiting_for_user_id = State()
+    language_selection = State()
+    user_id_entry = State()
 
 
 class FormSendToUser(StatesGroup):
-    waiting_for_user_id_for_message = State()
-    waiting_for_message_text = State()
-    waiting_for_image = State()
+    user_id_entry = State()
+    message_text_entry = State()
+    image_entry = State()
 
 
 class DonationState(StatesGroup):
-    waiting_for_amount = State()
+    amount_entry = State()
