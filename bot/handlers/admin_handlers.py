@@ -1,10 +1,9 @@
 import asyncio
-import os
 import logging
 from aiogram import types, F, Router
 from aiogram.fsm.context import FSMContext
-from aiogram.types import FSInputFile, InlineKeyboardMarkup
-from config import bot, BOT_ID, GAMES
+from aiogram.types import InlineKeyboardMarkup, Message
+from config import bot, BOT_ID, GAMES, GROUP_CHAT_ID
 from database.database import (get_session, log_user_action, get_user_status_info, get_admin_chat_ids,
                                get_keys_count_for_games, get_users_list_admin_panel, get_user_details,
                                get_subscribed_users, get_user_role_and_ban_info)
@@ -16,6 +15,10 @@ from states.form import Form, FormSendToUser
 from utils import load_image
 
 router = Router()
+
+
+# Mapping between forwarded message IDs and user IDs
+message_user_mapping = {}
 
 
 # Admin panel handler
@@ -195,10 +198,7 @@ async def send_to_myself_handler(callback_query: types.CallbackQuery):
         await log_user_action(session, user_id, "Sent ad to themselves")
 
         notification_text = await get_translation(user_id, "notifications", "second_notification")
-
-        # Let's use a function to load an image, specific or random
         photo = await load_image("notification", specific_image="notificate-Bouncemasters.png")
-
         if photo:
             test_message = await bot.send_photo(
                 chat_id=callback_query.message.chat.id,
@@ -357,6 +357,62 @@ async def process_image_and_send_message(message: types.Message, state: FSMConte
 
     # Back to the admin panel
     await admin_panel_handler(message)
+
+
+# Forward a message to all admins and optionally to a group chat
+async def forward_message_to_admins(message: Message):
+    admin_chat_ids = await get_admin_chat_ids()
+    tasks = []
+    message_ids = {}
+
+    # Forward the message to all admins
+    for admin_chat_id in admin_chat_ids:
+        logging.info(f"Forwarding message from {message.chat.username} to admin {admin_chat_id}")
+        task = bot.forward_message(
+            chat_id=admin_chat_id,
+            from_chat_id=message.chat.id,
+            message_id=message.message_id
+        )
+        tasks.append(task)
+
+    # Forward the message to the group chat if GROUP_CHAT_ID is defined
+    if GROUP_CHAT_ID:
+        logging.info(f"Forwarding message from {message.chat.username} to group {GROUP_CHAT_ID}")
+        task = bot.forward_message(
+            chat_id=GROUP_CHAT_ID,
+            from_chat_id=message.chat.id,
+            message_id=message.message_id
+        )
+        tasks.append(task)
+
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+
+    # Save the message IDs to allow admins to reply
+    for admin_chat_id, result in zip(admin_chat_ids + [GROUP_CHAT_ID], results):
+        if isinstance(result, types.Message):
+            message_ids[admin_chat_id] = result.message_id
+            message_user_mapping[result.message_id] = message.from_user.id
+
+    # Handle any exceptions that were raised during execution
+    for result in results:
+        if isinstance(result, Exception):
+            error_message = (
+                f"Failed to forward message from {message.chat.username} to group {GROUP_CHAT_ID} "
+                f"due to error: {str(result)[:50]}"
+            )
+            logging.error(error_message)
+            await send_error_to_admins(admin_chat_ids, error_message)
+
+    return message_ids
+
+
+# Send an error message to all admins
+async def send_error_to_admins(admin_chat_ids: list[int], error_message: str) -> None:
+    tasks = [
+        bot.send_message(chat_id=admin_chat_id, text=error_message)
+        for admin_chat_id in admin_chat_ids
+    ]
+    await asyncio.gather(*tasks)
 
 
 def register_admin_handlers(dp):

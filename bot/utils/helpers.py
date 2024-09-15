@@ -1,31 +1,34 @@
-import os
-import json
 import logging
+import os
+import random
 from datetime import datetime, timedelta, timezone
-from database.database import get_user_language, get_session
+
+from aiogram.types import FSInputFile
 
 
-def load_translations():
-    translations_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'translations', 'translations.json')
-    if os.path.exists(translations_path):
-        try:
-            with open(translations_path, 'r') as f:
-                return json.load(f)
-        except Exception as e:
-            logging.error(f"Error loading translations: {e}")
-    else:
-        logging.warning("Translations file not found. Using default empty translations.")
-    return {}
+async def load_image(subfolder: str, specific_image: str = None) -> FSInputFile | None:
+    base_image_dir = os.path.join(os.path.dirname(__file__), "..", "images", subfolder)
 
+    if os.path.exists(base_image_dir) and os.path.isdir(base_image_dir):
+        # Если указано конкретное изображение
+        if specific_image:
+            image_path = os.path.join(base_image_dir, specific_image)
+            if os.path.isfile(image_path):
+                return FSInputFile(image_path)
+            else:
+                logging.error(f"Image {specific_image} not found in {base_image_dir}.")
+                return None
+        # Если конкретное изображение не указано, выбираем случайное
+        else:
+            image_files = [f for f in os.listdir(base_image_dir) if os.path.isfile(os.path.join(base_image_dir, f))]
+            if image_files:
+                random_image = random.choice(image_files)
+                image_path = os.path.join(base_image_dir, random_image)
+                return FSInputFile(image_path)
 
-translations = load_translations()
+    logging.error(f"Directory {base_image_dir} does not exist or is not a directory.")
+    return None
 
-
-# Get translations
-async def get_translation(user_id: int, key: str) -> str:
-    async with await get_session() as session:
-        user_lang = await get_user_language(session, user_id)
-        return translations.get(user_lang, {}).get(key, key)
 
 
 def get_remaining_time(last_request_time, interval_minutes):
