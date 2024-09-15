@@ -62,8 +62,8 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.5.0
-          name: "Release v1.5.1"
+          tag: v1.6.0
+          name: "Release v1.6.0"
           body: |
-            Added new languages and added a new game Hide Ball | 🏖️
+            Bot refactoring | 🏖️
           token: ${{ secrets.GITHUB_TOKEN }}

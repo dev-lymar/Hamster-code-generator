@@ -1,0 +1,91 @@
+{
+  "language": {
+    "name": "English"
+  },
+  "commands": {
+    "start_bot": "Start Bot",
+    "change_language": "Change Language",
+    "admin_panel": "Admin Panel"
+  },
+  "common": {
+    "welcome": "Hey there, {first_name}! 👋 Ready to dive in? Pick an option to get started:",
+    "ban_notification": "🚫 Oops! Looks like you're banned. Reach out to support for assistance.",
+    "choose_language": "🌐 Choose your language:"
+  },
+  "buttons": {
+    "get_regular_keys": "🔑 Grab Regular Keys",
+    "get_premium_keys": "🚀 Get Elite Keys 🗝️",
+    "settings": "⚙️ Settings",
+    "referral_links": "📎 My Projects",
+    "info": "ℹ️ Info",
+    "user_stats": "📊 My Stats",
+    "back": "🔙 Back",
+    "change_status": "🔄 Update Status",
+    "language_selection": "🌐 Change Language",
+    "support": "📲 Contact Support 👮‍",
+    "pay": "💫 Pay",
+    "custom_donate_amount": "💫 Enter Custom Amount",
+    "cancel_donation": "Cancel"
+  },
+  "messages": {
+    "choose_action": "What’s next? 🤔\n\nChoose an option to continue:\n\n<b>Today users received:</b>\n- Regular keys: <b>{keys_today}</b> 🔑\n- Premium keys: <b>{premium_keys_today}</b> 🗝️\n\n❗ <b>Want more perks?</b> Premium keys unlock access to exclusive games, unique deals, and extra bonuses. Lead the way by unlocking new horizons 🏆🚀!\n\n💬 <b>Share the bot with a friend:</b> <code>https://t.me/hamster_keys_xbot</code>\n(copy the link and share!) 📋\n\n🔥 <b>Select an action below to continue and become part of the gaming elite!</b>",
+    "user_stats": "📊 <b>Your Stats:</b>\n\n🏆 <b><u>Your Level:</u></b>\n<i>{achievement_name}</i> — <i>Keep climbing and earn exclusive rewards!</i>\n\n<b><u>Today:</u></b>\n🔑 <i>Regular Keys Used:</i> <b>{keys_today}</b>\n🗝️ <i>Premium Keys Used:</i> <b>{premium_keys_today}</b>\n\n<b><u>Total:</u></b>\n🏅 <i>Regular Keys:</i> <b>{keys_total}</b>\n🥇 <i>Premium Keys:</i> <b>{premium_keys_total}</b>\n\n<b><u>Your Status:</u></b>\n<i>{user_status}</i> — <i>Become an elite player and unlock even more opportunities!</i>\n\n🚀 <b>Earn keys, invite friends, and reach the top together!</b>",
+    "settings_intro": "⚙️ <i>Settings</i>\n\nChoose an option below to customize the bot to your preferences.",
+    "info_description": "<b>Hello!</b> I’m your key to reliable promo codes for Hamster Combat games 🎮! Get codes <i>instantly</i> and <i>without hassle</i>!\n\n📊 <b>My Stats:</b>\n- Track your achievements. 🎯\n- Level up your status! 🚀\n- Earn badges for redeemed codes. 🏆\n\n📎 <b><i>My Projects:</i></b> Discover new horizons — these projects offer exciting opportunities! 🎗️\n\n💡 <i>Like what I’m doing?</i>\n<b>Support the project!</b> Send Telegram stars ⭐️ or donate to one of the wallets 💸.\nMore info — <code>/paysupport</code>.\nAll donations go towards improving the service and future giveaways 🎁.\n<b>USDT (TON):</b>\n<code>UQBKsWMgDbW-eSON_beitf6P9qFJTtdJfQzZoHjMqdhN5obz</code>\n<b>USDT (TRC20):</b>\n<code>TNoR9woaGGNKGr9ToWCTdYRP2zuB5VoSnH</code>\n<b>Toncoin (TON):</b>\n<code>UQBKsWMgDbW-eSON_beitf6P9qFJTtdJfQzZoHjMqdhN5obz</code>\n\n🙏 <b>Thank you for your support!</b> Together, we’ll make this service even better!\n📬 <b>Got questions?</b> Reach out to us: <a href=\"https://t.me/bot_support_hamster\">Support 🖊️</a>",
+    "referral_links_intro": "🌐 <b>Projects that inspire me!</b> <i>Open for everyone:</i>\n\n💎 <b>Join now and get exclusive bonuses</b> — be one of the first!\n🚀 <b>Become part of communities that are changing the game.</b>\n💼 <i>Trusted platforms and proven opportunities where I’m already participating</i>, and I hope to earn from them!\n🔗 <b>Grab the link and seize your chance right now!</b>",
+    "support_project_prompt": "💡 <b>Support the project!</b>\n\nTo ensure you receive elite keys, we use expensive mobile proxies and a new algorithm that requires much more time and resources. This allows us to provide maximum security and the freshest keys.\n\n💎 <b>Want to help?</b> Your support helps us cover these costs and continue providing quality keys. Just send any amount to one of the wallets below:\n\n<b>• USDT (TON):</b>\n<code>UQBKsWMgDbW-eSON_beitf6P9qFJTtdJfQzZoHjMqdhN5obz</code>\n\n<b>• USDT (TRC20):</b>\n<code>TNoR9woaGGNKGr9ToWCTdYRP2zuB5VoSnH</code>\n\n<b>• Toncoin (TON):</b>\n<code>UQBKsWMgDbW-eSON_beitf6P9qFJTtdJfQzZoHjMqdhN5obz</code>\n\n🙏 <b>Thank you for your support!</b> With your help, we can make the service even better and more reliable!",
+    "not_premium_access": "😎 <b>Hey, friend!</b> 😎\n\nWe’ve launched a <b>test phase</b> for premium access to elite keys! 🚀 Currently, we’re randomly selecting users to test our system’s speed and stability. This is your chance to be part of this experiment and get keys without any wait time. 🔥\n\n🔒 Our new algorithm and costly mobile proxies provide the maximum security for the keys, but they require more resources. We’re carefully evaluating performance to ensure you get the best experience.\n\n💎 <b>Want to support the project?</b> Your help allows us to further refine the algorithm and guarantee access to the freshest keys.\n\n<b>• USDT (TON):</b>\n<code>UQBKsWMgDbW-eSON_beitf6P9qFJTtdJfQzZoHjMqdhN5obz</code>\n\n<b>• USDT (TRC20):</b>\n<code>TNoR9woaGGNKGr9ToWCTdYRP2zuB5VoSnH</code>\n\n<b>• Toncoin (TON):</b>\n<code>UQBKsWMgDbW-eSON_beitf6P9qFJTtdJfQzZoHjMqdhN5obz</code>\n\n🙏 <b>Support us</b>, and you’ll get a chance to be among the lucky ones 🏖️. Thank you for your help 💫!\n\n<b>Questions?</b> Reach out to <a href=\"https://t.me/bot_support_hamster\">support 📲</a>!",
+    "language_selected": "🌍 <b>English</b> selected. You’re all set!",
+    "default_response": "👌 Got it! We’ve received your message. Our super-secret admin squad will reach out to you soon. 🕵️‍♂️⏱",
+    "custom_donate_prompt": "💰 <b>Please enter the amount to support:</b>",
+    "wait_time_with_hours": "⏳ Hold tight! You need to wait {hours} h {minutes} min {sec} sec before trying again.",
+    "wait_time_without_hours": "⏳ Hold tight! You need to wait {minutes} min {sec} sec before trying again.",
+    "daily_limit_exceeded": "🚧 Whoa, slow down! You’ve hit today’s limit. Come back tomorrow for more fun. 😎",
+    "keys_generated_success": "🎉 All set! Here are your keys (tap to copy):",
+    "premium_keys_generated_success": "🎉 Thanks for your support! Here are your <b>elite</b> keys (tap to copy):",
+    "no_keys_available": "🚫 No keys available for <b>{game}</b> at the moment. 😢\n\n",
+    "error_handler": "❗️ <b>Error:</b> {error_message}"
+  },
+  "admin": {
+    "no_access": "⛔️ Access Denied! 🚫",
+    "panel_description": "👨‍💼💼 Admin Panel. Time to wield the power! (But shh... keep it secret!)",
+    "manage_keys": "🔑 Magic Keys",
+    "manage_users": "🚫🧑‍💻 User Wrangling",
+    "manage_notifications": "📢 Announce Chaos",
+    "message_user": "🎙️ Send a message by ID",
+    "view_details": "🔍 Get Details"
+  },
+  "payment": {
+    "invalid_donation_input": "⚠️ Please enter a valid number to support us.",
+    "donation_success": "🥳 <b>Thank you! Your support helps us improve!</b> 🤗",
+    "donation_cancelled": "😔 Payment canceled. We hope for your support in the future!",
+    "donation_invoice_title": "Support Our Growth 🚀",
+    "donation_invoice_description": "Your contribution of {amount} 🌟 helps us add new features and improve the service! 🏖️",
+    "refund_prompt": "To refund ⭐️ use the command <code><b>/refund_stars</b></code> <i>with your transaction number.</i>",
+    "refund_success": "🎉 <i>Stars successfully refunded! Thanks for your patience!</i>",
+    "support_donation_prompt": "💡 <b>Every donation helps us enhance the bot and add new features! 💪</b> Thank you for your support! <i>Please note that donations are voluntary and non-refundable.</i> If you have any questions, contact us. 📞",
+    "refund_transaction_not_found": "❌ <b>Transaction with this number not found. Please check your input!</b>",
+    "refund_already_processed": "⚠️ <b>This transaction has already been refunded!!</b>",
+    "refund_error": "❗️ <b>Error:</b> {error_message}",
+    "invalid_donation_amount": "❗️ Please enter an amount between <b>1</b> and <b>2500</b>. Your support matters!"
+  },
+  "notifications": {
+    "notification": "🚀 <b>Great news!</b> You might have noticed that we’ve added a new feature — <b>Elite Keys</b>! 🎉 It’s currently in <i>testing mode</i>. Premium access has been given to around 5% of users, selected <b>randomly</b>.\n\nWhat does this mean for you? During the testing phase, those with access to elite keys can use them without waiting! 🔥 Want to join in? We’re continually improving the algorithms and stability, and your support helps us push forward.\n\n💎 <b>Got questions or want to learn how to get access?</b> Reach out to our <a href=\"https://t.me/bot_support_hamster\">support team 📲</a>, and we’ll be happy to assist!\n\n<b>Stay tuned</b> for updates, as more users will gain access to elite keys soon. Thanks for being with us! 💫",
+    "second_notification": "🚀 <b>Great news!</b> We have <b>new codes for the game — Hide Ball</b> in our bot! 🎉 Get your keys and dive into the game without delays! Elite key holders are guaranteed <i>maximum comfort and security</i>! 🔥\n\n🌍 <b>We've added support for new languages:</b> <i>German, Farsi, Urdu, and Hindi</i>. Your experience is now even more convenient!\n\nIn addition, <b>your donations</b> help us grow! Learn more about donations and support in the section — 📄 <b>INFO</b>.\n\nDon't miss your chance to be part of reliable projects! Check out 📎 <b>My Projects</b> and receive bonuses for participation! 😉\n\nCheck your stats and achievements in 📊 <b>My Stats</b> and make sure you're climbing to new heights! 💪\n\n💎 <b>Stay tuned for our news</b> to be the first to access new games! Thank you for being with us! 💫\n\n🤝 <b>Share the bot with a friend:</b> <code>https://t.me/hamster_keys_xbot</code> (copy the link and share!)"
+  },
+  "achievements": {
+    "newcomer": "🌱 <b>Newcomer</b> — <i>You've just begun your journey! Keep going, there are many opportunities ahead!</i> 🚀",
+    "key_seeker": "🔑 <b>Key Seeker</b> — <i>You've unlocked a few doors, but more valuable keys await you.</i> 💎",
+    "bonus_hunter": "🎯 <b>Bonus Hunter</b> — <i>With each new key, you grow stronger. Unlock bonuses!</i> 🎁",
+    "code_expert": "🧠 <b>Code Expert</b> — <i>You already know how the system works. Keep improving!</i> 📈",
+    "key_master": "🏆 <b>Key Master</b> — <i>Your skills are impressive! Reach new heights!</i> 🗝️",
+    "elite_player": "🚀 <b>Elite Player</b> — <i>You're among the best. Elite keys unlock new opportunities!</i> 💥",
+    "game_legend": "🌟 <b>Game Legend</b> — <i>You've achieved almost everything! Stay at the top and collect all the keys!</i> 🏅",
+    "absolute_leader": "👑 <b>Absolute Leader</b> — <i>You're at the top! All the keys are at your disposal, and you're a role model for everyone!</i> 🌍"
+  },
+  "statuses": {
+    "free": "🎮 <b>Regular Player</b> — Get keys and open doors to become stronger. 🚀",
+    "friend": "🤝 <b>Friend of the Project</b> — You have access to exclusive features, but there's more ahead! 🔥",
+    "premium": "👑 <b>Elite Player!</b> Use all your privileges and enjoy exclusive content. ✨"
+  }
+}

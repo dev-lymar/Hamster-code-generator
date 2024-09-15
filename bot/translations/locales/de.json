@@ -1,0 +1,91 @@
+{
+  "language": {
+    "name": "Deutsch"
+  },
+  "commands": {
+    "start_bot": "Bot starten",
+    "change_language": "Sprache ändern",
+    "admin_panel": "Admin-Panel"
+  },
+  "common": {
+    "welcome": "Hallo, {first_name}! 👋 Bereit, loszulegen? Wähle eine Option, um zu starten:",
+    "ban_notification": "🚫 Oops! Du bist gesperrt. Kontaktiere den Support für Hilfe.",
+    "choose_language": "🌐 Wähle deine Sprache:"
+  },
+  "buttons": {
+    "get_regular_keys": "🔑 Reguläre Schlüssel holen",
+    "get_premium_keys": "🚀 Elite-Schlüssel erhalten 🗝️",
+    "settings": "⚙️ Einstellungen",
+    "referral_links": "📎 Meine Projekte",
+    "info": "ℹ️ Info",
+    "user_stats": "📊 Meine Statistiken",
+    "back": "🔙 Zurück",
+    "change_status": "🔄 Status aktualisieren",
+    "language_selection": "🌐 Sprache ändern",
+    "support": "📲 Kontaktieren Sie den Support 👮‍",
+    "pay": "💫 Bezahlen",
+    "custom_donate_amount": "💫 Betrag eingeben",
+    "cancel_donation": "Abbrechen"
+  },
+  "messages": {
+    "choose_action": "Was kommt als Nächstes? 🤔\n\nWähle eine Option, um fortzufahren:\n\n<b>Heute erhielten Nutzer:</b>\n- Reguläre Schlüssel: <b>{keys_today}</b> 🔑\n- Premium-Schlüssel: <b>{premium_keys_today}</b> 🗝️\n\n❗ <b>Mehr Vorteile gewünscht?</b> Premium-Schlüssel schalten exklusive Spiele, einzigartige Angebote und zusätzliche Boni frei. Erschließe neue Horizonte 🏆🚀!\n\n💬 <b>Teile den Bot mit einem Freund:</b> <code>https://t.me/hamster_keys_xbot</code>\n(Kopiere den Link und teile ihn!) 📋\n\n🔥 <b>Wähle unten eine Aktion, um fortzufahren und Teil der Spielelite zu werden!</b>",
+    "user_stats": "📊 <b>Deine Statistiken:</b>\n\n🏆 <b><u>Dein Level:</u></b>\n<i>{achievement_name}</i> — <i>Bleibe dran und erhalte exklusive Belohnungen!</i>\n\n<b><u>Heute:</u></b>\n🔑 <i>Verwendete reguläre Schlüssel:</i> <b>{keys_today}</b>\n🗝️ <i>Verwendete Premium-Schlüssel:</i> <b>{premium_keys_today}</b>\n\n<b><u>Insgesamt:</u></b>\n🏅 <i>Reguläre Schlüssel:</i> <b>{keys_total}</b>\n🥇 <i>Premium-Schlüssel:</i> <b>{premium_keys_total}</b>\n\n<b><u>Dein Status:</u></b>\n<i>{user_status}</i> — <i>Werde ein Elite-Spieler und schalte noch mehr Möglichkeiten frei!</i>\n\n🚀 <b>Verdiene Schlüssel, lade Freunde ein und erreiche gemeinsam die Spitze!</b>",
+    "settings_intro": "⚙️ <i>Einstellungen</i>\n\nWähle unten eine Option, um den Bot nach deinen Vorlieben anzupassen.",
+    "info_description": "<b>Hallo!</b> Ich bin dein Schlüssel zu zuverlässigen Promo-Codes für Hamster Combat-Spiele 🎮! Erhalte Codes <i>sofort</i> und <i>ohne Mühe</i>!\n\n📊 <b>Meine Statistiken:</b>\n- Verfolge deine Erfolge. 🎯\n- Verbessere deinen Status! 🚀\n- Verdiene Abzeichen für eingelöste Codes. 🏆\n\n📎 <b><i>Meine Projekte:</i></b> Entdecke neue Horizonte — diese Projekte bieten spannende Möglichkeiten! 🎗️\n\n💡 <i>Gefällt dir, was ich tue?</i>\n<b>Unterstütze das Projekt!</b> Sende Telegram-Sterne ⭐️ oder spende an eine der Brieftaschen 💸.\nMehr Infos — <code>/paysupport</code>.\nAlle Spenden fließen in die Verbesserung des Dienstes und zukünftige Giveaways 🎁.\n<b>USDT (TON):</b>\n<code>UQBKsWMgDbW-eSON_beitf6P9qFJTtdJfQzZoHjMqdhN5obz</code>\n<b>USDT (TRC20):</b>\n<code>TNoR9woaGGNKGr9ToWCTdYRP2zuB5VoSnH</code>\n<b>Toncoin (TON):</b>\n<code>UQBKsWMgDbW-eSON_beitf6P9qFJTtdJfQzZoHjMqdhN5obz</code>\n\n🙏 <b>Danke für deine Unterstützung!</b> Gemeinsam machen wir diesen Service noch besser!\n📬 <b>Fragen?</b> Kontaktiere uns: <a href=\"https://t.me/bot_support_hamster\">Support 🖊️</a>",
+    "referral_links_intro": "🌐 <b>Projekte, die mich inspirieren!</b> <i>Für alle offen:</i>\n\n💎 <b>Jetzt beitreten und exklusive Boni erhalten</b> — sei einer der Ersten!\n🚀 <b>Werde Teil von Gemeinschaften, die das Spiel verändern.</b>\n💼 <i>Vertrauenswürdige Plattformen und bewährte Möglichkeiten, an denen ich bereits teilnehme</i>, und ich hoffe, davon zu profitieren!\n🔗 <b>Greife den Link ab und nutze deine Chance jetzt!</b>",
+    "support_project_prompt": "💡 <b>Unterstütze das Projekt!</b>\n\nUm sicherzustellen, dass du Elite-Schlüssel erhältst, verwenden wir teure mobile Proxys und einen neuen Algorithmus, der viel mehr Zeit und Ressourcen erfordert. Dies ermöglicht es uns, maximale Sicherheit und die frischesten Schlüssel bereitzustellen.\n\n💎 <b>Möchtest du helfen?</b> Deine Unterstützung hilft uns, diese Kosten zu decken und weiterhin qualitativ hochwertige Schlüssel bereitzustellen. Sende einfach einen beliebigen Betrag an eine der untenstehenden Brieftaschen:\n\n<b>• USDT (TON):</b>\n<code>UQBKsWMgDbW-eSON_beitf6P9qFJTtdJfQzZoHjMqdhN5obz</code>\n\n<b>• USDT (TRC20):</b>\n<code>TNoR9woaGGNKGr9ToWCTdYRP2zuB5VoSnH</code>\n\n<b>• Toncoin (TON):</b>\n<code>UQBKsWMgDbW-eSON_beitf6P9qFJTtdJfQzZoHjMqdhN5obz</code>\n\n🙏 <b>Danke für deine Unterstützung!</b> Mit deiner Hilfe können wir den Service noch besser und zuverlässiger machen!",
+    "not_premium_access": "😎 <b>Hey, Freund!</b> 😎\n\nWir haben eine <b>Testphase</b> für den Premium-Zugang zu Elite-Schlüsseln gestartet! 🚀 Derzeit wählen wir zufällig Nutzer aus, um die Geschwindigkeit und Stabilität unseres Systems zu testen. Dies ist deine Chance, Teil dieses Experiments zu sein und Schlüssel ohne Wartezeit zu erhalten. 🔥\n\n🔒 Unser neuer Algorithmus und teure mobile Proxys bieten maximale Sicherheit für die Schlüssel, aber sie erfordern mehr Ressourcen. Wir bewerten sorgfältig die Leistung, um sicherzustellen, dass du das beste Erlebnis hast.\n\n💎 <b>Möchtest du das Projekt unterstützen?</b> Deine Hilfe ermöglicht es uns, den Algorithmus weiter zu verfeinern und den Zugang zu den frischesten Schlüsseln zu garantieren.\n\n<b>• USDT (TON):</b>\n<code>UQBKsWMgDbW-eSON_beitf6P9qFJTtdJfQzZoHjMqdhN5obz</code>\n\n<b>• USDT (TRC20):</b>\n<code>TNoR9woaGGNKGr9ToWCTdYRP2zuB5VoSnH</code>\n\n<b>• Toncoin (TON):</b>\n<code>UQBKsWMgDbW-eSON_beitf6P9qFJTtdJfQzZoHjMqdhN5obz</code>\n\n🙏 <b>Unterstütze uns</b>, und du hast die Chance, einer der Glücklichen zu sein 🏖️. Danke für deine Hilfe 💫!\n\n<b>Fragen?</b> Kontaktiere <a href=\"https://t.me/bot_support_hamster\">Support 📲</a>!",
+    "language_selected": "🌍 <b>Deutsch</b> ausgewählt. Du bist startklar!",
+    "default_response": "👌 Verstanden! Wir haben deine Nachricht erhalten. Unser supergeheimes Admin-Team wird sich bald bei dir melden. 🕵️‍♂️⏱",
+    "custom_donate_prompt": "💰 <b>Bitte gib den Betrag ein, um das Projekt zu unterstützen:</b>",
+    "wait_time_with_hours": "⏳ Halte durch! Du musst noch {hours} h {minutes} min {sec} sec warten, bevor du es erneut versuchen kannst.",
+    "wait_time_without_hours": "⏳ Halte durch! Du musst noch {minutes} min {sec} sec warten, bevor du es erneut versuchen kannst.",
+    "daily_limit_exceeded": "🚧 Whoa, langsam! Du hast das heutige Limit erreicht. Komm morgen für mehr Spaß zurück. 😎",
+    "keys_generated_success": "🎉 Alles bereit! Hier sind deine Schlüssel (zum Kopieren tippen):",
+    "premium_keys_generated_success": "🎉 Danke für deine Unterstützung! Hier sind deine <b>Elite</b>-Schlüssel (zum Kopieren tippen):",
+    "no_keys_available": "🚫 Für <b>{game}</b> sind momentan keine Schlüssel verfügbar. 😢\n\n",
+    "error_handler": "❗️ <b>Fehler:</b> {error_message}"
+  },
+  "admin": {
+    "no_access": "⛔️ Zugriff verweigert! 🚫",
+    "panel_description": "👨‍💼💼 Admin-Panel. Zeit, die Macht zu nutzen! (Aber psst... behalte es für dich!)",
+    "manage_keys": "🔑 Magische Schlüssel",
+    "manage_users": "🚫🧑‍💻 Benutzerverwaltung",
+    "manage_notifications": "📢 Chaos ankündigen",
+    "message_user": "🎙️ Nachricht nach ID senden",
+    "view_details": "🔍 Details abrufen"
+  },
+  "payment": {
+    "invalid_donation_input": "⚠️ Bitte gib eine gültige Zahl ein, um uns zu unterstützen.",
+    "donation_success": "🥳 <b>Danke! Deine Unterstützung hilft uns, besser zu werden!</b> 🤗",
+    "donation_cancelled": "😔 Zahlung abgebrochen. Wir hoffen auf deine Unterstützung in der Zukunft!",
+    "donation_invoice_title": "Unterstütze unser Wachstum 🚀",
+    "donation_invoice_description": "Dein Beitrag von {amount} 🌟 hilft uns, neue Features hinzuzufügen und den Service zu verbessern! 🏖️",
+    "refund_prompt": "Um ⭐️ zurückzuerstatten, benutze den Befehl <code><b>/refund_stars</b></code> <i>mit deiner Transaktionsnummer.</i>",
+    "refund_success": "🎉 <i>Sterne erfolgreich zurückerstattet! Danke für deine Geduld!</i>",
+    "support_donation_prompt": "💡 <b>Jede Spende hilft uns, den Bot zu verbessern und neue Funktionen hinzuzufügen! 💪</b> Danke für deine Unterstützung! <i>Bitte beachte, dass Spenden freiwillig und nicht erstattungsfähig sind.</i> Wenn du Fragen hast, kontaktiere uns. 📞",
+    "refund_transaction_not_found": "❌ <b>Transaktion mit dieser Nummer nicht gefunden. Bitte überprüfe deine Eingabe!</b>",
+    "refund_already_processed": "⚠️ <b>Diese Transaktion wurde bereits erstattet!</b>",
+    "refund_error": "❗️ <b>Fehler:</b> {error_message}",
+    "invalid_donation_amount": "❗️ Bitte gib einen Betrag zwischen <b>1</b> und <b>2500</b> ein. Deine Unterstützung zählt!"
+  },
+  "notifications": {
+    "notification": "🚀 <b>Großartige Neuigkeiten!</b> Du hast vielleicht bemerkt, dass wir eine neue Funktion hinzugefügt haben — <b>Elite-Schlüssel</b>! 🎉 Es befindet sich derzeit im <i>Testmodus</i>. Premium-Zugang wurde etwa 5% der Nutzer zufällig gewährt.\n\nWas bedeutet das für dich? Während der Testphase können diejenigen mit Zugang zu Elite-Schlüsseln diese ohne Wartezeit nutzen! 🔥 Willst du mitmachen? Wir verbessern kontinuierlich die Algorithmen und Stabilität, und deine Unterstützung hilft uns, weiter voranzukommen.\n\n💎 <b>Fragen oder möchtest du wissen, wie du Zugang erhältst?</b> Kontaktiere unser <a href=\"https://t.me/bot_support_hamster\">Support-Team 📲</a>, und wir helfen dir gerne weiter!\n\n<b>Bleib dran</b> für Updates, da bald mehr Nutzer Zugang zu Elite-Schlüsseln erhalten werden. Danke, dass du bei uns bist! 💫",
+    "second_notification": "🚀 <b>Großartige Neuigkeiten!</b> In unserem Bot gibt es <b>neue Codes für das Spiel — Hide Ball</b>! 🎉 Holen Sie sich Ihre Schlüssel und tauchen Sie ohne Verzögerung ins Spiel ein! Elite-Schlüsselbesitzer erhalten <i>maximalen Komfort und Sicherheit</i>! 🔥\n\n🌍 <b>Wir haben die Unterstützung für neue Sprachen hinzugefügt:</b> <i>Deutsch, Farsi, Urdu und Hindi</i>. Ihre Erfahrung ist jetzt noch komfortabler!\n\nAußerdem helfen <b>Ihre Spenden</b> uns zu wachsen! Erfahren Sie mehr über Spenden und Unterstützung im Abschnitt — 📄 <b>INFO</b>.\n\nVerpassen Sie nicht die Gelegenheit, Teil vertrauenswürdiger Projekte zu werden! Schauen Sie in 📎 <b>Meine Projekte</b> und erhalten Sie Boni für Ihre Teilnahme! 😉\n\nÜberprüfen Sie Ihre Statistiken und Erfolge in 📊 <b>Meine Statistiken</b> und stellen Sie sicher, dass Sie neue Höhen erreichen! 💪\n\n💎 <b>Bleiben Sie auf dem Laufenden</b>, um als Erster Zugang zu neuen Spielen zu erhalten! Danke, dass Sie bei uns sind! 💫\n\n🤝 <b>Teilen Sie den Bot mit einem Freund:</b> <code>https://t.me/hamster_keys_xbot</code> (kopieren Sie den Link und teilen Sie ihn!)"
+  },
+  "achievements": {
+    "newcomer": "🌱 <b>Neuling</b> — <i>Du hast gerade erst begonnen! Bleib dran, es gibt viele Möglichkeiten voraus!</i> 🚀",
+    "key_seeker": "🔑 <b>Schlüsselsucher</b> — <i>Du hast ein paar Türen geöffnet, aber wertvollere Schlüssel erwarten dich.</i> 💎",
+    "bonus_hunter": "🎯 <b>Bonusjäger</b> — <i>Mit jedem neuen Schlüssel wirst du stärker. Schalte Boni frei!</i> 🎁",
+    "code_expert": "🧠 <b>Code-Experte</b> — <i>Du weißt bereits, wie das System funktioniert. Bleib dran!</i> 📈",
+    "key_master": "🏆 <b>Schlüsselmeister</b> — <i>Deine Fähigkeiten sind beeindruckend! Erreiche neue Höhen!</i> 🗝️",
+    "elite_player": "🚀 <b>Elite-Spieler</b> — <i>Du gehörst zu den Besten. Elite-Schlüssel schalten neue Möglichkeiten frei!</i> 💥",
+    "game_legend": "🌟 <b>Spiel-Legende</b> — <i>Du hast fast alles erreicht! Bleib an der Spitze und sammle alle Schlüssel!</i> 🏅",
+    "absolute_leader": "👑 <b>Absoluter Anführer</b> — <i>Du bist ganz oben! Alle Schlüssel stehen dir zur Verfügung, und du bist ein Vorbild für alle!</i> 🌍"
+  },
+  "statuses": {
+    "free": "🎮 <b>Regulärer Spieler</b> — Erhalte Schlüssel und öffne Türen, um stärker zu werden. 🚀",
+    "friend": "🤝 <b>Freund des Projekts</b> — Du hast Zugriff auf exklusive Funktionen, aber es gibt noch mehr zu entdecken! 🔥",
+    "premium": "👑 <b>Elite-Spieler!</b> Nutze all deine Privilegien und genieße exklusive Inhalte. ✨"
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "language": {
+    "name": "Español"
+  },
+  "commands": {
+    "start_bot": "Iniciar Bot",
+    "change_language": "Cambiar Idioma",
+    "admin_panel": "Panel de Administración"
+  },
+  "common": {
+    "welcome": "¡Hola, {first_name}! 👋 ¿Listo para empezar? Elige una opción para comenzar:",
+    "ban_notification": "🚫 ¡Ups! Parece que estás bloqueado. Ponte en contacto con soporte para obtener ayuda.",
+    "choose_language": "🌐 Elige tu idioma:"
+  },
+  "buttons": {
+    "get_regular_keys": "🔑 Obtener Llaves Regulares",
+    "get_premium_keys": "🚀 Obtener Llaves Élite 🗝️",
+    "settings": "⚙️ Configuración",
+    "referral_links": "📎 Mis Proyectos",
+    "info": "ℹ️ Información",
+    "user_stats": "📊 Mis Estadísticas",
+    "back": "🔙 Atrás",
+    "change_status": "🔄 Actualizar Estado",
+    "language_selection": "🌐 Cambiar Idioma",
+    "support": "📲 Contacta Soporte 👮‍",
+    "pay": "💫 Pagar",
+    "custom_donate_amount": "💫 Introduce Monto Personalizado",
+    "cancel_donation": "Cancelar"
+  },
+  "messages": {
+    "choose_action": "¿Qué sigue? 🤔\n\nElige una opción para continuar:\n\n<b>Hoy los usuarios recibieron:</b>\n- Llaves regulares: <b>{keys_today}</b> 🔑\n- Llaves premium: <b>{premium_keys_today}</b> 🗝️\n\n❗ <b>¿Quieres más beneficios?</b> Las llaves premium desbloquean acceso a juegos exclusivos, ofertas únicas y bonificaciones adicionales. ¡Sé líder abriendo nuevos horizontes 🏆🚀!\n\n💬 <b>Comparte el bot con un amigo:</b> <code>https://t.me/hamster_keys_xbot</code>\n(copia el enlace y compártelo) 📋\n\n🔥 <b>Elige una acción a continuación para continuar y convertirte en parte de la élite gamer!</b>",
+    "user_stats": "📊 <b>Tus estadísticas:</b>\n\n🏆 <b><u>Tu Nivel:</u></b>\n<i>{achievement_name}</i> — <i>¡Sigue avanzando y obtén recompensas exclusivas!</i>\n\n<b><u>Hoy:</u></b>\n🔑 <i>Llaves Regulares Usadas:</i> <b>{keys_today}</b>\n🗝️ <i>Llaves Premium Usadas:</i> <b>{premium_keys_today}</b>\n\n<b><u>Total:</u></b>\n🏅 <i>Llaves Regulares:</i> <b>{keys_total}</b>\n🥇 <i>Llaves Premium:</i> <b>{premium_keys_total}</b>\n\n<b><u>Tu Estado:</u></b>\n<i>{user_status}</i> — <i>Conviértete en un jugador élite y desbloquea aún más oportunidades!</i>\n\n🚀 <b>Gana llaves, invita a amigos y alcanza la cima juntos!</b>",
+    "settings_intro": "⚙️ <i>Configuración</i>\n\nElige una opción abajo para personalizar el bot según tus preferencias.",
+    "info_description": "<b>¡Hola!</b> Soy tu llave para obtener códigos promocionales confiables para los juegos de Hamster Combat 🎮! Obtén códigos <i>al instante</i> y <i>sin complicaciones</i>.\n\n📊 <b>Mis Estadísticas:</b>\n- Sigue tus logros. 🎯\n- ¡Mejora tu estado! 🚀\n- Gana insignias por códigos usados. 🏆\n\n📎 <b><i>Mis Proyectos:</i></b> Descubre nuevos horizontes — ¡estos proyectos te ofrecen oportunidades emocionantes! 🎗️\n\n💡 <i>¿Te gusta lo que hago?</i>\n<b>Apoya el proyecto!</b> Envía estrellas de Telegram ⭐️ o haz una donación a una de las billeteras 💸.\nMás información — <code>/paysupport</code>.\nTodas las donaciones se destinan a mejorar el servicio y futuros sorteos 🎁.\n<b>USDT (TON):</b>\n<code>UQBKsWMgDbW-eSON_beitf6P9qFJTtdJfQzZoHjMqdhN5obz</code>\n<b>USDT (TRC20):</b>\n<code>TNoR9woaGGNKGr9ToWCTdYRP2zuB5VoSnH</code>\n<b>Toncoin (TON):</b>\n<code>UQBKsWMgDbW-eSON_beitf6P9qFJTtdJfQzZoHjMqdhN5obz</code>\n\n🙏 <b>¡Gracias por tu apoyo!</b> ¡Juntos, haremos que este servicio sea aún mejor!\n📬 <b>¿Tienes preguntas?</b> Contáctanos: <a href=\"https://t.me/bot_support_hamster\">Soporte 🖊️</a>",
+    "referral_links_intro": "🌐 <b>Proyectos que me inspiran!</b> <i>Abiertos para todos:</i>\n\n💎 <b>Únete y obtén bonos exclusivos</b> — ¡sé de los primeros!\n🚀 <b>Forma parte de comunidades que están cambiando el juego.</b>\n💼 <i>Plataformas confiables y oportunidades comprobadas donde ya estoy participando</i>, ¡y espero ganar con ellas!\n🔗 <b>¡Toma el enlace y aprovecha tu oportunidad ahora mismo!</b>",
+    "support_project_prompt": "💡 <b>¡Apoya el proyecto!</b>\n\nPara que puedas recibir llaves élite, utilizamos proxies móviles costosos y un nuevo algoritmo que requiere mucho más tiempo y recursos. Esto nos permite garantizar la máxima seguridad y las llaves más frescas.\n\n💎 <b>¿Te gustaría ayudar?</b> Tu apoyo nos ayudará a cubrir estos costos y seguir proporcionando llaves de calidad. Simplemente envía cualquier cantidad a una de las carteras a continuación:\n\n<b>• USDT (TON):</b>\n<code>UQBKsWMgDbW-eSON_beitf6P9qFJTtdJfQzZoHjMqdhN5obz</code>\n\n<b>• USDT (TRC20):</b>\n<code>TNoR9woaGGNKGr9ToWCTdYRP2zuB5VoSnH</code>\n\n<b>• Toncoin (TON):</b>\n<code>UQBKsWMgDbW-eSON_beitf6P9qFJTtdJfQzZoHjMqdhN5obz</code>\n\n🙏 <b>¡Gracias por tu apoyo!</b> ¡Con tu ayuda, podemos hacer el servicio aún mejor y más confiable!",
+    "not_premium_access": "😎 <b>¡Hola, amigo!</b> 😎\n\nHemos lanzado una <b>fase de prueba</b> para el acceso premium a las llaves élite. 🚀 Actualmente, estamos seleccionando usuarios aleatoriamente para probar la velocidad y estabilidad del sistema. ¡Es tu oportunidad de ser parte de este experimento y obtener llaves sin esperar! 🔥\n\n🔒 Nuestro nuevo algoritmo y los proxies móviles costosos garantizan la máxima seguridad de las llaves, pero requieren más recursos. Estamos evaluando cuidadosamente el rendimiento para ofrecerte la mejor experiencia.\n\n💎 <b>¿Quieres apoyar el proyecto?</b> Tu ayuda nos permitirá seguir mejorando el algoritmo y garantizar el acceso a los códigos más recientes.\n\n<b>• USDT (TON):</b>\n<code>UQBKsWMgDbW-eSON_beitf6P9qFJTtdJfQzZoHjMqdhN5obz</code>\n\n<b>• USDT (TRC20):</b>\n<code>TNoR9woaGGNKGr9ToWCTdYRP2zuB5VoSnH</code>\n\n<b>• Toncoin (TON):</b>\n<code>UQBKsWMgDbW-eSON_beitf6P9qFJTtdJfQzZoHjMqdhN5obz</code>\n\n🙏 <b>¡Apóyanos</b>, y tendrás la oportunidad de estar entre los afortunados 🏖️! ¡Gracias por tu apoyo! 💫\n\n<b>¿Preguntas?</b> Contacta a <a href=\"https://t.me/bot_support_hamster\">Soporte 📲</a>!",
+    "language_selected": "🌍 <b>Español</b> seleccionado. ¡Todo listo!",
+    "default_response": "👌 ¡Entendido! Hemos recibido tu mensaje. Nuestro equipo de administración súper secreto te contactará pronto. 🕵️‍♂️⏱",
+    "custom_donate_prompt": "💰 <b>Por favor introduce el monto para apoyar:</b>",
+    "wait_time_with_hours": "⏳ ¡Aguanta! Debes esperar {hours} h {minutes} min {sec} seg antes de intentarlo de nuevo.",
+    "wait_time_without_hours": "⏳ ¡Aguanta! Debes esperar {minutes} min {sec} seg antes de intentarlo de nuevo.",
+    "daily_limit_exceeded": "🚧 ¡Tranquilo! Has alcanzado el límite de hoy. Vuelve mañana para más diversión. 😎",
+    "keys_generated_success": "🎉 ¡Todo listo! Aquí tienes tus llaves (toca para copiar):",
+    "premium_keys_generated_success": "🎉 ¡Gracias por tu apoyo! Aquí tienes tus <b>Llaves Élite</b> (haz clic para copiar):",
+    "no_keys_available": "🚫 No hay llaves disponibles para <b>{game}</b> en este momento. 😢\n\n",
+    "error_handler": "❗️ <b>Error:</b> {error_message}"
+  },
+  "admin": {
+    "no_access": "⛔️ ¡Acceso Denegado! 🚫",
+    "panel_description": "👨‍💼💼 Panel de admin. ¡Es hora de manejar el poder! (Pero shh... mantenlo en secreto)",
+    "manage_keys": "🔑 Llaves Mágicas",
+    "manage_users": "🚫🧑‍💻 Gestión de Usuarios",
+    "manage_notifications": "📢 Anunciar Caos",
+    "message_user": "🎙️ Enviar un mensaje por ID",
+    "view_details": "🔍 Obtener Detalles"
+  },
+  "payment": {
+    "invalid_donation_input": "⚠️ Por favor, introduce un número válido para apoyarnos.",
+    "donation_success": "🥳 <b>¡Gracias! ¡Tu apoyo nos ayuda a mejorar!</b> 🤗",
+    "donation_cancelled": "😔 Pago cancelado. ¡Esperamos tu apoyo en el futuro!",
+    "donation_invoice_title": "Apoya Nuestro Crecimiento 🚀",
+    "donation_invoice_description": "Tu contribución de {amount} 🌟 nos ayuda a añadir nuevas funciones y mejorar el servicio! 🏖️",
+    "refund_prompt": "Para reembolsar ⭐️ utiliza el comando <code><b>/refund_stars</b></code> <i>con tu número de transacción.</i>",
+    "refund_success": "🎉 <i>¡Estrellas reembolsadas con éxito! ¡Gracias por tu paciencia!</i>",
+    "support_donation_prompt": "💡 <b>¡Cada donación nos ayuda a mejorar el bot y añadir nuevas funciones! 💪</b> ¡Gracias por tu apoyo! <i>Ten en cuenta que las donaciones son voluntarias y no reembolsables.</i> Si tienes preguntas, contáctanos. 📞",
+    "refund_transaction_not_found": "❌ <b>No se encontró ninguna transacción con este número. ¡Por favor, verifica tus datos!</b>",
+    "refund_already_processed": "⚠️ <b>¡Esta transacción ya ha sido reembolsada!</b>",
+    "refund_error": "❗️ <b>Error:</b> {error_message}",
+    "invalid_donation_amount": "❗️ Por favor, introduce un monto entre <b>1</b> y <b>2500</b>. ¡Tu apoyo es importante!"
+  },
+  "notifications": {
+    "notification": "🚀 <b>¡Grandes noticias!</b> Quizás hayas notado que hemos agregado una nueva función: <b>Llaves Élite</b>! 🎉 Actualmente está en <i>modo de prueba</i>. El acceso premium se ha dado a alrededor del 5% de los usuarios, seleccionados <b>al azar</b>.\n\n¿Qué significa esto para ti? Durante la fase de prueba, aquellos con acceso a las llaves élite pueden usarlas sin esperar. 🔥 ¿Quieres unirte? Seguimos mejorando los algoritmos y la estabilidad, y tu apoyo nos ayuda a avanzar.\n\n💎 <b>¿Tienes preguntas o quieres saber cómo obtener acceso?</b> Contacta a nuestro <a href=\"https://t.me/bot_support_hamster\">equipo de soporte 📲</a>, ¡y estaremos encantados de ayudarte!\n\n<b>Estate atento</b> a las actualizaciones, ya que pronto más usuarios tendrán acceso a las llaves élite. ¡Gracias por estar con nosotros! 💫",
+    "second_notification": "🚀 <b>¡Grandes noticias!</b> ¡En nuestro bot, ahora hay <b>códigos para el nuevo juego — Hide Ball</b>! 🎉 ¡Toma tus llaves y sumérgete en el juego sin retrasos! Los titulares de claves élite tienen garantizado <i>máximo confort y seguridad</i>! 🔥\n\n🌍 <b>Hemos agregado soporte para nuevos idiomas:</b> <i>alemán, persa, urdu y hindi</i>. ¡Ahora tu experiencia es aún más conveniente!\n\nAdemás, <b>tus donaciones</b> nos ayudan a crecer! Aprende más sobre las donaciones y el apoyo en la sección — 📄 <b>INFO</b>.\n\n¡No pierdas la oportunidad de ser parte de proyectos confiables! ¡Echa un vistazo a 📎 <b>Mis Proyectos</b> y recibe bonificaciones por participar! 😉\n\nConsulta tus estadísticas y logros en 📊 <b>Mis Estadísticas</b> y asegúrate de estar alcanzando nuevas alturas! 💪\n\n💎 <b>Sigue nuestras noticias</b> para ser el primero en acceder a nuevos juegos! ¡Gracias por estar con nosotros! 💫\n\n🤝 <b>Comparte el bot con un amigo:</b> <code>https://t.me/hamster_keys_xbot</code> (¡copia el enlace y compártelo!)"
+  },
+  "achievements": {
+    "newcomer": "🌱 <b>Principiante</b> — <i>¡Acabas de comenzar tu viaje! ¡Sigue adelante, hay muchas oportunidades por delante!</i> 🚀",
+    "key_seeker": "🔑 <b>Buscador de Llaves</b> — <i>Has desbloqueado algunas puertas, pero llaves más valiosas te esperan.</i> 💎",
+    "bonus_hunter": "🎯 <b>Cazador de Bonos</b> — <i>Con cada nueva llave, te vuelves más fuerte. ¡Desbloquea bonos!</i> 🎁",
+    "code_expert": "🧠 <b>Experto en Códigos</b> — <i>Ya sabes cómo funciona el sistema. ¡Sigue mejorando!</i> 📈",
+    "key_master": "🏆 <b>Maestro de Llaves</b> — <i>¡Tus habilidades son impresionantes! ¡Alcanza nuevas alturas!</i> 🗝️",
+    "elite_player": "🚀 <b>Jugador Élite</b> — <i>Estás entre los mejores. ¡Las llaves élite desbloquean nuevas oportunidades!</i> 💥",
+    "game_legend": "🌟 <b>Leyenda del Juego</b> — <i>¡Has logrado casi todo! ¡Mantente en la cima y reúne todas las llaves!</i> 🏅",
+    "absolute_leader": "👑 <b>Líder Absoluto</b> — <i>¡Estás en la cima! Todas las llaves están a tu disposición, y eres un modelo a seguir para todos.</i> 🌍"
+  },
+  "statuses": {
+    "free": "🎮 <b>Jugador Regular</b> — Obtén llaves y abre puertas para hacerte más fuerte. 🚀",
+    "friend": "🤝 <b>Amigo del Proyecto</b> — Tienes acceso a funciones exclusivas, ¡pero hay más por delante! 🔥",
+    "premium": "👑 <b>Jugador Élite</b> — Usa todos tus privilegios y disfruta de contenido exclusivo. ✨"
+  }
+}

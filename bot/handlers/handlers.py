@@ -212,6 +212,8 @@ async def set_language(callback: types.CallbackQuery, state: FSMContext):
         # Updating the language in the database
         await update_user_language(session, user_id, selected_language)
 
+        await get_user_language(session, user_id)
+
         # Set commands for the selected language
         await set_user_commands(bot, user_id)
 
