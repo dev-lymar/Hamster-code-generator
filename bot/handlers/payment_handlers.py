@@ -1,4 +1,5 @@
 import asyncio
+import logging
 
 from aiogram import types, F, Router
 from aiogram.fsm.context import FSMContext
@@ -91,7 +92,10 @@ async def donate_callback_handler(callback: types.CallbackQuery, state: FSMConte
 
 @router.pre_checkout_query()
 async def pre_checkout_handler(pre_checkout_query: types.PreCheckoutQuery):
-    await pre_checkout_query.answer(ok=True)
+    try:
+        await pre_checkout_query.answer(ok=True)
+    except TelegramBadRequest as e:
+        logging.error(f"Failed to process pre-checkout: {e}")
 
 
 @router.message(F.content_type == types.ContentType.SUCCESSFUL_PAYMENT)
@@ -176,19 +180,25 @@ async def send_invoice_message(callback_or_message, amount: int, state: FSMConte
     keyboard = await get_payment_keyboard(user_id)
     invoice_title_text = await get_translation(user_id, "payment", "donation_invoice_title")
     invoice_description_text = await get_translation(user_id, "payment", "donation_invoice_description")
+    error_text = await get_translation(user_id, "payment", "refund_error")
 
     prices = [types.LabeledPrice(label="XTR", amount=amount)]
-    invoice_message = await callback_or_message.answer_invoice(
-        title=invoice_title_text,
-        description=invoice_description_text.format(amount=amount),
-        prices=prices,
-        provider_token="",
-        payload="channel_support",
-        currency="XTR",
-        reply_markup=keyboard
-    )
-    # Save the invoice message ID to a state
-    await state.update_data(invoice_message_id=invoice_message.message_id)
+    try:
+        invoice_message = await callback_or_message.answer_invoice(
+            title=invoice_title_text,
+            description=invoice_description_text.format(amount=amount),
+            prices=prices,
+            provider_token="",
+            payload="channel_support",
+            currency="XTR",
+            reply_markup=keyboard
+        )
+        # Save the invoice message ID to a state
+        await state.update_data(invoice_message_id=invoice_message.message_id)
+    except TelegramBadRequest as error:
+        logging.error(f"Failed to send invoice: {error}")
+
+        await callback_or_message.answer(error_text.format(error_message=error))
 
 
 def register_payment_handlers(dp):

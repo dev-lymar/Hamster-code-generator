@@ -15,7 +15,7 @@ from handlers.admin_handlers import message_user_mapping, forward_message_to_adm
 router = Router()
 
 
-# Handler of other messages (including ban check)
+# Handler of other messages
 @router.message(F.text)
 async def handle_message(message: types.Message):
     try:
@@ -41,7 +41,10 @@ async def handle_message(message: types.Message):
                 logging.info("Message received from the group chat, skipping response.")
                 return
 
-            await log_user_action(session, user_id, f"User message: {message.text}")
+            try:
+                await log_user_action(session, user_id, f"User message: {message.text}")
+            except Exception as e:
+                logging.error(f"Error logging user action: {e}")
 
             # Forwarding message to administrators
             await forward_message_to_admins(message)
