@@ -47,13 +47,13 @@ async def get_admin_panel_keyboard(session, user_id):
     main_menu_back = await get_back_to_main_menu_button(user_id)
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
-            text=await get_translation(user_id, "buttons", "manage_keys"), callback_data="keys_admin_panel"),
+            text=await get_translation(user_id, "admin", "manage_keys"), callback_data="keys_admin_panel"),
          InlineKeyboardButton(
-             text=await get_translation(user_id, "buttons", "manage_users"), callback_data="users_admin_panel")],
+             text=await get_translation(user_id, "admin", "manage_users"), callback_data="users_admin_panel")],
         [InlineKeyboardButton(
-            text=await get_translation(user_id, "buttons", "manage_notifications"), callback_data="send_message_to_user")],
+            text=await get_translation(user_id, "admin", "manage_notifications"), callback_data="notifications_admin_panel")],
         [InlineKeyboardButton(
-            text=await get_translation(user_id, "buttons", "message_user"), callback_data="notifications_admin_panel")],
+            text=await get_translation(user_id, "admin", "message_user"), callback_data="send_message_to_user")],
         main_menu_back.inline_keyboard[0]
     ])
 
@@ -88,7 +88,7 @@ async def confirmation_button_notification(session, user_id):
 async def get_detail_info_in_admin(session, user_id):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
-            text=await get_translation(user_id, "buttons", "view_details"), callback_data="detail_info_in_admin")],
+            text=await get_translation(user_id, "admin", "view_details"), callback_data="detail_info_in_admin")],
     ])
 
 
