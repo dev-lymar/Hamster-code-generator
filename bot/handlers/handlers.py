@@ -2,20 +2,20 @@ import asyncio
 import logging
 from aiogram import types, F, Router
 from aiogram.fsm.context import FSMContext
-from config import bot, BOT_ID, GAMES, STATUS_LIMITS, GROUP_CHAT_ID, SUPPORTED_LANGUAGES
-from database.database import (get_session, get_or_create_user, update_user_language, log_user_action,
-                               get_user_language, get_oldest_keys, update_keys_generated,
-                               delete_keys, get_user_status_info, is_admin, get_admin_chat_ids,
-                               get_keys_count_for_games, get_users_list_admin_panel, get_user_details,
-                               get_subscribed_users, get_user_role_and_ban_info, update_safety_keys_generated,
-                               delete_safety_keys, get_safety_keys, check_user_limits, check_user_safety_limits,
-                               get_keys_count_main_menu, get_user_stats)
-
+from config import bot, BOT_ID, GAMES, STATUS_LIMITS, SUPPORTED_LANGUAGES
+from database.database import (
+    get_session, get_or_create_user, update_user_language, log_user_action,
+    get_user_language, get_oldest_keys, update_keys_generated,
+    delete_keys, get_user_status_info, get_subscribed_users,
+    check_user_limits, check_user_safety_limits,
+    get_keys_count_main_menu, get_user_stats, update_safety_keys_generated,
+    delete_safety_keys, get_safety_keys
+)
 from handlers.command_setup import set_user_commands
 from keyboards.back_to_main_kb import get_back_to_main_menu_button
 from keyboards.donate_kb import get_donation_keyboard
 from keyboards.referral_links_kb import referral_links_keyboard
-from keyboards.inline import (get_action_buttons, get_settings_menu, create_language_keyboard, instruction_prem_button)
+from keyboards.inline import get_action_buttons, get_settings_menu, create_language_keyboard, instruction_prem_button
 from utils import get_translation, get_available_languages, load_image
 from utils.helpers import get_remaining_time
 from states.form import Form
@@ -26,48 +26,56 @@ router = Router()
 
 # Command handler /start
 async def welcome_command_handler(session, message, user_id, chat_id, user):
-    # Define the user language, if it is not supported - set English
-    user_language_code = user.language_code if user.language_code in SUPPORTED_LANGUAGES else 'en'
+    try:
+        # Define the user language, if it is not supported - set English
+        user_language_code = user.language_code if user.language_code in SUPPORTED_LANGUAGES else 'en'
 
-    user_data = {
-        'chat_id': chat_id,
-        'user_id': user_id,
-        'first_name': user.first_name,
-        'last_name': user.last_name,
-        'username': user.username,
-        'language_code': user_language_code
-    }
+        user_data = {
+            'chat_id': chat_id,
+            'user_id': user_id,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'username': user.username,
+            'language_code': user_language_code
+        }
 
-    await log_user_action(session, user_id, "/start command used")
+        await log_user_action(session, user_id, "/start command used")
 
-    user_record = await get_or_create_user(session, chat_id, user_data)
+        user_record = await get_or_create_user(session, chat_id, user_data)
 
-    if user_record is None:
-        await message.answer("Error creating user.")
-        return
+        if user_record is None:
+            await message.answer("Error creating user.")
+            return
 
-    # Update user language if necessary
-    if user_record.language_code != user_data['language_code']:
-        await update_user_language(session, user_id, user_data['language_code'])
+        # Update user language if necessary
+        if user_record.language_code != user_data['language_code']:
+            await update_user_language(session, user_id, user_data['language_code'])
 
-    translation = await get_translation(user_id, "common", "welcome")
-    welcome_text = translation.format(first_name=user.first_name)
+        translation = await get_translation(user_id, "common", "welcome")
+        welcome_text = translation.format(first_name=user.first_name)
 
-    photo = await load_image("welcome")
-    if photo:
-        await bot.send_photo(
-            chat_id=chat_id,
-            photo=photo,
-            caption=welcome_text,
-            reply_markup=await get_action_buttons(session, user_id)
-        )
-        return
+        photo = await load_image("welcome")
+        if photo:
+            try:
+                await bot.send_photo(
+                    chat_id=chat_id,
+                    photo=photo,
+                    caption=welcome_text,
+                    reply_markup=await get_action_buttons(session, user_id)
+                )
+                return
+            except Exception as e:
+                logging.error(f"Failed to send photo in welcome message: {e}")
 
-    await bot.send_message(
-        chat_id=chat_id,
-        text=welcome_text,
-        reply_markup=await get_action_buttons(session, user_id)
-    )
+            await bot.send_message(
+                chat_id=chat_id,
+                text=welcome_text,
+                reply_markup=await get_action_buttons(session, user_id)
+            )
+    except Exception as e:
+        logging.error(f"Error in welcome_command_handler: {e}")
+
+        await message.answer("An error occurred while processing your request.")
 
 
 # Function to send keys menu after generating keys
@@ -235,173 +243,187 @@ async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
 # Handling of "get_keys" button pressing
 @router.callback_query(F.data == "get_keys")
 async def send_keys_callback_handler(callback_query: types.CallbackQuery):
-    async with (await get_session()) as session:
-        user_id = (
-            callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
-        )
-        await callback_query.answer()
+    try:
+        async with (await get_session()) as session:
+            user_id = (
+                callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+            )
+            await callback_query.answer()
 
-        user_info = await get_user_status_info(session, user_id)
+            user_info = await get_user_status_info(session, user_id)
 
-        # Checking the request limit
-        if not await check_user_limits(session, user_id, STATUS_LIMITS):
-            await send_daily_limit_reached_message(callback_query, user_id)
-            return
+            # Checking the request limit
+            if not await check_user_limits(session, user_id, STATUS_LIMITS):
+                await send_daily_limit_reached_message(callback_query, user_id)
+                return
 
-        # Checking the interval between requests
-        interval_minutes = STATUS_LIMITS[user_info.user_status]['interval_minutes']
-        minutes, seconds = get_remaining_time(user_info.last_request_time, interval_minutes)
-        if minutes > 0 or seconds > 0:
-            wait_message_template = await get_translation(user_id, "messages", "wait_time_without_hours")
-            wait_message = wait_message_template.format(minutes=minutes, sec=seconds)
-            await send_wait_time_message(callback_query, user_id, wait_message)
-            return
+            # Checking the interval between requests
+            interval_minutes = STATUS_LIMITS[user_info.user_status]['interval_minutes']
+            minutes, seconds = get_remaining_time(user_info.last_request_time, interval_minutes)
+            if minutes > 0 or seconds > 0:
+                wait_message_template = await get_translation(user_id, "messages", "wait_time_without_hours")
+                wait_message = wait_message_template.format(minutes=minutes, sec=seconds)
+                await send_wait_time_message(callback_query, user_id, wait_message)
+                return
 
-        await bot.edit_message_reply_markup(
-            chat_id=callback_query.message.chat.id,
-            message_id=callback_query.message.message_id,
-            reply_markup=None
-        )
+            await bot.edit_message_reply_markup(
+                chat_id=callback_query.message.chat.id,
+                message_id=callback_query.message.message_id,
+                reply_markup=None
+            )
 
-        keys_list = []
-        for game in GAMES:
-            keys = await get_oldest_keys(session, game)
-            keys_list.append(keys)
+            keys_list = []
+            for game in GAMES:
+                keys = await get_oldest_keys(session, game)
+                keys_list.append(keys)
 
-        response_text_template = await get_translation(user_id, "messages", 'keys_generated_success')
-        response_text = f"{response_text_template}\n\n"
-        total_keys_in_request = 0
+            response_text_template = await get_translation(user_id, "messages", 'keys_generated_success')
+            response_text = f"{response_text_template}\n\n"
+            total_keys_in_request = 0
 
-        for game, keys in zip(GAMES, keys_list):
-            if keys:
-                total_keys_in_request += len(keys)
-                response_text += f"<b>{game}</b>:\n"
-                keys_to_delete = [key[0] for key in keys]
-                response_text += "\n".join([f"<code>{key}</code>" for key in keys_to_delete]) + "\n\n"
-                await delete_keys(session, game, keys_to_delete)
-            else:
-                no_keys_template = await get_translation(user_id, "messages", 'no_keys_available')
-                response_text += no_keys_template.format(game=game)
+            for game, keys in zip(GAMES, keys_list):
+                if keys:
+                    total_keys_in_request += len(keys)
+                    response_text += f"<b>{game}</b>:\n"
+                    keys_to_delete = [key[0] for key in keys]
+                    response_text += "\n".join([f"<code>{key}</code>" for key in keys_to_delete]) + "\n\n"
+                    await delete_keys(session, game, keys_to_delete)
+                else:
+                    no_keys_template = await get_translation(user_id, "messages", 'no_keys_available')
+                    response_text += no_keys_template.format(game=game)
 
-        await bot.send_message(
-            chat_id=callback_query.message.chat.id,
-            text=response_text.strip()
-        )
+            await bot.send_message(
+                chat_id=callback_query.message.chat.id,
+                text=response_text.strip()
+            )
 
-        if total_keys_in_request > 0:
-            await update_keys_generated(session, user_id, total_keys_in_request)
+            if total_keys_in_request > 0:
+                await update_keys_generated(session, user_id, total_keys_in_request)
 
-        await send_menu_handler(callback_query.message)
+            await send_menu_handler(callback_query.message)
+
+    except Exception as e:
+        logging.error(f"Error processing get_keys: {e}")
+        error_text = await get_translation(user_id, "messages", "error_handler")
+
+        await callback_query.answer(error_text)
 
 
 # Handling of "get_safety_keys" button pressing
 @router.callback_query(F.data == "get_safety_keys")
 async def send_safety_keys_callback_handler(callback_query: types.CallbackQuery):
-    async with (await get_session()) as session:
-        user_id = (
-            callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
-        )
-        await callback_query.answer()
+    try:
+        async with (await get_session()) as session:
+            user_id = (
+                callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
+            )
+            await callback_query.answer()
 
-        logging.info(f"User {user_id} press prem keys")
-        user_info = await get_user_status_info(session, user_id)
+            logging.info(f"User {user_id} press prem keys")
+            user_info = await get_user_status_info(session, user_id)
 
-        if user_info.user_status not in ['premium']:
-            not_prem_message = await get_translation(user_id, "messages", "not_premium_access")
-            photo = await load_image("premium")
-            if photo:
-                await bot.delete_message(
+            if user_info.user_status not in ['premium']:
+                not_prem_message = await get_translation(user_id, "messages", "not_premium_access")
+                photo = await load_image("premium")
+                if photo:
+                    await bot.delete_message(
+                        chat_id=callback_query.message.chat.id,
+                        message_id=callback_query.message.message_id
+                    )
+                    await bot.send_photo(
+                        chat_id=callback_query.message.chat.id,
+                        photo=photo,
+                        caption=not_prem_message,
+                        reply_markup=await instruction_prem_button(session, user_id)
+                    )
+                    return
+                await bot.send_message(
                     chat_id=callback_query.message.chat.id,
-                    message_id=callback_query.message.message_id
-                )
-                await bot.send_photo(
-                    chat_id=callback_query.message.chat.id,
-                    photo=photo,
-                    caption=not_prem_message,
+                    text=not_prem_message,
                     reply_markup=await instruction_prem_button(session, user_id)
                 )
+
+            # Checking the limit of requests for safety keys
+            if not await check_user_safety_limits(session, user_id, STATUS_LIMITS):
+                message_to_update = await send_daily_limit_reached_message(callback_query, user_id)
+
+                await asyncio.sleep(1.5)
+
+                support_message = await get_translation(user_id, "messages", "support_project_prompt")
+                photo = await load_image("premium")
+                if photo:
+                    await bot.edit_message_media(
+                        chat_id=callback_query.message.chat.id,
+                        message_id=message_to_update.message_id,
+                        media=types.InputMediaPhoto(media=photo, caption=support_message),
+                        reply_markup=await get_action_buttons(session, user_id)
+                    )
+                else:
+                    await bot.edit_message_text(
+                        chat_id=callback_query.message.chat.id,
+                        message_id=message_to_update.message_id,
+                        text=support_message,
+                        reply_markup=await get_action_buttons(session, user_id)
+                    )
                 return
-            await bot.send_message(
+
+            # Checking the interval between requests
+            interval_minutes = STATUS_LIMITS[user_info.user_status]['safety_interval_minutes']
+            minutes, seconds = get_remaining_time(user_info.last_safety_keys_request_time, interval_minutes)
+            if minutes > 59:
+                hours = minutes // 60
+                minutes = minutes % 60
+                wait_message_template = await get_translation(user_id, "messages", "wait_time_with_hours")
+                wait_message = wait_message_template.format(hours=hours, minutes=minutes, sec=seconds)
+            else:
+                wait_message_template = await get_translation(user_id, "messages", "wait_time_without_hours")
+                wait_message = wait_message_template.format(minutes=minutes, sec=seconds)
+
+            if minutes > 0 or seconds > 0:
+                await send_wait_time_message(callback_query, user_id, wait_message)
+                return
+
+            await bot.edit_message_reply_markup(
                 chat_id=callback_query.message.chat.id,
-                text=not_prem_message,
-                reply_markup=await instruction_prem_button(session, user_id)
+                message_id=callback_query.message.message_id,
+                reply_markup=None
             )
 
-        # Checking the limit of requests for safety keys
-        if not await check_user_safety_limits(session, user_id, STATUS_LIMITS):
-            message_to_update = await send_daily_limit_reached_message(callback_query, user_id)
+            keys_list = []
+            for game in GAMES:
+                keys = await get_safety_keys(session, game)
+                keys_list.append(keys)
 
-            await asyncio.sleep(1.5)
+            response_text_template = await get_translation(user_id, "messages", 'premium_keys_generated_success')
+            response_text = f"{response_text_template}\n\n"
+            total_keys_in_request = 0
 
-            support_message = await get_translation(user_id, "messages", "support_project_prompt")
-            photo = await load_image("premium")
-            if photo:
-                await bot.edit_message_media(
-                    chat_id=callback_query.message.chat.id,
-                    message_id=message_to_update.message_id,
-                    media=types.InputMediaPhoto(media=photo, caption=support_message),
-                    reply_markup=await get_action_buttons(session, user_id)
-                )
-            else:
-                await bot.edit_message_text(
-                    chat_id=callback_query.message.chat.id,
-                    message_id=message_to_update.message_id,
-                    text=support_message,
-                    reply_markup=await get_action_buttons(session, user_id)
-                )
-            return
+            for game, keys in zip(GAMES, keys_list):
+                if keys:
+                    total_keys_in_request += len(keys)
+                    response_text += f"<b>{game}</b>:\n"
+                    keys_to_delete = [key[0] for key in keys]
+                    response_text += "\n".join([f"<code>{key}</code>" for key in keys_to_delete]) + "\n\n"
+                    await delete_safety_keys(session, game, keys_to_delete)
+                else:
+                    no_keys_template = await get_translation(user_id, "messages", 'no_keys_available')
+                    response_text += no_keys_template.format(game=game)
 
-        # Checking the interval between requests
-        interval_minutes = STATUS_LIMITS[user_info.user_status]['safety_interval_minutes']
-        minutes, seconds = get_remaining_time(user_info.last_safety_keys_request_time, interval_minutes)
-        if minutes > 59:
-            hours = minutes // 60
-            minutes = minutes % 60
-            wait_message_template = await get_translation(user_id, "messages", "wait_time_with_hours")
-            wait_message = wait_message_template.format(hours=hours, minutes=minutes, sec=seconds)
-        else:
-            wait_message_template = await get_translation(user_id, "messages", "wait_time_without_hours")
-            wait_message = wait_message_template.format(minutes=minutes, sec=seconds)
+            await bot.send_message(
+                chat_id=callback_query.message.chat.id,
+                text=response_text.strip()
+            )
 
-        if minutes > 0 or seconds > 0:
-            await send_wait_time_message(callback_query, user_id, wait_message)
-            return
+            if total_keys_in_request > 0:
+                await update_safety_keys_generated(session, user_id, total_keys_in_request)
 
-        await bot.edit_message_reply_markup(
-            chat_id=callback_query.message.chat.id,
-            message_id=callback_query.message.message_id,
-            reply_markup=None
-        )
+            await send_menu_handler(callback_query.message)
 
-        keys_list = []
-        for game in GAMES:
-            keys = await get_safety_keys(session, game)
-            keys_list.append(keys)
+    except Exception as e:
+        logging.error(f"Error processing get_keys: {e}")
+        error_text = await get_translation(user_id, "messages", "error_handler")
 
-        response_text_template = await get_translation(user_id, "messages", 'premium_keys_generated_success')
-        response_text = f"{response_text_template}\n\n"
-        total_keys_in_request = 0
-
-        for game, keys in zip(GAMES, keys_list):
-            if keys:
-                total_keys_in_request += len(keys)
-                response_text += f"<b>{game}</b>:\n"
-                keys_to_delete = [key[0] for key in keys]
-                response_text += "\n".join([f"<code>{key}</code>" for key in keys_to_delete]) + "\n\n"
-                await delete_safety_keys(session, game, keys_to_delete)
-            else:
-                no_keys_template = await get_translation(user_id, "messages", 'no_keys_available')
-                response_text += no_keys_template.format(game=game)
-
-        await bot.send_message(
-            chat_id=callback_query.message.chat.id,
-            text=response_text.strip()
-        )
-
-        if total_keys_in_request > 0:
-            await update_safety_keys_generated(session, user_id, total_keys_in_request)
-
-        await send_menu_handler(callback_query.message)
+        await callback_query.answer(error_text)
 
 
 # Function for sending a message when the daily limit is reached
