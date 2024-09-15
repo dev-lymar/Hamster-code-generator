@@ -9,7 +9,7 @@ from filters.admin_filter import AdminFilter
 
 from config import BOT_ID, bot
 from handlers.admin_handlers import handle_admin_command_handler
-from handlers.handlers import welcome_command_handler, execute_change_language_logic, set_user_commands
+from handlers.handlers import welcome_command_handler, change_language_logic_handler, set_user_commands
 
 router = Router()
 
@@ -28,7 +28,7 @@ async def command_start(message: Message):
 @router.message(Command("change_lang"))
 async def command_change_lang(message: Message, state: FSMContext):
     user_id = message.from_user.id
-    await execute_change_language_logic(message, user_id, state)
+    await change_language_logic_handler(message, user_id, state)
 
     await set_user_commands(bot, user_id)
 

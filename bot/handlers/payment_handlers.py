@@ -6,8 +6,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 
 from config import BOT_ID
-from handlers.handlers import send_menu_handler, show_info_message
-from keyboards.back_to_main_kb import get_back_to_main_menu_button
+from handlers.handlers import send_menu_handler, info_handler
+from keyboards.back_to_main_kb import get_back_to_main_menu_handler_button
 
 from keyboards.donate_kb import get_payment_keyboard, get_cancel_donation_keyboard
 
@@ -37,7 +37,7 @@ async def donate_custom_handler(callback: types.CallbackQuery, state: FSMContext
 
 @router.callback_query(F.data == "cancel_custom_donation", DonationState.amount_entry)
 async def cancel_custom_donation_handler(callback: types.CallbackQuery, state: FSMContext):
-    await show_info_message(callback)
+    await info_handler(callback)
 
     await state.clear()
 
@@ -169,7 +169,7 @@ async def paysupport_handler(message: types.Message):
     user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
     await message.delete()
     paysupport_prompt_text = await get_translation(user_id, "payment", "support_donation_prompt")
-    keyboard = await get_back_to_main_menu_button(user_id)
+    keyboard = await get_back_to_main_menu_handler_button(user_id)
 
     await message.answer(text=paysupport_prompt_text, reply_markup=keyboard)
 

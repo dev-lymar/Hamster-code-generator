@@ -1,7 +1,7 @@
 from aiogram import BaseMiddleware, types
 from aiogram.types import Update
 from database.database import get_user_status_info, get_session
-from handlers.handlers import handle_banned_user
+from handlers.handlers import banned_user_handler
 
 
 class BanCheckMiddleware(BaseMiddleware):
@@ -14,7 +14,7 @@ class BanCheckMiddleware(BaseMiddleware):
             async with await get_session() as session:
                 user_info = await get_user_status_info(session, user_id)
                 if user_info.is_banned:
-                    await handle_banned_user(event.callback_query.message)
+                    await banned_user_handler(event.callback_query.message)
                     return
 
         # Check if the event is a command
@@ -25,7 +25,7 @@ class BanCheckMiddleware(BaseMiddleware):
             async with await get_session() as session:
                 user_info = await get_user_status_info(session, user_id)
                 if user_info.is_banned:
-                    await handle_banned_user(event.message)
+                    await banned_user_handler(event.message)
                     return
 
         return await handler(event, data)
