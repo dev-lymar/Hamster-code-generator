@@ -12,7 +12,7 @@ from database.database import (
     delete_safety_keys, get_safety_keys
 )
 from handlers.command_setup import set_user_commands
-from keyboards.back_to_main_kb import get_back_to_main_menu_handler_button
+from keyboards.back_to_main_kb import get_back_to_main_menu_button
 from keyboards.donate_kb import get_donation_keyboard
 from keyboards.referral_links_kb import referral_links_keyboard
 from keyboards.inline import get_action_buttons, get_settings_menu, create_language_keyboard, instruction_prem_button
@@ -189,7 +189,7 @@ async def change_language_logic_handler(message: types.Message, user_id: int, st
         await state.set_state(Form.language_selection)
 
 
-@router.callback_query(F.data == "choose_language")
+@router.callback_query(F.data == "settings_choose_language")
 async def language_button_handler(callback: types.CallbackQuery, state: FSMContext):
     await callback.answer()
     async with await get_session() as _:
@@ -241,7 +241,7 @@ async def set_language(callback: types.CallbackQuery, state: FSMContext):
 
 
 # Handling of "get_keys" button pressing
-@router.callback_query(F.data == "get_keys")
+@router.callback_query(F.data == "keys_regular")
 async def keys_handler(callback: types.CallbackQuery):
     try:
         async with (await get_session()) as session:
@@ -310,7 +310,7 @@ async def keys_handler(callback: types.CallbackQuery):
 
 
 # Handling of "get_safety_keys" button pressing
-@router.callback_query(F.data == "get_safety_keys")
+@router.callback_query(F.data == "keys_premium")
 async def safety_keys_handler(callback: types.CallbackQuery):
     try:
         async with (await get_session()) as session:
@@ -512,7 +512,7 @@ async def banned_user_handler(message: types.Message):
 
 
 # Settings button
-@router.callback_query(F.data == "settings")
+@router.callback_query(F.data == "settings_menu")
 async def settings_handler(callback: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
@@ -580,7 +580,7 @@ async def user_stats_handler(callback: types.CallbackQuery):
             premium_keys_total=user_stats['premium_keys_total'],
             user_status=user_status,
         )
-        keyboard = await get_back_to_main_menu_handler_button(user_id)
+        keyboard = await get_back_to_main_menu_button(user_id)
 
         if callback.message.photo:
             await bot.edit_message_caption(
@@ -598,7 +598,7 @@ async def user_stats_handler(callback: types.CallbackQuery):
             )
 
 
-@router.callback_query(F.data == "info")
+@router.callback_query(F.data == "user_info")
 async def info_handler(callback: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (

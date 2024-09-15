@@ -152,7 +152,7 @@ async def notification_menu_handler(callback: types.CallbackQuery):
         )
 
 
-@router.callback_query(F.data == "send_all")
+@router.callback_query(F.data == "notifications_send_all")
 async def confirm_send_all_notifications_handler(callback: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
@@ -171,7 +171,7 @@ async def confirm_send_all_notifications_handler(callback: types.CallbackQuery):
         )
 
 
-@router.callback_query(F.data == "send_to_myself")
+@router.callback_query(F.data == "notifications_send_self")
 async def send_notification_to_myself_handler(callback: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
@@ -219,7 +219,7 @@ async def send_notification_to_myself_handler(callback: types.CallbackQuery):
         )
 
 
-@router.callback_query(F.data == "confirm_send")
+@router.callback_query(F.data == "notifications_confirm_send")
 async def confirm_send_all_handler(callback: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
@@ -242,7 +242,7 @@ async def confirm_send_all_handler(callback: types.CallbackQuery):
             first_name = user.first_name
 
             # Notification text
-            notification_text = await get_translation(chat_id, "notifications", "second_notification_text")
+            notification_text = await get_translation(chat_id, "notifications", "second_notification")
             personalized_text = f"{first_name}, {notification_text}"
             keyboard = await get_action_buttons(session, chat_id)
 

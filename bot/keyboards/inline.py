@@ -9,17 +9,17 @@ from .back_to_main_kb import get_back_to_main_menu_button
 async def get_action_buttons(session, user_id):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
-            text=await get_translation(user_id, "buttons",  "get_premium_keys"), callback_data="get_safety_keys")],
+            text=await get_translation(user_id, "buttons",  "get_premium_keys"), callback_data="keys_premium")],
         [InlineKeyboardButton(
-            text=await get_translation(user_id, "buttons", "get_regular_keys"), callback_data="get_keys")],
+            text=await get_translation(user_id, "buttons", "get_regular_keys"), callback_data="keys_regular")],
         [InlineKeyboardButton(
             text=await get_translation(user_id, "buttons", "referral_links"), callback_data="referral_links")],
         [InlineKeyboardButton(
-            text=await get_translation(user_id, "buttons", "settings"), callback_data="settings"),
+            text=await get_translation(user_id, "buttons", "settings"), callback_data="settings_menu"),
          InlineKeyboardButton(
              text=await get_translation(user_id, "buttons", "user_stats"), callback_data="user_stats")],
         [InlineKeyboardButton(
-            text=await get_translation(user_id, "buttons", "info"), callback_data="info")],
+            text=await get_translation(user_id, "buttons", "info"), callback_data="user_info")],
     ])
 
 
@@ -28,7 +28,7 @@ async def get_settings_menu(session, user_id):
     main_menu_back = await get_back_to_main_menu_button(user_id)
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
-            text=await get_translation(user_id, "common", "choose_language"), callback_data="choose_language")],
+            text=await get_translation(user_id, "common", "choose_language"), callback_data="settings_choose_language")],
         main_menu_back.inline_keyboard[0],
     ])
 
@@ -69,8 +69,8 @@ async def get_main_in_admin(session, user_id):
 # Notification menu
 async def notification_menu(session, user_id):
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="📩 Send to yourself", callback_data="send_to_myself"),  # Add translation ‼️
-         InlineKeyboardButton(text="📤 Send to all !", callback_data="send_all")],  # Add translation ‼️
+        [InlineKeyboardButton(text="📩 Send to yourself", callback_data="notifications_send_self"),  # Add translation ‼️
+         InlineKeyboardButton(text="📤 Send to all !", callback_data="notifications_send_all")],  # Add translation ‼️
         [InlineKeyboardButton(text="🔙 Back", callback_data="back_to_admin_main")]  # Add translation ‼️
     ])
 
@@ -78,7 +78,7 @@ async def notification_menu(session, user_id):
 # Confirmation button
 async def confirmation_button_notification(session, user_id):
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🤡 YES !", callback_data="confirm_send"),  # Add translation ‼️
+        [InlineKeyboardButton(text="🤡 YES !", callback_data="notifications_confirm_send"),  # Add translation ‼️
          InlineKeyboardButton(text="🥱 No, not sending...", callback_data="back_to_admin_main")],  # Add translation ‼️
         [InlineKeyboardButton(text="🔙 Back", callback_data="notifications_admin_panel")]  # Add translation ‼️
     ])
