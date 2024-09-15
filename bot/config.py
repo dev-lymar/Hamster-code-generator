@@ -1,10 +1,8 @@
 import os
 from aiogram import Bot, Dispatcher
 from aiogram.client.bot import DefaultBotProperties
-from aiogram.types import BotCommand, BotCommandScopeChat
 from aiogram.fsm.storage.memory import MemoryStorage
 from dotenv import load_dotenv
-from utils import get_translation
 
 load_dotenv()
 
@@ -65,16 +63,3 @@ STATUS_LIMITS = {
 
 # Forwarding message to group§
 GROUP_CHAT_ID = int(os.getenv("GROUP_CHAT_ID", 0))
-
-
-async def set_commands(bot: Bot, user_id: int, language_code: str):
-    start_command_description = await get_translation(user_id, "commands", "start_bot")
-    change_lang_command_description = await get_translation(user_id, "commands", "change_language")
-    admin_command_description = await get_translation(user_id, "commands", "admin_panel")
-
-    commands = [
-        BotCommand(command="/start", description=start_command_description),
-        BotCommand(command="/change_lang", description=change_lang_command_description),
-        BotCommand(command="/admin", description=admin_command_description),
-    ]
-    await bot.set_my_commands(commands, scope=BotCommandScopeChat(chat_id=user_id))
