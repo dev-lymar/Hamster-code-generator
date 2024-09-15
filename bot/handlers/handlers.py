@@ -159,11 +159,6 @@ async def referral_links_callback_handler(callback_query: types.CallbackQuery):
 
 async def execute_change_language_logic(message: types.Message, user_id: int, state: FSMContext):
     async with await get_session() as session:
-        # Ban check
-        user_info = await get_user_status_info(session, user_id)
-        if user_info.is_banned:
-            await handle_banned_user(message)
-            return
 
         # Log user action
         await log_user_action(session, user_id, "/change_lang command used")
@@ -203,12 +198,6 @@ async def set_language(callback_query: types.CallbackQuery, state: FSMContext):
         user_id = (
             callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
         )
-
-        # Ban check
-        user_info = await get_user_status_info(session, user_id)
-        if user_info.is_banned:
-            await handle_banned_user(callback_query.message)
-            return
 
         selected_language = callback_query.data
 
@@ -253,9 +242,6 @@ async def send_keys_callback_handler(callback_query: types.CallbackQuery):
         await callback_query.answer()
 
         user_info = await get_user_status_info(session, user_id)
-        if user_info.is_banned:
-            await handle_banned_user(callback_query.message)
-            return
 
         # Checking the request limit
         if not await check_user_limits(session, user_id, STATUS_LIMITS):
@@ -319,9 +305,6 @@ async def send_safety_keys_callback_handler(callback_query: types.CallbackQuery)
 
         logging.info(f"User {user_id} press prem keys")
         user_info = await get_user_status_info(session, user_id)
-        if user_info.is_banned:
-            await handle_banned_user(callback_query.message)
-            return
 
         if user_info.user_status not in ['premium']:
             not_prem_message = await get_translation(user_id, "messages", "not_premium_access")
@@ -486,9 +469,6 @@ async def send_wait_time_message(callback_query: types.CallbackQuery, user_id: i
         )
 
 
-
-
-
 # Handling banned users
 async def handle_banned_user(message: types.Message):
     async with await get_session() as session:
@@ -516,12 +496,6 @@ async def show_settings_menu(callback_query: types.CallbackQuery):
         user_id = (
             callback_query.from_user.id if callback_query.from_user.id != BOT_ID else callback_query.message.chat.id
         )
-
-        # Ban check
-        user_info = await get_user_status_info(session, user_id)
-        if user_info.is_banned:
-            await handle_banned_user(callback_query.message)
-            return
 
         await log_user_action(session, user_id, "Settings menu opened")
         settings_message = await get_translation(user_id, "buttons", "settings")

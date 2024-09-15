@@ -4,6 +4,7 @@ import os
 from config import bot, dp
 from database.database import init_db, close_db
 from handlers import register_handlers
+from middlewares.ban_check_middleware import BanCheckMiddleware
 
 # Set up logging configuration
 log_directory = os.path.join(os.path.dirname(__file__), 'logs')
@@ -28,6 +29,7 @@ async def main():
     await init_db()
     try:
         logging.info("✅ | Starting the bot and initialising the database")
+        dp.update.middleware(BanCheckMiddleware())
         register_handlers(dp)
         await dp.start_polling(bot)
     finally:
