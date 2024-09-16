@@ -65,5 +65,5 @@ jobs:
           tag: v1.6.0
           name: "Release v1.6.0"
           body: |
-            Bot refactoring | 🏖️
+            Bot refactoring. Improved translations | 🏖️
           token: ${{ secrets.GITHUB_TOKEN }}

@@ -70,17 +70,49 @@ async def get_main_in_admin(session, user_id):
 
 # Notification menu
 async def notification_menu(session, user_id):
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="📩 Send to yourself", callback_data="notifications_send_self"),  # Add translation ‼️
-         InlineKeyboardButton(text="📤 Send to all !", callback_data="notifications_send_all")],  # Add translation ‼️
-        [InlineKeyboardButton(text="🔙 Back", callback_data="back_to_admin_main")]  # Add translation ‼️
+    notifications = {
+        "notification": "Great news!",
+        "second_notification": "New game!",
+        "tapswap": "TapSwap",
+        "catizen": "Catizen",
+        "cityholder": "City Holder",
+        "cexiopower": "CEX.IO Power Tap",
+        "cats": "Cats",
+        "dotcoin": "DotCoin",
+        "muskempire": "Musk Empire",
+        "hrum": "HRUM",
+        "frogtrader": "Frog Trader",
+        "notpixel": "Not Pixel",
+        "major": "Major",
+        "blum": "Blum"
+    }
+
+    inline_keyboard = []
+
+    # Generate buttons for each notification
+    for key, name in notifications.items():
+        inline_keyboard.append([
+            InlineKeyboardButton(
+                text=f"📩 {name} себе",
+                callback_data=f"send_self_{key}"
+            ),
+            InlineKeyboardButton(
+                text=f"📤 {name} всем",
+                callback_data=f"send_all_{key}"
+            )
+        ])
+
+    inline_keyboard.append([
+        InlineKeyboardButton(text="🔙 Назад", callback_data="back_to_admin_main")
     ])
+
+    return InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
 
 
 # Confirmation button
-async def confirmation_button_notification(session, user_id):
+async def confirmation_button_notification(session, user_id, notif_key):
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🤡 YES !", callback_data="notifications_confirm_send"),  # Add translation ‼️
+        [InlineKeyboardButton(text="🤡 YES !", callback_data=f"confirm_send_all_{notif_key}"),  # Add translation ‼️
          InlineKeyboardButton(text="🥱 No, not sending...", callback_data="back_to_admin_main")],  # Add translation ‼️
         [InlineKeyboardButton(text="🔙 Back", callback_data="notifications_admin_panel")]  # Add translation ‼️
     ])

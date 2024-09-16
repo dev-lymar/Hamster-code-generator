@@ -149,27 +149,10 @@ async def notification_menu_handler(callback: types.CallbackQuery):
         )
 
 
-@router.callback_query(F.data == "notifications_send_all")
-async def confirm_send_all_notifications_handler(callback: types.CallbackQuery):
-    async with await get_session() as session:
-        user_id = (
-            callback.from_user.id if callback.from_user.id != BOT_ID else callback.message.chat.id
-        )
+@router.callback_query(F.data.startswith('send_self_'))
+async def send_notification_to_self_handler(callback: types.CallbackQuery):
+    notif_key = callback.data.split('send_self_')[-1]
 
-        await log_user_action(session, user_id, "Confirmation send notification")
-
-        keyboard = await confirmation_button_notification(session, user_id)
-
-        await bot.edit_message_text(
-            chat_id=callback.message.chat.id,
-            message_id=callback.message.message_id,
-            text="‼️ <i>Send a notification to <b>ALL</b> users ?</i> ‼️",  # Add translation ‼️
-            reply_markup=keyboard
-        )
-
-
-@router.callback_query(F.data == "notifications_send_self")
-async def send_notification_to_myself_handler(callback: types.CallbackQuery):
     async with await get_session() as session:
         user_id = (
             callback.from_user.id if callback.from_user.id != BOT_ID else callback.message.chat.id
@@ -181,8 +164,8 @@ async def send_notification_to_myself_handler(callback: types.CallbackQuery):
 
         await log_user_action(session, user_id, "Sent ad to themselves")
 
-        notification_text = await get_translation(user_id, "notifications", "second_notification")
-        photo = await load_image("notification", specific_image="notificate-Bouncemasters.png")
+        notification_text = await get_translation(user_id, "notifications", notif_key)
+        photo = await load_image("notification", specific_image=f"{notif_key}.png")
         keyboard = await get_action_buttons(session, user_id)
 
         if photo:
@@ -216,8 +199,31 @@ async def send_notification_to_myself_handler(callback: types.CallbackQuery):
         )
 
 
-@router.callback_query(F.data == "notifications_confirm_send")
+@router.callback_query(F.data.startswith('send_all_'))
+async def confirm_send_all_notifications_handler(callback: types.CallbackQuery):
+    notif_key = callback.data.split('send_all_')[-1]
+
+    async with await get_session() as session:
+        user_id = (
+            callback.from_user.id if callback.from_user.id != BOT_ID else callback.message.chat.id
+        )
+
+        await log_user_action(session, user_id, "Confirmation send notification")
+
+        keyboard = await confirmation_button_notification(session, user_id, notif_key)
+
+        await bot.edit_message_text(
+            chat_id=callback.message.chat.id,
+            message_id=callback.message.message_id,
+            text="‼️ <i>Send a notification to <b>ALL</b> users ?</i> ‼️",  # Add translation ‼️
+            reply_markup=keyboard
+        )
+
+
+@router.callback_query(F.data.startswith('confirm_send_all_'))
 async def confirm_send_all_handler(callback: types.CallbackQuery):
+    notif_key = callback.data.split('confirm_send_all_')[-1]
+
     async with await get_session() as session:
         user_id = (
             callback.from_user.id if callback.from_user.id != BOT_ID else callback.message.chat.id
@@ -232,14 +238,14 @@ async def confirm_send_all_handler(callback: types.CallbackQuery):
         # Getting a list of users for mailing
         users = await get_subscribed_users(session)
 
-        photo = await load_image("notification", specific_image="notificate-Bouncemasters.png")
+        photo = await load_image("notification", specific_image=f"{notif_key}.png")
 
         for user in users:
             chat_id = user.chat_id
             first_name = user.first_name
 
             # Notification text
-            notification_text = await get_translation(chat_id, "notifications", "second_notification")
+            notification_text = await get_translation(chat_id, "notifications", notif_key)
             personalized_text = f"{first_name}, {notification_text}"
             keyboard = await get_action_buttons(session, chat_id)
 
