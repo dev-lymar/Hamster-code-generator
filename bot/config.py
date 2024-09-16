@@ -24,6 +24,7 @@ REFERRAL_LINKS = {
     '🏠 CITY Holder': 'https://t.me/cityholder/game?startapp=452792586',
     '🤖 TapSwap': 'https://t.me/tapswap_mirror_2_bot?start=r_452792586',
     '⚫️ DotCoin': 'https://t.me/dotcoin_bot?start=r_452792586',
+    '🖲️ CEX.IO Power Tap': 'https://t.me/cexio_tap_bot?start=1716399236183636',
     '⭐ Major': 'https://t.me/major/start?startapp=452792586',
     '🪙 Blum': 'https://t.me/blum/app?startapp=ref_8U6nYohQav',
     '🐸 Frog Trader': 'https://t.me/xkucoinbot/kucoinminiapp?startapp'
