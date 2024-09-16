@@ -439,7 +439,7 @@ async def get_user_stats(session: AsyncSession, user_id: int, games: list) -> di
     if not user_data:
         raise KeyError(f"User with ID {user_id} not found or missing data.")
     keys_today = user_data[2] * (len(games) * 4 + 4)
-    premium_keys_today = user_data[3] * (len(games) * 4 + 4)
+    premium_keys_today = (user_data[3] or 0) * (len(games) * 4 + 4)
     return {
         "registration_date": user_data[0],
         "user_status": user_data[1],

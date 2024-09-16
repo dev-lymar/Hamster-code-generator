@@ -1,8 +1,13 @@
-from aiogram import Dispatcher
-from .handlers import handlers_router
-from .payment import payment_router
+from .admin_handlers import register_admin_handlers
+from .handlers import register_all_handlers
+from .message_handler import register_message_handler
+from .payment_handlers import register_payment_handlers
+from .commands import register_commands_handler
 
 
-def setup_routers(dp: Dispatcher):
-    dp.include_router(payment_router)  # register handlers from payment.py
-    dp.include_router(handlers_router)   # register handlers from handlers.py
+def register_handlers(dp):
+    register_commands_handler(dp)
+    register_payment_handlers(dp)
+    register_admin_handlers(dp)
+    register_all_handlers(dp)
+    register_message_handler(dp)
