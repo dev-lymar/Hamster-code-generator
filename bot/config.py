@@ -19,6 +19,7 @@ SUPPORTED_LANGUAGES = ['en', 'ru', 'uk', 'sk', 'es', 'fr', 'tr', 'ar', 'de', 'fa
 REFERRAL_LINKS = {
     'Cats 🐈‍⬛': 'https://t.me/catsgang_bot/join?startapp=Lv39AXNhcBvwK6ZWcoGpD',
     '🅧 X Empire': 't.me/empirebot/game?startapp=hero452792586',
+    'Binance Moonbix 🟠': 'https://t.me/Binance_Moonbix_bot/start?startapp=ref_452792586&startApp=ref_452792586',
     '🥠 Hrum': 't.me/hrummebot/game?startapp=ref452792586',
     '🏠 CITY Holder': 'https://t.me/cityholder/game?startapp=452792586',
     '🤖 TapSwap': 'https://t.me/tapswap_mirror_2_bot?start=r_452792586',

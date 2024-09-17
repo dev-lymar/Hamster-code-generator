@@ -84,7 +84,8 @@ async def notification_menu(session, user_id):
         "frogtrader": "Frog Trader",
         "notpixel": "Not Pixel",
         "major": "Major",
-        "blum": "Blum"
+        "blum": "Blum",
+        "binancemoon": "Binance Moonbix"
     }
 
     inline_keyboard = []

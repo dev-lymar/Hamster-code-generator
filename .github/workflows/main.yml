@@ -62,8 +62,8 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.6.0
-          name: "Release v1.6.0"
+          tag: v1.6.1
+          name: "Release v1.6.1"
           body: |
-            Bot refactoring. Improved translations | 🏖️
+            Added new ref mini-game | 🏖️
           token: ${{ secrets.GITHUB_TOKEN }}
