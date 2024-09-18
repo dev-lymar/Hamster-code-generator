@@ -1,5 +1,5 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from config import REFERRAL_LINKS
+from common.referals import REFERRAL_LINKS
 from .back_to_main_kb import get_back_to_main_menu_button
 
 

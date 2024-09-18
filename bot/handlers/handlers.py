@@ -2,7 +2,8 @@ import asyncio
 import logging
 from aiogram import types, F, Router
 from aiogram.fsm.context import FSMContext
-from config import bot, BOT_ID, GAMES, STATUS_LIMITS, SUPPORTED_LANGUAGES
+from config import bot, BOT_ID
+from common.static_data import GAMES, STATUS_LIMITS, SUPPORTED_LANGUAGES
 from database.database import (
     get_session, get_or_create_user, update_user_language, log_user_action,
     get_user_language, get_oldest_keys, update_keys_generated,

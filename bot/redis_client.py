@@ -1,13 +1,13 @@
-import redis
+import os
+from dotenv import load_dotenv
 
+import redis.asyncio as redis
+
+load_dotenv()
+
+# Configuring the Redis client
 redis_client = redis.StrictRedis(
-    host='localhost',
-    port=6379,
+    host=os.getenv('REDIS_HOST', 'localhost'),
+    port=os.getenv('REDIS_PORT', 6379),
     decode_responses=True
 )
-
-try:
-    redis_client.ping()
-    print("Successfully connected to Redis!")
-except redis.ConnectionError:
-    print("Could not connect to Redis.")

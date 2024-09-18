@@ -112,7 +112,7 @@ game_configs = [
         'name': 'Pin Out Master',
         'app_token': 'd2378baf-d617-417a-9d99-d685824335f0',
         'promo_id': 'd2378baf-d617-417a-9d99-d685824335f0',
-        'base_delay': 30,
+        'base_delay': 20,
         'attempts': 35,
         'copies': 90,
     },
@@ -121,7 +121,7 @@ game_configs = [
         'app_token': '4bdc17da-2601-449b-948e-f8c7bd376553',
         'promo_id': '4bdc17da-2601-449b-948e-f8c7bd376553',
         'base_delay': 30,
-        'attempts': 35,
+        'attempts': 40,
         'copies': 90,
     }
 ]
