@@ -6,7 +6,7 @@ from aiogram.types import InlineKeyboardMarkup, Message
 from config import bot, BOT_ID, GAMES, GROUP_CHAT_ID
 from database.database import (get_session, log_user_action, get_admin_chat_ids, get_keys_count_for_games,
                                get_users_list_admin_panel, get_user_details, get_subscribed_users)
-from keyboards.inline import (get_action_buttons, get_admin_panel_keyboard, get_main_in_admin, get_detail_info_in_admin,
+from keyboards.inline import (get_admin_panel_keyboard, get_main_in_admin, get_detail_info_in_admin,
                               notification_menu, confirmation_button_notification)
 from keyboards.referral_links_kb import referral_links_keyboard
 from utils import get_translation
