@@ -8,6 +8,7 @@ from database.database import (get_session, log_user_action, get_admin_chat_ids,
                                get_users_list_admin_panel, get_user_details, get_subscribed_users)
 from keyboards.inline import (get_action_buttons, get_admin_panel_keyboard, get_main_in_admin, get_detail_info_in_admin,
                               notification_menu, confirmation_button_notification)
+from keyboards.referral_links_kb import referral_links_keyboard
 from utils import get_translation
 from states.form import Form, FormSendToUser
 from utils import load_image
@@ -166,7 +167,7 @@ async def send_notification_to_self_handler(callback: types.CallbackQuery):
 
         notification_text = await get_translation(user_id, "notifications", notif_key)
         photo = await load_image("notification", specific_image=f"{notif_key}.png")
-        keyboard = await get_action_buttons(session, user_id)
+        keyboard = await referral_links_keyboard(user_id)
 
         if photo:
             try:
@@ -247,7 +248,7 @@ async def confirm_send_all_handler(callback: types.CallbackQuery):
             # Notification text
             notification_text = await get_translation(chat_id, "notifications", notif_key)
             personalized_text = f"{first_name}, {notification_text}"
-            keyboard = await get_action_buttons(session, chat_id)
+            keyboard = await referral_links_keyboard(chat_id)
 
             if photo:
                 try:

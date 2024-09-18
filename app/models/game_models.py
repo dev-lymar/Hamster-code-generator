@@ -122,3 +122,11 @@ class HideBall(GameTableBase):
         Index('ix_hide_ball_promo_code', 'promo_code'),
         Index('ix_hide_ball_created_at', 'created_at')
     )
+
+
+class PinOutMaster(GameTableBase):
+    __tablename__ = 'pin_out_master'
+    __table_args__ = (
+        Index('ix_pin_out_master_promo_code', 'promo_code'),
+        Index('ix_pin_out_master_created_at', 'created_at')
+    )

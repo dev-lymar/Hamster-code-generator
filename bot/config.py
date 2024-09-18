@@ -46,6 +46,7 @@ ACHIEVEMENTS = [
 
 
 GAMES = [
+    'Pin Out Master',
     'Hide Ball',
     'Bouncemasters',
     'Merge Away',
@@ -57,7 +58,7 @@ GAMES = [
     'Polysphere',
     'Twerk Race 3D',
     'Zoopolis',
-    'Tile Trio',
+    'Tile Trio'
 ]
 
 STATUS_LIMITS = {
