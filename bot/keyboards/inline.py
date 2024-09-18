@@ -72,7 +72,7 @@ async def get_main_in_admin(session, user_id):
 async def notification_menu(session, user_id):
     notifications = {
         "notification": "Great news!",
-        "second_notification": "New game!",
+        "newgame": "New game!",
         "tapswap": "TapSwap",
         "catizen": "Catizen",
         "cityholder": "City Holder",
@@ -84,7 +84,8 @@ async def notification_menu(session, user_id):
         "frogtrader": "Frog Trader",
         "notpixel": "Not Pixel",
         "major": "Major",
-        "blum": "Blum"
+        "blum": "Blum",
+        "binancemoon": "Binance Moonbix"
     }
 
     inline_keyboard = []

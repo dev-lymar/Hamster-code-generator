@@ -1,7 +1,6 @@
 import os
 from sqlalchemy import update, text, func
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
 from dotenv import load_dotenv
@@ -24,7 +23,7 @@ engine = create_async_engine(
 )
 
 # Creating a session factory
-AsyncSessionLocal = sessionmaker(
+AsyncSessionLocal = async_sessionmaker(
     bind=engine,
     class_=AsyncSession,
     expire_on_commit=False

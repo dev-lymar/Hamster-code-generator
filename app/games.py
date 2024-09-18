@@ -106,6 +106,14 @@ game_configs = [
         'promo_id': '4bf4966c-4d22-439b-8ff2-dc5ebca1a600',
         'base_delay': 40,
         'attempts': 35,
+        'copies': 0,
+    },
+    {
+        'name': 'Pin Out Master',
+        'app_token': 'd2378baf-d617-417a-9d99-d685824335f0',
+        'promo_id': 'd2378baf-d617-417a-9d99-d685824335f0',
+        'base_delay': 30,
+        'attempts': 35,
         'copies': 180,
     }
 ]
