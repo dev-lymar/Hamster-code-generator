@@ -1,10 +1,11 @@
 import asyncio
 import logging
+
 from config import bot, setup_dispatcher
-from database.database import init_db, close_db
-from redis_client import create_redis_client, close_redis_client
+from database.database import close_db, init_db
 from handlers import register_handlers
 from middlewares.ban_check_middleware import BanCheckMiddleware
+from redis_client import close_redis_client, create_redis_client
 
 
 async def main():

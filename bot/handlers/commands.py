@@ -1,15 +1,12 @@
-from aiogram.types import Message
-
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-
+from aiogram.types import Message
+from config import BOT_ID, bot
 from database.database import get_session
 from filters.admin_filter import AdminFilter
-
-from config import BOT_ID, bot
 from handlers.admin_handlers import handle_admin_command_handler
-from handlers.handlers import welcome_command_handler, change_language_logic_handler, set_user_commands
+from handlers.handlers import change_language_logic_handler, set_user_commands, welcome_command_handler
 
 router = Router()
 

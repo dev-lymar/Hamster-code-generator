@@ -1,14 +1,15 @@
 import logging
 import os
-from sqlalchemy import update, text, func
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from sqlalchemy.future import select
-from sqlalchemy.exc import IntegrityError
-from dotenv import load_dotenv
 from datetime import datetime, timezone
 
-from .models import Base, User, UserLog
+from dotenv import load_dotenv
 from redis_client import create_redis_client
+from sqlalchemy import func, text, update
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.future import select
+
+from .models import Base, User, UserLog
 
 load_dotenv()
 redis_client = create_redis_client()

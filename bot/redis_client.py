@@ -1,7 +1,7 @@
+import logging
 import os
 
 import redis.asyncio as redis
-import logging
 from dotenv import load_dotenv
 
 load_dotenv()

@@ -1,18 +1,33 @@
 import asyncio
 import json
-import aiohttp
-import os
-import time
-import random
-import uuid
 import logging.handlers
-import coloredlogs
+import os
+import random
+import time
+import uuid
 from urllib.parse import urlparse
+
+import aiohttp
+import coloredlogs
 from database import get_session
-from models.game_models import (ChainCube2048, TrainMiner, MergeAway,
-                                TwerkRace3D, Polysphere, MowAndTrim, CafeDash, Zoopolis,
-                                GangsWars, FluffCrusade, TileTrio, StoneAge, Bouncemasters, HideBall, PinOutMaster,
-                                CountMasters)
+from models.game_models import (
+    Bouncemasters,
+    CafeDash,
+    ChainCube2048,
+    CountMasters,
+    FluffCrusade,
+    GangsWars,
+    HideBall,
+    MergeAway,
+    MowAndTrim,
+    PinOutMaster,
+    Polysphere,
+    StoneAge,
+    TileTrio,
+    TrainMiner,
+    TwerkRace3D,
+    Zoopolis,
+)
 
 # Configuring logging
 log_directory = "logs"

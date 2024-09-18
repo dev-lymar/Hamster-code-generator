@@ -1,7 +1,7 @@
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-
 from utils import get_translation
+
 from .back_to_main_kb import get_back_to_main_menu_button
 
 

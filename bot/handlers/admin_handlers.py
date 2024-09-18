@@ -1,18 +1,30 @@
 import asyncio
 import logging
-from aiogram import types, F, Router
+
+from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, Message
-from config import bot, BOT_ID, GROUP_CHAT_ID
 from common.static_data import GAMES
-from database.database import (get_session, log_user_action, get_admin_chat_ids, get_keys_count_for_games,
-                               get_users_list_admin_panel, get_user_details, get_subscribed_users)
-from keyboards.inline import (get_admin_panel_keyboard, get_main_in_admin, get_detail_info_in_admin,
-                              notification_menu, confirmation_button_notification)
+from config import BOT_ID, GROUP_CHAT_ID, bot
+from database.database import (
+    get_admin_chat_ids,
+    get_keys_count_for_games,
+    get_session,
+    get_subscribed_users,
+    get_user_details,
+    get_users_list_admin_panel,
+    log_user_action,
+)
+from keyboards.inline import (
+    confirmation_button_notification,
+    get_admin_panel_keyboard,
+    get_detail_info_in_admin,
+    get_main_in_admin,
+    notification_menu,
+)
 from keyboards.referral_links_kb import referral_links_keyboard
-from utils import get_translation
 from states.form import Form, FormSendToUser
-from utils import load_image
+from utils import get_translation, load_image
 
 router = Router()
 

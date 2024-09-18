@@ -1,7 +1,8 @@
 import asyncio
+
+from database import init_db
 from game_promo_manager import gen
 from games import games
-from database import init_db
 
 
 async def run_all_games():
