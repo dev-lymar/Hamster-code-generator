@@ -288,7 +288,7 @@ async def keys_handler(callback: types.CallbackQuery):
                 if keys:
                     total_keys_in_request += len(keys)
                     response_text += f"<b>{game}</b>:\n"
-                    keys_to_delete = [key[0] for key in keys]
+                    keys_to_delete = [key for key in keys]
                     response_text += "\n".join([f"<code>{key}</code>" for key in keys_to_delete]) + "\n\n"
                     await delete_keys(session, game, keys_to_delete)
                 else:

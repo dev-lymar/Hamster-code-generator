@@ -25,3 +25,10 @@ def create_redis_client():
     except Exception as e:
         logging.error(f"❌ Failed to connect to Redis: {e}")
         raise
+
+
+async def close_redis_client(redis_client):
+    """Closing a Redis client"""
+    if redis_client:
+        await redis_client.close()
+        logging.info("📁 Redis connection closed")

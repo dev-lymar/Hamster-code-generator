@@ -15,8 +15,7 @@ BOT_ID = int(API_TOKEN.split(':')[0])
 bot = Bot(token=API_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 
 
-async def setup_dispatcher():
-    redis_client = await create_redis_client()
+async def setup_dispatcher(redis_client):
     storage = RedisStorage(redis=redis_client, state_ttl=600)
     dp = Dispatcher(storage=storage)
     return dp

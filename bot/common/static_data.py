@@ -27,7 +27,10 @@ GAMES = [
 ]
 
 STATUS_LIMITS = {
-    'free': {'daily_limit': 2, 'interval_minutes': 10},
+    'free': {
+        'daily_limit': 2, 'interval_minutes': 60,
+        'safety_daily_limit': 1, 'safety_interval_minutes': 240
+    },
     'friend': {'daily_limit': 5, 'interval_minutes': 10},
     'premium': {
         'daily_limit': 4, 'interval_minutes': 10,
