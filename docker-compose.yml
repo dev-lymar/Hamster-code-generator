@@ -11,6 +11,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
 
   backup:
     image: postgres:16.3-alpine
@@ -25,6 +27,19 @@ services:
       - postgres_backups:/backups
     entrypoint: >
       sh -c 'mkdir -p /backups && echo "0 0 * * * pg_dump -h postgres -U \$POSTGRES_USER \$POSTGRES_DB > /backups/db_backup_\$(date +\%Y-\%m-\%d_%H-%M-%S).sql 2>> /backups/backup.log" > /etc/crontabs/root && crond -f'
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7.4.0-alpine
+    hostname: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - app-network
 
 volumes:
   postgres_data:
@@ -34,3 +49,7 @@ volumes:
       type: none
       device: /home/ubuntu/Hamster-code-generator/backups
       o: bind
+
+networks:
+  app-network:
+    driver: bridge
