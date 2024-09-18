@@ -62,8 +62,8 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.6.2
-          name: "Release v1.6.2"
+          tag: v1.6.3
+          name: "Release v1.6.3"
           body: |
-            Added new game 'Pin Out Master' | 🏖️
+            Added new game 'Count Masters' | 🏖️
           token: ${{ secrets.GITHUB_TOKEN }}
