@@ -130,3 +130,11 @@ class PinOutMaster(GameTableBase):
         Index('ix_pin_out_master_promo_code', 'promo_code'),
         Index('ix_pin_out_master_created_at', 'created_at')
     )
+
+
+class CountMasters(GameTableBase):
+    __tablename__ = 'count_masters'
+    __table_args__ = (
+        Index('ix_count_masters_promo_code', 'promo_code'),
+        Index('ix_count_masters_created_at', 'created_at')
+    )

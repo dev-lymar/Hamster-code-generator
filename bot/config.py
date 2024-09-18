@@ -47,6 +47,7 @@ ACHIEVEMENTS = [
 
 GAMES = [
     'Pin Out Master',
+    'Count Masters',
     'Hide Ball',
     'Bouncemasters',
     'Merge Away',
