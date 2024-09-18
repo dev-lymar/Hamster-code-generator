@@ -4,7 +4,6 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.bot import DefaultBotProperties
 from aiogram.fsm.storage.redis import RedisStorage
 from dotenv import load_dotenv
-from redis_client import create_redis_client
 
 load_dotenv()
 

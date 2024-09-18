@@ -62,8 +62,8 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.6.3
-          name: "Release v1.6.3"
+          tag: v1.7.0
+          name: "Release v1.7.0"
           body: |
-            Added new game 'Count Masters' | 🏖️
+            Added Redis(state, get keys) | 🏖️
           token: ${{ secrets.GITHUB_TOKEN }}
