@@ -147,3 +147,19 @@ class InfectedFrontier(GameTableBase):
         Index('ix_infected_frontier_promo_code', 'promo_code'),
         Index('ix_infected_frontier_created_at', 'created_at')
     )
+
+
+class AmongWaterr(GameTableBase):
+    __tablename__ = 'among_waterr'
+    __table_args__ = (
+        Index('ix_among_waterr_promo_code', 'promo_code'),
+        Index('ix_among_waterr_created_at', 'created_at')
+    )
+
+
+class FactoryWorld(GameTableBase):
+    __tablename__ = 'factory_world'
+    __table_args__ = (
+        Index('ix_factory_world_promo_code', 'promo_code'),
+        Index('ix_factory_world_created_at', 'created_at')
+    )

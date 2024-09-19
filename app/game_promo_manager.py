@@ -11,10 +11,12 @@ import aiohttp
 import coloredlogs
 from database import get_session
 from models.game_models import (
+    AmongWaterr,
     Bouncemasters,
     CafeDash,
     ChainCube2048,
     CountMasters,
+    FactoryWorld,
     FluffCrusade,
     GangsWars,
     HideBall,
@@ -240,6 +242,8 @@ class GamePromo:
                 'Pin Out Master': PinOutMaster,
                 'Count Masters': CountMasters,
                 'Infected Frontier': InfectedFrontier,
+                'Among Waterr': AmongWaterr,
+                'Factory World': FactoryWorld,
             }
             GameTable = table_mapping.get(game_name)
             if GameTable:
