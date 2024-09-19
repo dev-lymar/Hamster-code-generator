@@ -10,6 +10,7 @@ ACHIEVEMENTS = [
 
 
 GAMES = [
+    'Infected Frontier',
     'Pin Out Master',
     'Count Masters',
     'Hide Ball',
@@ -23,7 +24,7 @@ GAMES = [
     'Polysphere',
     'Twerk Race 3D',
     'Zoopolis',
-    'Tile Trio'
+    'Tile Trio',
 ]
 
 STATUS_LIMITS = {

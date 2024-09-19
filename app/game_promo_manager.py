@@ -18,6 +18,7 @@ from models.game_models import (
     FluffCrusade,
     GangsWars,
     HideBall,
+    InfectedFrontier,
     MergeAway,
     MowAndTrim,
     PinOutMaster,
@@ -238,6 +239,7 @@ class GamePromo:
                 'Hide Ball': HideBall,
                 'Pin Out Master': PinOutMaster,
                 'Count Masters': CountMasters,
+                'Infected Frontier': InfectedFrontier,
             }
             GameTable = table_mapping.get(game_name)
             if GameTable:

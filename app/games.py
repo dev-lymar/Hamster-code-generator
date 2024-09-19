@@ -42,7 +42,7 @@ game_configs = [
         'promo_id': '61308365-9d16-4040-8bb0-2f4a4c69074c',
         'base_delay': 20,
         'attempts': 45,
-        'copies': 0,
+        'copies': 20,
     },
     {
         'name': 'Polysphere',
@@ -114,7 +114,7 @@ game_configs = [
         'promo_id': 'd2378baf-d617-417a-9d99-d685824335f0',
         'base_delay': 20,
         'attempts': 35,
-        'copies': 90,
+        'copies': 0,
     },
     {
         'name': 'Count Masters',
@@ -122,7 +122,15 @@ game_configs = [
         'promo_id': '4bdc17da-2601-449b-948e-f8c7bd376553',
         'base_delay': 30,
         'attempts': 40,
-        'copies': 90,
+        'copies': 60,
+    },
+    {
+        'name': 'Infected Frontier',
+        'app_token': 'eb518c4b-e448-4065-9d33-06f3039f0fcb',
+        'promo_id': 'eb518c4b-e448-4065-9d33-06f3039f0fcb',
+        'base_delay': 20,
+        'attempts': 40,
+        'copies': 100,
     }
 ]
 

@@ -139,3 +139,11 @@ class CountMasters(GameTableBase):
         Index('ix_count_masters_promo_code', 'promo_code'),
         Index('ix_count_masters_created_at', 'created_at')
     )
+
+
+class InfectedFrontier(GameTableBase):
+    __tablename__ = 'infected_frontier'
+    __table_args__ = (
+        Index('ix_infected_frontier_promo_code', 'promo_code'),
+        Index('ix_infected_frontier_created_at', 'created_at')
+    )

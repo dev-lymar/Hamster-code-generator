@@ -46,7 +46,7 @@ jobs:
             ps aux | grep "python3 main.py" | grep -v grep | awk '{print $2}' | xargs -r kill -9
 
             docker-compose stop
-            docker-compose up -d postgres backup
+            docker-compose up -d postgres backup redis
             sleep 10
             
             alembic upgrade head || { echo "Alembic migration failed"; exit 1; }
@@ -67,5 +67,5 @@ jobs:
           tag: v1.7.0
           name: "Release v1.7.0"
           body: |
-            Added Redis(state, get keys) | 🏖️
+            Added Redis, Ruff, new game 'Infected Frontier' | 🏖️
           token: ${{ secrets.GITHUB_TOKEN }}
