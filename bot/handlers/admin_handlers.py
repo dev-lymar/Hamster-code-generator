@@ -193,7 +193,7 @@ async def send_notification_to_self_handler(callback: types.CallbackQuery):
             except Exception as e:
                 logging.error(f"Failed to send photo notification: {e}")
                 error_text = f"Failed to send photo notification: {e}"
-                bot.send_message(
+                await bot.send_message(
                     chat_id=callback.message.chat.id,
                     text=error_text
                 )
