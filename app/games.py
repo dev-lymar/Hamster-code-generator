@@ -121,8 +121,8 @@ game_configs = [
         'app_token': '4bdc17da-2601-449b-948e-f8c7bd376553',
         'promo_id': '4bdc17da-2601-449b-948e-f8c7bd376553',
         'base_delay': 30,
-        'attempts': 40,
-        'copies': 60,
+        'attempts': 45,
+        'copies': 20,
     },
     {
         'name': 'Infected Frontier',
@@ -130,7 +130,23 @@ game_configs = [
         'promo_id': 'eb518c4b-e448-4065-9d33-06f3039f0fcb',
         'base_delay': 20,
         'attempts': 40,
-        'copies': 100,
+        'copies': 10,
+    },
+    {
+        'name': 'Among Waterr',
+        'app_token': 'daab8f83-8ea2-4ad0-8dd5-d33363129640',
+        'promo_id': 'daab8f83-8ea2-4ad0-8dd5-d33363129640',
+        'base_delay': 20,
+        'attempts': 45,
+        'copies': 62,
+    },
+    {
+        'name': 'Factory World',
+        'app_token': 'd02fc404-8985-4305-87d8-32bd4e66bb16',
+        'promo_id': 'd02fc404-8985-4305-87d8-32bd4e66bb16',
+        'base_delay': 20,
+        'attempts': 45,
+        'copies': 63,
     }
 ]
 

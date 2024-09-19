@@ -10,6 +10,8 @@ ACHIEVEMENTS = [
 
 
 GAMES = [
+    'Among Waterr',
+    'Factory World',
     'Infected Frontier',
     'Pin Out Master',
     'Count Masters',

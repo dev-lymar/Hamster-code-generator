@@ -64,8 +64,8 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.7.0
-          name: "Release v1.7.0"
+          tag: v1.7.1
+          name: "Release v1.7.1"
           body: |
-            Added Redis, Ruff, new game 'Infected Frontier' | 🏖️
+            Added 2 new games | 🏖️
           token: ${{ secrets.GITHUB_TOKEN }}
