@@ -1,6 +1,6 @@
 from aiogram import BaseMiddleware, types
 from aiogram.types import Update
-from database.database import get_user_status_info, get_session
+from database.database import get_session, get_user_status_info
 from handlers.handlers import banned_user_handler
 
 

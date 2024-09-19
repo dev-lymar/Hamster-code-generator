@@ -1,16 +1,13 @@
 import asyncio
 import logging
 
-from aiogram import types, F, Router
-from aiogram.fsm.context import FSMContext
+from aiogram import F, Router, types
 from aiogram.exceptions import TelegramBadRequest
-
+from aiogram.fsm.context import FSMContext
 from config import BOT_ID
-from handlers.handlers import send_menu_handler, info_handler
+from handlers.handlers import info_handler, send_menu_handler
 from keyboards.back_to_main_kb import get_back_to_main_menu_button
-
-from keyboards.donate_kb import get_payment_keyboard, get_cancel_donation_keyboard
-
+from keyboards.donate_kb import get_cancel_donation_keyboard, get_payment_keyboard
 from states.form import DonationState
 from utils import get_translation
 

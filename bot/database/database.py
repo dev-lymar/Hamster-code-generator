@@ -1,14 +1,18 @@
+import logging
 import os
-from sqlalchemy import update, text, func
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from sqlalchemy.future import select
-from sqlalchemy.exc import IntegrityError
-from dotenv import load_dotenv
 from datetime import datetime, timezone
+
+from dotenv import load_dotenv
+from redis_client import create_redis_client
+from sqlalchemy import func, text, update
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.future import select
 
 from .models import Base, User, UserLog
 
 load_dotenv()
+redis_client = create_redis_client()
 
 # Database connection
 DATABASE_URL = (f"postgresql+asyncpg://{os.getenv('DATABASE_USER')}:{os.getenv('DATABASE_PASSWORD')}@"
@@ -45,6 +49,21 @@ async def get_session() -> AsyncSession:
 # Closing connections
 async def close_db():
     await engine.dispose()
+
+
+async def load_keys_to_cache(session: AsyncSession, game_name: str, limit: int = 2000):
+    """Loading keys from the database into the Redis cache."""
+    # Load missing keys from the database
+    table_name = game_name.replace(" ", "_").lower()
+    query = text(f"SELECT promo_code FROM {table_name} ORDER BY created_at ASC LIMIT :limit")
+    result = await session.execute(query, {'limit': limit})
+    keys = [row[0] for row in result.fetchall()]
+
+    if keys:
+        await redis_client.rpush(f"keys:{game_name}", *keys)
+        logging.info(f"✅ {len(keys)} new keys loaded into cache for game: {game_name}")
+    else:
+        logging.info(f"❌ No new keys found in the database for game: {game_name}")
 
 
 # Adds new user to the database
@@ -127,14 +146,31 @@ async def log_user_action(session: AsyncSession, user_id: int, action: str):
     await session.commit()
 
 
-# Getting oldest keys for the game
+# Getting the oldest keys for the game
 async def get_oldest_keys(session: AsyncSession, game_name: str, limit: int = 4):
-    table_name = game_name.replace(" ", "_").lower()
-    if table_name == "fluff_crusade":
+    """Retrieving the oldest keys using Redis cache, reloading from the database if necessary."""
+    if game_name.lower() == "fluff crusade":
         limit = 8
-    query = text(f"SELECT promo_code FROM {table_name} ORDER BY created_at ASC LIMIT :limit")
-    result = await session.execute(query, {'limit': limit})
-    return result.fetchall()
+
+    # Get the current number of keys in the cache
+    cached_keys_count = await redis_client.llen(f"keys:{game_name}")
+
+    # Reload if the number of cached keys falls below the threshold
+    if cached_keys_count <= 0:
+        logging.info(f"Not enough keys ({cached_keys_count}). Reloading new keys for {game_name}.")
+        await load_keys_to_cache(session, game_name, 2000)
+
+    # Fetch the oldest keys again after reloading
+    cached_keys = await redis_client.lrange(f"keys:{game_name}", 0, limit - 1)
+
+    if cached_keys:
+        # Remove issued keys from the cache
+        await redis_client.ltrim(f"keys:{game_name}", len(cached_keys), -1)
+        logging.info(f"Issued {len(cached_keys)}/{cached_keys_count} keys from cache for game: {game_name}")
+        return cached_keys
+    else:
+        logging.error(f"Failed to retrieve keys even after reloading cache for game: {game_name}")
+        return []
 
 
 # Getting safety keys with new tables for the game
@@ -149,10 +185,18 @@ async def get_safety_keys(session: AsyncSession, game_name: str, limit: int = 4)
 
 # Deleting used keys
 async def delete_keys(session: AsyncSession, game_name: str, keys: list):
+    """Deleting keys from the database and cache"""
+
+    # Deleting keys from the database
     table_name = game_name.replace(" ", "_").lower()
     query = text(f"DELETE FROM {table_name} WHERE promo_code = ANY(:keys)")
     await session.execute(query, {'keys': keys})
     await session.commit()
+
+    # Deleting keys from the cache
+    for key in keys:
+        await redis_client.lrem(f"keys:{game_name}", 0, key)
+    logging.info(f"Deleted {len(keys)} keys from both cache and database for game: {game_name}")
 
 
 # Deleting used safety keys

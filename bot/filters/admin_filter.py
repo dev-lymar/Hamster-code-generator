@@ -1,8 +1,9 @@
+import asyncio
+
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
-from database.database import get_user_role_and_ban_info, get_session
 from config import bot
-import asyncio
+from database.database import get_session, get_user_role_and_ban_info
 from handlers.handlers import send_menu_handler
 from utils import get_translation
 

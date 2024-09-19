@@ -1,24 +1,36 @@
 import asyncio
 import logging
-from aiogram import types, F, Router
+
+from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
-from config import bot, BOT_ID, GAMES, STATUS_LIMITS, SUPPORTED_LANGUAGES
+from common.static_data import GAMES, STATUS_LIMITS, SUPPORTED_LANGUAGES
+from config import BOT_ID, bot
 from database.database import (
-    get_session, get_or_create_user, update_user_language, log_user_action,
-    get_user_language, get_oldest_keys, update_keys_generated,
-    delete_keys, get_user_status_info,
-    check_user_limits, check_user_safety_limits,
-    get_keys_count_main_menu, get_user_stats, update_safety_keys_generated,
-    delete_safety_keys, get_safety_keys
+    check_user_limits,
+    check_user_safety_limits,
+    delete_keys,
+    delete_safety_keys,
+    get_keys_count_main_menu,
+    get_oldest_keys,
+    get_or_create_user,
+    get_safety_keys,
+    get_session,
+    get_user_language,
+    get_user_stats,
+    get_user_status_info,
+    log_user_action,
+    update_keys_generated,
+    update_safety_keys_generated,
+    update_user_language,
 )
 from handlers.command_setup import set_user_commands
 from keyboards.back_to_main_kb import get_back_to_main_menu_button
 from keyboards.donate_kb import get_donation_keyboard
+from keyboards.inline import create_language_keyboard, get_action_buttons, get_settings_menu, instruction_prem_button
 from keyboards.referral_links_kb import referral_links_keyboard
-from keyboards.inline import get_action_buttons, get_settings_menu, create_language_keyboard, instruction_prem_button
-from utils import get_translation, get_available_languages, load_image
-from utils.helpers import get_remaining_time
 from states.form import Form
+from utils import get_available_languages, get_translation, load_image
+from utils.helpers import get_remaining_time
 from utils.services import generate_user_stats
 
 router = Router()
@@ -287,7 +299,7 @@ async def keys_handler(callback: types.CallbackQuery):
                 if keys:
                     total_keys_in_request += len(keys)
                     response_text += f"<b>{game}</b>:\n"
-                    keys_to_delete = [key[0] for key in keys]
+                    keys_to_delete = [key for key in keys]
                     response_text += "\n".join([f"<code>{key}</code>" for key in keys_to_delete]) + "\n\n"
                     await delete_keys(session, game, keys_to_delete)
                 else:

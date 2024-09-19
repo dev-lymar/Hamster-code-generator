@@ -1,6 +1,5 @@
 from aiogram import types
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-
 from keyboards.back_to_main_kb import get_back_to_main_menu_button
 from utils import get_translation
 

@@ -2,6 +2,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.12.2-3776AB?style=flat&logo=Python&logoColor=yellow)](https://www.python.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16.3-336791?style=flat&logo=PostgreSQL&logoColor=white)](https://www.postgresql.org/)
+[![Redis](https://img.shields.io/badge/Redis-5.0.8-DC382D?style=flat&logo=Redis&logoColor=white)](https://redis.io/)
 [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-D71F00?style=flat&logo=sqlalchemy&logoColor=white)](https://www.sqlalchemy.org/)
 [![aiogram](https://img.shields.io/badge/aiogram-3.10.0-3776AB?style=flat&logo=telegram&logoColor=white")](https://aiogram.dev/)
 [![Flake8](https://img.shields.io/badge/flake8-checked-blueviolet?style=flat)](https://flake8.pycqa.org/en/latest/)
@@ -27,6 +28,8 @@ The [Hamster Keys Generator](https://t.me/hamster_keys_xbot) project is a system
 User interaction is handled through a Telegram bot, while code generation and management, 
 using proxy servers to send requests to game APIs, ensure seamless integration with game platforms.
 A `PostgresSQL` database is used for storing promo codes, and sessions and requests are processed asynchronously with the `aiohttp` library.
+The system uses a Redis database for session management and caching to improve performance.
+
 
 #### The project utilizes:
 - `Alembic` for database migrations,
@@ -55,7 +58,7 @@ A `PostgresSQL` database is used for storing promo codes, and sessions and reque
   - Displays inflated key counts to attract more users.
 - **Multilingual support**.
   - Easy switching between languages for a global audience.
-  - **Supported languages**: `en`, `ru`, `uk`, `sk`, `es`, `fr`, `tr`, `ar`
+  - **Supported languages**: `en`, `ru`, `uk`, `sk`, `es`, `fr`, `tr`, `ar`, `de`, `fa`, `ur`, `hi`
 - **Donation system (XTR stars)**.
   - Users can donate using fixed or custom amounts of Telegram stars.
   - Includes payment confirmation, cancellation, and refund options.
@@ -64,6 +67,10 @@ A `PostgresSQL` database is used for storing promo codes, and sessions and reque
   Encourage users to invite others and get bonuses in return.
 - **Achievement system**.
   - **Track user progress**: Users can unlock achievements based on their activity and receive special rewards as they progress.
+
+### Redis Integration
+- **Session and caching management**.
+  - Redis is used to manage sessions and cache frequently used data, providing faster access and reducing the load on the PostgreSQL database.
 
 ## Installation
 
@@ -91,12 +98,16 @@ DATABASE_PORT=your_database_port
 BOT_TOKEN=your_telegram_bot_token
 GROUP_CHAT_ID=your_group_chat_id
 POPULARITY_COEFFICIENT=1
+
+REDIS_HOST=your_redis_host
+REDIS_PORT=your_redis_port
+REDIS_DB=0
 ```
 
 ## Running with Docker
 1. Build and start the containers using Docker Compose:
 ```sh
-docker-compose up -d postgres
+docker-compose up -d postgres redis
 ```
 2. Apply migrations and set up the database:
 ```sh
@@ -160,6 +171,7 @@ Make sure to configure the following ***GitHub Secrets*** for deployment:
 ├── bot                  # Telegram bot
 │   ├── main.py
 │   ├── config.py
+│   ├── redis_client.py
 │   ├── handlers/
 │   ├── translations/
 │   └── keyboards/
@@ -167,6 +179,7 @@ Make sure to configure the following ***GitHub Secrets*** for deployment:
 │   ├── versions/
 │   └── env.py
 ├── backups              # Database backups
+├── redis.conf           # Redis configuration file
 ├── docker-compose.yml   # Docker configuration
 ├── requirements.txt     # Project dependencies
 ├── .env                 # Environment Configuration
