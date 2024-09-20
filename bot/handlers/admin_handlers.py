@@ -9,7 +9,6 @@ from bot.common.static_data import GAMES
 from bot.database.database import (
     get_admin_chat_ids,
     get_keys_count_for_games,
-    get_session,
     get_subscribed_users,
     get_user_details,
     get_users_list_admin_panel,
@@ -25,6 +24,7 @@ from bot.keyboards.inline import (
 from bot.keyboards.referral_links_kb import referral_links_keyboard
 from bot.states.form import Form, FormSendToUser
 from bot.utils import get_translation, load_image
+from db.database import get_session
 
 router = Router()
 

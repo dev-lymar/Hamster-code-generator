@@ -14,7 +14,6 @@ from bot.database.database import (
     get_oldest_keys,
     get_or_create_user,
     get_safety_keys,
-    get_session,
     get_user_language,
     get_user_stats,
     get_user_status_info,
@@ -37,6 +36,7 @@ from bot.states.form import Form
 from bot.utils import get_available_languages, get_translation, load_image
 from bot.utils.helpers import get_remaining_time
 from bot.utils.services import generate_user_stats
+from db.database import get_session
 
 router = Router()
 

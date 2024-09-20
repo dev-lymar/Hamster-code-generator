@@ -15,42 +15,6 @@ from .models import Base, User, UserLog
 load_dotenv()
 redis_client = create_redis_client()
 
-# Database connection
-DATABASE_URL = (f"postgresql+asyncpg://{os.getenv('DATABASE_USER')}:{os.getenv('DATABASE_PASSWORD')}@"
-                f"{os.getenv('DATABASE_HOST')}:{os.getenv('DATABASE_PORT')}/{os.getenv('DATABASE_NAME')}")
-
-# Creating an asynchronous engine
-engine = create_async_engine(
-    DATABASE_URL,
-    echo=False,
-    pool_size=5,
-    max_overflow=10
-)
-
-# Creating a session factory
-AsyncSessionLocal = async_sessionmaker(
-    bind=engine,
-    class_=AsyncSession,
-    expire_on_commit=False
-)
-
-
-# Function for creating a database and tables
-async def init_db():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
-
-# Session retrieval
-async def get_session() -> AsyncSession:
-    session = AsyncSessionLocal()
-    return session
-
-
-# Closing connections
-async def close_db():
-    await engine.dispose()
-
 
 async def load_keys_to_cache(session: AsyncSession, game_name: str, limit: int = 2000):
     """Loading keys from the database into the Redis cache."""

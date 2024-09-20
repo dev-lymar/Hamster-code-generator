@@ -4,9 +4,10 @@ from aiogram.filters import BaseFilter
 from aiogram.types import Message
 
 from bot.bot_config import bot
-from bot.database.database import get_session, get_user_role_and_ban_info
+from bot.database.database import get_user_role_and_ban_info
 from bot.handlers.handlers import send_menu_handler
 from bot.utils import get_translation
+from db.database import get_session
 
 
 class AdminFilter(BaseFilter):

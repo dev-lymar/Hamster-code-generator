@@ -1,7 +1,8 @@
 import os
 
-from bot.database.database import get_session, get_user_language
+from bot.database.database import get_user_language
 from bot.translations import TranslationManager
+from db.database import get_session
 
 
 async def get_translation(user_id: int, category: str, key: str) -> str:
