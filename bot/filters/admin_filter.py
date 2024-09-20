@@ -2,10 +2,11 @@ import asyncio
 
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
-from config import bot
-from database.database import get_session, get_user_role_and_ban_info
-from handlers.handlers import send_menu_handler
-from utils import get_translation
+
+from bot.bot_config import bot
+from bot.database.database import get_session, get_user_role_and_ban_info
+from bot.handlers.handlers import send_menu_handler
+from bot.utils import get_translation
 
 
 class AdminFilter(BaseFilter):

@@ -4,5 +4,8 @@ check:
 	flake8 .
 
 
-run:
+run_app:
 	python3 -m app.main
+
+run_bot:
+		python3 -m bot.main

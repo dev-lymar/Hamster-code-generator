@@ -1,15 +1,15 @@
 import asyncio
-import logging
 
 from aiogram import F, Router, types
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
-from config import BOT_ID
-from handlers.handlers import info_handler, send_menu_handler
-from keyboards.back_to_main_kb import get_back_to_main_menu_button
-from keyboards.donate_kb import get_cancel_donation_keyboard, get_payment_keyboard
-from states.form import DonationState
-from utils import get_translation
+
+from bot.bot_config import BOT_ID, logger
+from bot.handlers.handlers import info_handler, send_menu_handler
+from bot.keyboards.back_to_main_kb import get_back_to_main_menu_button
+from bot.keyboards.donate_kb import get_cancel_donation_keyboard, get_payment_keyboard
+from bot.states.form import DonationState
+from bot.utils import get_translation
 
 router = Router()
 
@@ -92,7 +92,7 @@ async def pre_checkout_handler(pre_checkout_query: types.PreCheckoutQuery):
     try:
         await pre_checkout_query.answer(ok=True)
     except TelegramBadRequest as e:
-        logging.error(f"Failed to process pre-checkout: {e}")
+        logger.error(f"Failed to process pre-checkout: {e}")
 
 
 @router.message(F.content_type == types.ContentType.SUCCESSFUL_PAYMENT)
@@ -193,7 +193,7 @@ async def send_invoice_message(callback_or_message, amount: int, state: FSMConte
         # Save the invoice message ID to a state
         await state.update_data(invoice_message_id=invoice_message.message_id)
     except TelegramBadRequest as error:
-        logging.error(f"Failed to send invoice: {error}")
+        logger.error(f"Failed to send invoice: {error}")
 
         await callback_or_message.answer(error_text.format(error_message=error))
 

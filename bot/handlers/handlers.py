@@ -1,11 +1,11 @@
 import asyncio
-import logging
 
 from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
-from common.static_data import GAMES, STATUS_LIMITS, SUPPORTED_LANGUAGES
-from config import BOT_ID, bot
-from database.database import (
+
+from bot.bot_config import BOT_ID, bot, logger
+from bot.common.static_data import GAMES, STATUS_LIMITS, SUPPORTED_LANGUAGES
+from bot.database.database import (
     check_user_limits,
     check_user_safety_limits,
     delete_keys,
@@ -23,15 +23,20 @@ from database.database import (
     update_safety_keys_generated,
     update_user_language,
 )
-from handlers.command_setup import set_user_commands
-from keyboards.back_to_main_kb import get_back_to_main_menu_button
-from keyboards.donate_kb import get_donation_keyboard
-from keyboards.inline import create_language_keyboard, get_action_buttons, get_settings_menu, instruction_prem_button
-from keyboards.referral_links_kb import referral_links_keyboard
-from states.form import Form
-from utils import get_available_languages, get_translation, load_image
-from utils.helpers import get_remaining_time
-from utils.services import generate_user_stats
+from bot.handlers.command_setup import set_user_commands
+from bot.keyboards.back_to_main_kb import get_back_to_main_menu_button
+from bot.keyboards.donate_kb import get_donation_keyboard
+from bot.keyboards.inline import (
+    create_language_keyboard,
+    get_action_buttons,
+    get_settings_menu,
+    instruction_prem_button,
+)
+from bot.keyboards.referral_links_kb import referral_links_keyboard
+from bot.states.form import Form
+from bot.utils import get_available_languages, get_translation, load_image
+from bot.utils.helpers import get_remaining_time
+from bot.utils.services import generate_user_stats
 
 router = Router()
 
@@ -77,7 +82,7 @@ async def welcome_command_handler(session, message, user_id, chat_id, user):
                 )
                 return
             except Exception as e:
-                logging.error(f"Failed to send photo in welcome message: {e}")
+                logger.error(f"Failed to send photo in welcome message: {e}")
 
             await bot.send_message(
                 chat_id=chat_id,
@@ -85,7 +90,7 @@ async def welcome_command_handler(session, message, user_id, chat_id, user):
                 reply_markup=await get_action_buttons(session, user_id)
             )
     except Exception as e:
-        logging.error(f"Error in welcome_command_handler: {e}")
+        logger.error(f"Error in welcome_command_handler: {e}")
 
         await message.answer("An error occurred while processing your request.")
 
@@ -231,7 +236,7 @@ async def set_language(callback: types.CallbackQuery, state: FSMContext):
 
         # Forcibly query the language from the database again
         new_language = await get_user_language(session, user_id)
-        logging.info(f"Language after update for user {user_id}: {new_language}")
+        logger.info(f"Language after update for user {user_id}: {new_language}")
 
         # Log user action
         await log_user_action(session, user_id, f"Language changed to {selected_language}")
@@ -317,7 +322,7 @@ async def keys_handler(callback: types.CallbackQuery):
             await send_menu_handler(callback.message)
 
     except Exception as e:
-        logging.error(f"Error processing get_keys: {e}")
+        logger.error(f"Error processing get_keys: {e}")
         error_text = await get_translation(user_id, "messages", "error_handler")
 
         await callback.answer(error_text)
@@ -333,7 +338,7 @@ async def safety_keys_handler(callback: types.CallbackQuery):
             )
             await callback.answer()
 
-            logging.info(f"User {user_id} press prem keys")
+            logger.info(f"User {user_id} press prem keys")
             user_info = await get_user_status_info(session, user_id)
 
             if user_info.user_status not in ['premium']:
@@ -434,7 +439,7 @@ async def safety_keys_handler(callback: types.CallbackQuery):
             await send_menu_handler(callback.message)
 
     except Exception as e:
-        logging.error(f"Error processing get_keys: {e}")
+        logger.error(f"Error processing get_keys: {e}")
         error_text = await get_translation(user_id, "messages", "error_handler")
 
         await callback.answer(error_text)
@@ -511,7 +516,7 @@ async def banned_user_handler(message: types.Message):
         user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
         chat_id = message.chat.id
 
-        # User action logging
+        # User action logger
         await log_user_action(session, user_id, "Attempted interaction while banned")
 
         photo = await load_image("banned")

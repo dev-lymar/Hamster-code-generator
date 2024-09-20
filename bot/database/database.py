@@ -1,13 +1,14 @@
-import logging
 import os
 from datetime import datetime, timezone
 
 from dotenv import load_dotenv
-from redis_client import create_redis_client
 from sqlalchemy import func, text, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.future import select
+
+from bot.bot_config import logger
+from bot.redis_client import create_redis_client
 
 from .models import Base, User, UserLog
 
@@ -61,9 +62,9 @@ async def load_keys_to_cache(session: AsyncSession, game_name: str, limit: int =
 
     if keys:
         await redis_client.rpush(f"keys:{game_name}", *keys)
-        logging.info(f"✅ {len(keys)} new keys loaded into cache for game: {game_name}")
+        logger.info(f"✅ {len(keys)} new keys loaded into cache for game: {game_name}")
     else:
-        logging.info(f"❌ No new keys found in the database for game: {game_name}")
+        logger.info(f"❌ No new keys found in the database for game: {game_name}")
 
 
 # Adds new user to the database
@@ -157,7 +158,7 @@ async def get_oldest_keys(session: AsyncSession, game_name: str, limit: int = 4)
 
     # Reload if the number of cached keys falls below the threshold
     if cached_keys_count <= 0:
-        logging.info(f"Not enough keys ({cached_keys_count}). Reloading new keys for {game_name}.")
+        logger.info(f"Not enough keys ({cached_keys_count}). Reloading new keys for {game_name}.")
         await load_keys_to_cache(session, game_name, 2000)
 
     # Fetch the oldest keys again after reloading
@@ -166,10 +167,10 @@ async def get_oldest_keys(session: AsyncSession, game_name: str, limit: int = 4)
     if cached_keys:
         # Remove issued keys from the cache
         await redis_client.ltrim(f"keys:{game_name}", len(cached_keys), -1)
-        logging.info(f"Issued {len(cached_keys)}/{cached_keys_count} keys from cache for game: {game_name}")
+        logger.info(f"Issued {len(cached_keys)}/{cached_keys_count} keys from cache for game: {game_name}")
         return cached_keys
     else:
-        logging.error(f"Failed to retrieve keys even after reloading cache for game: {game_name}")
+        logger.error(f"Failed to retrieve keys even after reloading cache for game: {game_name}")
         return []
 
 
@@ -196,7 +197,7 @@ async def delete_keys(session: AsyncSession, game_name: str, keys: list):
     # Deleting keys from the cache
     for key in keys:
         await redis_client.lrem(f"keys:{game_name}", 0, key)
-    logging.info(f"Deleted {len(keys)} keys from both cache and database for game: {game_name}")
+    logger.info(f"Deleted {len(keys)} keys from both cache and database for game: {game_name}")
 
 
 # Deleting used safety keys

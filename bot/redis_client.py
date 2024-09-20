@@ -1,8 +1,9 @@
-import logging
 import os
 
 import redis.asyncio as redis
 from dotenv import load_dotenv
+
+from bot.bot_config import logger
 
 load_dotenv()
 
@@ -20,10 +21,10 @@ def create_redis_client():
             db=REDIS_DB,
             decode_responses=True
         )
-        logging.info("✅ Redis client connected successfully")
+        logger.info("✅ Redis client connected successfully")
         return client
     except Exception as e:
-        logging.error(f"❌ Failed to connect to Redis: {e}")
+        logger.error(f"❌ Failed to connect to Redis: {e}")
         raise
 
 
@@ -31,4 +32,4 @@ async def close_redis_client(redis_client):
     """Closing a Redis client"""
     if redis_client:
         await redis_client.close()
-        logging.info("📁 Redis connection closed")
+        logger.info("📁 Redis connection closed")

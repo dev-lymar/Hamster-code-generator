@@ -1,6 +1,7 @@
 from aiogram import Bot
 from aiogram.types import BotCommand, BotCommandScopeChat
-from utils import get_translation
+
+from bot.utils import get_translation
 
 
 async def set_user_commands(bot: Bot, user_id: int):

@@ -1,7 +1,8 @@
 from aiogram import BaseMiddleware, types
 from aiogram.types import Update
-from database.database import get_session, get_user_status_info
-from handlers.handlers import banned_user_handler
+
+from bot.database.database import get_session, get_user_status_info
+from bot.handlers.handlers import banned_user_handler
 
 
 class BanCheckMiddleware(BaseMiddleware):
