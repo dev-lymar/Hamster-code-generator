@@ -1,10 +1,13 @@
-import logging
 import os
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.bot import DefaultBotProperties
 from aiogram.fsm.storage.redis import RedisStorage
 from dotenv import load_dotenv
+
+from config.logging_config import logging_setup
+
+logger = logging_setup('app', 'app.log')
 
 load_dotenv()
 
@@ -23,19 +26,3 @@ async def setup_dispatcher(redis_client):
 
 # Forwarding message to groups
 GROUP_CHAT_ID = int(os.getenv("GROUP_CHAT_ID", 0))
-
-
-# Set up logging configuration
-log_directory = os.path.join(os.path.dirname(__file__), 'logs')
-os.makedirs(log_directory, exist_ok=True)
-log_file = os.path.join(log_directory, 'game_promo.log')
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s | %(name)s | %(levelname)s | %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-    ]
-)
-# Reduce the logging level of SQLAlchemy to WARNING
-logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
