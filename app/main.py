@@ -1,7 +1,7 @@
 import asyncio
 
-from game_promo_manager import gen
-from games import games
+from app.game_promo_manager import gen
+from app.games import games
 
 
 async def run_all_games():

@@ -1,2 +1,8 @@
+check:
+	@echo "Starting linting"
+	ruff check .
+	flake8 .
+
+
 run:
-	python3 app/main.py
+	python3 -m app.main

@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from app.models.game_models import Base as AppBase
+from app.models import Base as AppBase
 from bot.database.models import Base as BotBase
 
 from dotenv import load_dotenv
