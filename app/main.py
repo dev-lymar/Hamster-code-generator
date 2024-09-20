@@ -1,6 +1,7 @@
 import asyncio
 
-from app.game_promo_manager import gen, logger
+from app.app_config import logger
+from app.game_promo_manager import gen
 from app.games import games
 
 

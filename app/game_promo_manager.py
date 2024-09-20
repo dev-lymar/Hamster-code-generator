@@ -1,56 +1,15 @@
 import asyncio
 import json
-import logging.handlers
-import os
 import random
 import time
 import uuid
 from urllib.parse import urlparse
 
 import aiohttp
-import coloredlogs
 
+from app.app_config import logger
 from db.database import get_session
 from db.repositories import GamePromoRepository
-
-# Configuring logging
-log_directory = "logs"
-if not os.path.exists(log_directory):
-    os.makedirs(log_directory)
-
-log_file = os.path.join(log_directory, 'game_promo.log')
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s | %(name)s | %(levelname)s | %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-        logging.handlers.RotatingFileHandler(
-            log_file, maxBytes=10 * 1024 * 1024, backupCount=5
-        )
-    ]
-)
-
-# Setup coloredlogs
-coloredlogs.install(
-    level='INFO',
-    logger=logging.getLogger(__name__),
-    fmt='%(asctime)s | %(name)s | %(levelname)s | %(message)s',
-    level_styles={
-        'info': {'color': 'green'},
-        'warning': {'color': 'yellow'},
-        'error': {'color': 'red'},
-        'critical': {'color': 'red', 'bold': True},
-    },
-    field_styles={
-        'asctime': {'color': 220},
-        'name': {'color': 208},
-        'levelname': {'color': 'white', 'bold': True},
-
-    }
-)
-
-logger = logging.getLogger(__name__)
 
 
 class GamePromo:
