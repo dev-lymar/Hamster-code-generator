@@ -1,6 +1,6 @@
 import asyncio
 
-from app.game_promo_manager import gen
+from app.game_promo_manager import gen, logger
 from app.games import games
 
 
@@ -9,4 +9,8 @@ async def run_all_games():
     await asyncio.gather(*tasks)
 
 if __name__ == "__main__":
-    asyncio.run(run_all_games())
+    try:
+        logger.info("✅ | Starting `app` application")
+        asyncio.run(run_all_games())
+    except KeyboardInterrupt:
+        logger.info("🛑 | App application is terminated by the `Ctrl+C` signal")
