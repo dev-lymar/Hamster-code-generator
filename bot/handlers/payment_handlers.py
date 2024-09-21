@@ -112,13 +112,14 @@ async def success_payment_handler(message: types.Message, state: FSMContext):
 
 
 @router.callback_query(F.data == "cancel_payment")
-async def cancel_payment_handler(callback: types.CallbackQuery):
+async def cancel_payment_handler(callback: types.CallbackQuery, state: FSMContext):
     user_id = callback.from_user.id if callback.from_user.id != BOT_ID else callback.chat.id
     payment_cancelled_text = await get_translation(user_id, "payment", "donation_cancelled")
 
     # Delete the invoice message
     await callback.message.delete()
     await callback.answer(payment_cancelled_text)
+    await state.clear()
 
 
 @router.message(F.text.startswith("/refund_stars"))

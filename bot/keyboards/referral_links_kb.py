@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from bot.common.referals import REFERRAL_LINKS
+from bot.utils.referals import REFERRAL_LINKS
 
 from .back_to_main_kb import get_back_to_main_menu_button
 

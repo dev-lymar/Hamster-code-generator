@@ -5,8 +5,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, Message
 
 from bot.bot_config import BOT_ID, GROUP_CHAT_ID, bot, logger
-from bot.common.static_data import GAMES
-from bot.database.database import (
+from bot.db_handler.db_service import (
     get_admin_chat_ids,
     get_keys_count_for_games,
     get_subscribed_users,
@@ -24,6 +23,7 @@ from bot.keyboards.inline import (
 from bot.keyboards.referral_links_kb import referral_links_keyboard
 from bot.states.form import Form, FormSendToUser
 from bot.utils import get_translation, load_image
+from bot.utils.static_data import GAMES
 from db.database import get_session
 
 router = Router()
@@ -271,6 +271,7 @@ async def confirm_send_all_handler(callback: types.CallbackQuery):
                         caption=personalized_text,
                         reply_markup=keyboard
                     )
+                    await asyncio.sleep(0.05)
                 except Exception as e:
                     logger.error(f"Failed to send photo notification to {chat_id}: {e}")
             else:
@@ -280,6 +281,7 @@ async def confirm_send_all_handler(callback: types.CallbackQuery):
                         text=personalized_text,
                         reply_markup=keyboard
                     )
+                    await asyncio.sleep(0.05)
                 except Exception as e:
                     logger.error(f"Failed to send text notification to {chat_id}: {e}")
 

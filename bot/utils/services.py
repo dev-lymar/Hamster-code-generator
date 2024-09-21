@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from bot.common.static_data import ACHIEVEMENTS
+from bot.utils.static_data import ACHIEVEMENTS
 
 
 def calculate_achievement(total_keys: int, total_premium_keys: int, days_in_bot: int) -> str:

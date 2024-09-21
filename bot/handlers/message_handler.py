@@ -2,7 +2,7 @@ from aiogram import F, Router, types
 from aiogram.exceptions import TelegramBadRequest
 
 from bot.bot_config import BOT_ID, GROUP_CHAT_ID, bot, logger
-from bot.database.database import is_admin, log_user_action
+from bot.db_handler.db_service import is_admin, log_user_action
 from bot.handlers.admin_handlers import forward_message_to_admins, message_user_mapping
 from db.database import get_session
 

@@ -36,7 +36,7 @@ STATUS_LIMITS = {
     },
     'friend': {'daily_limit': 5, 'interval_minutes': 10},
     'premium': {
-        'daily_limit': 4, 'interval_minutes': 10,
+        'daily_limit': 100, 'interval_minutes': 0,
         'safety_daily_limit': 2, 'safety_interval_minutes': 240
     }
 }

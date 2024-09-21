@@ -4,14 +4,13 @@ from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
 
 from bot.bot_config import BOT_ID, bot, logger
-from bot.common.static_data import GAMES, STATUS_LIMITS, SUPPORTED_LANGUAGES
-from bot.database.database import (
+from bot.db_handler.db_service import (
     check_user_limits,
     check_user_safety_limits,
     delete_keys,
     delete_safety_keys,
+    get_keys,
     get_keys_count_main_menu,
-    get_oldest_keys,
     get_or_create_user,
     get_safety_keys,
     get_user_language,
@@ -34,8 +33,9 @@ from bot.keyboards.inline import (
 from bot.keyboards.referral_links_kb import referral_links_keyboard
 from bot.states.form import Form
 from bot.utils import get_available_languages, get_translation, load_image
-from bot.utils.helpers import get_remaining_time
 from bot.utils.services import generate_user_stats
+from bot.utils.static_data import GAMES, STATUS_LIMITS, SUPPORTED_LANGUAGES
+from bot.utils.utils import get_remaining_time
 from db.database import get_session
 
 router = Router()
@@ -293,7 +293,7 @@ async def keys_handler(callback: types.CallbackQuery):
 
             keys_list = []
             for game in GAMES:
-                keys = await get_oldest_keys(session, game)
+                keys = await get_keys(session, game)
                 keys_list.append(keys)
 
             response_text_template = await get_translation(user_id, "messages", 'keys_generated_success')
