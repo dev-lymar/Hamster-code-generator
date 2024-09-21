@@ -10,11 +10,9 @@ from .back_to_main_kb import get_back_to_main_menu_button
 async def get_action_buttons(session, user_id):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
-            text=await get_translation(user_id, "buttons",  "get_premium_keys"), callback_data="keys_premium")],
+            text=await get_translation(user_id, "buttons", "referral_links"), callback_data="referral_links")],
         [InlineKeyboardButton(
             text=await get_translation(user_id, "buttons", "get_regular_keys"), callback_data="keys_regular")],
-        [InlineKeyboardButton(
-            text=await get_translation(user_id, "buttons", "referral_links"), callback_data="referral_links")],
         [InlineKeyboardButton(
             text=await get_translation(user_id, "buttons", "settings"), callback_data="settings_menu"),
          InlineKeyboardButton(
@@ -32,15 +30,6 @@ async def get_settings_menu(session, user_id):
             text=await get_translation(
                 user_id, "common", "choose_language"), callback_data="settings_choose_language")],
         main_menu_back.inline_keyboard[0],
-    ])
-
-
-# Button instruction premium
-async def instruction_prem_button(session, user_id):
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(
-            text=await get_translation(user_id, "buttons", "support"), url="https://t.me/bot_support_hamster")],
-        [InlineKeyboardButton(text=await get_translation(user_id, "buttons", "back"), callback_data="main_menu_back")]
     ])
 
 
