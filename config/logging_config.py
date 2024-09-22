@@ -11,7 +11,7 @@ def logging_setup(log_name: str, log_file: str):
     log_name: The name of the logger (e.g. ‘app’ or ‘bot’).
     log_file: The name of the file where the logs will be written (e.g. ‘app.log’ or ‘bot.log’).
     """
-    log_directory = os.path.join(os.path.dirname(__file__), '../logs')
+    log_directory = os.path.join(os.path.dirname(__file__), f'../logs/{log_name}')
     if not os.path.exists(log_directory):
         os.makedirs(log_directory)
 

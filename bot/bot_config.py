@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 from config.logging_config import logging_setup
 
-logger = logging_setup('app', 'app.log')
+logger = logging_setup('bot', 'bot.log')
 
 load_dotenv()
 

@@ -64,8 +64,8 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.7.5
-          name: "Release v1.7.5"
+          tag: v1.7.6
+          name: "Release v1.7.6"
           body: |
-            Refactored project | 🏖️
+            Refactored project(FIXED) | 🏖️
           token: ${{ secrets.GITHUB_TOKEN }}
