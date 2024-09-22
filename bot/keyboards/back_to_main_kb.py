@@ -1,6 +1,7 @@
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from utils import get_translation
+
+from bot.utils import get_translation
 
 
 async def get_back_to_main_menu_button(user_id):

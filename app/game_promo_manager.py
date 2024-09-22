@@ -1,75 +1,15 @@
 import asyncio
 import json
-import logging.handlers
-import os
 import random
 import time
 import uuid
 from urllib.parse import urlparse
 
 import aiohttp
-import coloredlogs
-from database import get_session
-from models.game_models import (
-    AmongWaterr,
-    Bouncemasters,
-    CafeDash,
-    ChainCube2048,
-    CountMasters,
-    FactoryWorld,
-    FluffCrusade,
-    GangsWars,
-    HideBall,
-    InfectedFrontier,
-    MergeAway,
-    MowAndTrim,
-    PinOutMaster,
-    Polysphere,
-    StoneAge,
-    TileTrio,
-    TrainMiner,
-    TwerkRace3D,
-    Zoopolis,
-)
 
-# Configuring logging
-log_directory = "logs"
-if not os.path.exists(log_directory):
-    os.makedirs(log_directory)
-
-log_file = os.path.join(log_directory, 'game_promo.log')
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s | %(name)s | %(levelname)s | %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-        logging.handlers.RotatingFileHandler(
-            log_file, maxBytes=10 * 1024 * 1024, backupCount=5
-        )
-    ]
-)
-
-# Setup coloredlogs
-coloredlogs.install(
-    level='INFO',
-    logger=logging.getLogger(__name__),
-    fmt='%(asctime)s | %(name)s | %(levelname)s | %(message)s',
-    level_styles={
-        'info': {'color': 'green'},
-        'warning': {'color': 'yellow'},
-        'error': {'color': 'red'},
-        'critical': {'color': 'red', 'bold': True},
-    },
-    field_styles={
-        'asctime': {'color': 220},
-        'name': {'color': 208},
-        'levelname': {'color': 'white', 'bold': True},
-
-    }
-)
-
-logger = logging.getLogger(__name__)
+from app.app_config import logger
+from db.database import get_session
+from db.repositories import GamePromoRepository
 
 
 class GamePromo:
@@ -222,40 +162,10 @@ class GamePromo:
         return response['promoCode']
 
     async def save_code_to_db(self, code_data: str, game_name: str):
-        session = await get_session()
-        try:
-            table_mapping = {
-                'Chain Cube 2048': ChainCube2048,
-                'Train Miner': TrainMiner,
-                'Merge Away': MergeAway,
-                'Twerk Race 3D': TwerkRace3D,
-                'Polysphere': Polysphere,
-                'Mow and Trim': MowAndTrim,
-                'Cafe Dash': CafeDash,
-                'Zoopolis': Zoopolis,
-                'Gangs Wars': GangsWars,
-                'Fluff Crusade': FluffCrusade,
-                'Tile Trio': TileTrio,
-                'Stone Age': StoneAge,
-                'Bouncemasters': Bouncemasters,
-                'Hide Ball': HideBall,
-                'Pin Out Master': PinOutMaster,
-                'Count Masters': CountMasters,
-                'Infected Frontier': InfectedFrontier,
-                'Among Waterr': AmongWaterr,
-                'Factory World': FactoryWorld,
-            }
-            GameTable = table_mapping.get(game_name)
-            if GameTable:
-                table_entry = GameTable(promo_code=code_data)
-                session.add(table_entry)
-                await session.commit()
-                logger.info(f"🔑 `KEY` | `{code_data[:12]}` | Saved in table `{game_name.replace(' ', '_').lower()}` 🔑")
-        except Exception as e:
-            logger.critical(f" ❌ Failed to save promo code `{code_data[:12]}` for game `{game_name}`: {e}")
-            await session.rollback()
-        finally:
-            await session.close()
+        """Working with the repository to save data to the database"""
+        async with await get_session() as session:
+            repository = GamePromoRepository(session)
+            await repository.save_code(code_data, game_name)
 
     async def gen_promo_code(self):
         await self.login_client()

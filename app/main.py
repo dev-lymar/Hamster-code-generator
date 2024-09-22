@@ -1,14 +1,17 @@
 import asyncio
 
-from database import init_db
-from game_promo_manager import gen
-from games import games
+from app.app_config import logger
+from app.game_promo_manager import gen
+from app.games import games
 
 
 async def run_all_games():
-    await init_db()  # Creating tables before starting work
     tasks = [gen(game) for game in games]
     await asyncio.gather(*tasks)
 
 if __name__ == "__main__":
-    asyncio.run(run_all_games())
+    try:
+        logger.info("✅ | Starting `app` application")
+        asyncio.run(run_all_games())
+    except KeyboardInterrupt:
+        logger.info("🛑 | App application is terminated by the `Ctrl+C` signal")

@@ -5,6 +5,7 @@ REFERRAL_LINKS = {
     '🥠 Hrum': 't.me/hrummebot/game?startapp=ref452792586',
     '🏠 CITY Holder': 'https://t.me/cityholder/game?startapp=452792586',
     '🤖 TapSwap': 'https://t.me/tapswap_mirror_2_bot?start=r_452792586',
+    '☑️ TON Station': 'https://t.me/tonstationgames_bot/app?startapp=ref_89cdjxm8nmvle8dxnoy7fg',
     '⚫️ DotCoin': 'https://t.me/dotcoin_bot?start=r_452792586',
     '🖲️ CEX.IO Power Tap': 'https://t.me/cexio_tap_bot?start=1716399236183636',
     '⭐ Major': 'https://t.me/major/start?startapp=452792586',

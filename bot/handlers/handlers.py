@@ -1,37 +1,35 @@
-import asyncio
-import logging
-
 from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
-from common.static_data import GAMES, STATUS_LIMITS, SUPPORTED_LANGUAGES
-from config import BOT_ID, bot
-from database.database import (
+
+from bot.bot_config import BOT_ID, bot, logger
+from bot.db_handler.db_service import (
     check_user_limits,
-    check_user_safety_limits,
     delete_keys,
-    delete_safety_keys,
+    get_keys,
     get_keys_count_main_menu,
-    get_oldest_keys,
     get_or_create_user,
-    get_safety_keys,
-    get_session,
     get_user_language,
     get_user_stats,
     get_user_status_info,
     log_user_action,
     update_keys_generated,
-    update_safety_keys_generated,
     update_user_language,
 )
-from handlers.command_setup import set_user_commands
-from keyboards.back_to_main_kb import get_back_to_main_menu_button
-from keyboards.donate_kb import get_donation_keyboard
-from keyboards.inline import create_language_keyboard, get_action_buttons, get_settings_menu, instruction_prem_button
-from keyboards.referral_links_kb import referral_links_keyboard
-from states.form import Form
-from utils import get_available_languages, get_translation, load_image
-from utils.helpers import get_remaining_time
-from utils.services import generate_user_stats
+from bot.handlers.command_setup import set_user_commands
+from bot.keyboards.back_to_main_kb import get_back_to_main_menu_button
+from bot.keyboards.donate_kb import get_donation_keyboard
+from bot.keyboards.inline import (
+    create_language_keyboard,
+    get_action_buttons,
+    get_settings_menu,
+)
+from bot.keyboards.referral_links_kb import referral_links_keyboard
+from bot.states.form import Form
+from bot.utils import get_available_languages, get_translation, load_image
+from bot.utils.services import generate_user_stats
+from bot.utils.static_data import GAMES, STATUS_LIMITS, SUPPORTED_LANGUAGES
+from bot.utils.utils import get_remaining_time
+from db.database import get_session
 
 router = Router()
 
@@ -77,7 +75,7 @@ async def welcome_command_handler(session, message, user_id, chat_id, user):
                 )
                 return
             except Exception as e:
-                logging.error(f"Failed to send photo in welcome message: {e}")
+                logger.error(f"Failed to send photo in welcome message: {e}")
 
             await bot.send_message(
                 chat_id=chat_id,
@@ -85,7 +83,7 @@ async def welcome_command_handler(session, message, user_id, chat_id, user):
                 reply_markup=await get_action_buttons(session, user_id)
             )
     except Exception as e:
-        logging.error(f"Error in welcome_command_handler: {e}")
+        logger.error(f"Error in welcome_command_handler: {e}")
 
         await message.answer("An error occurred while processing your request.")
 
@@ -109,7 +107,6 @@ async def send_menu_handler(message: types.Message, is_back_to_menu: bool = Fals
                     message_id=message.message_id,
                     media=types.InputMediaPhoto(media=photo, caption=caption.format(
                         keys_today=keys_data['keys_today'],
-                        premium_keys_today=keys_data['premium_keys_today']
                     )),
                     reply_markup=buttons
                 )
@@ -119,7 +116,6 @@ async def send_menu_handler(message: types.Message, is_back_to_menu: bool = Fals
                     photo=photo,
                     caption=caption.format(
                         keys_today=keys_data['keys_today'],
-                        premium_keys_today=keys_data['premium_keys_today']
                     ),
                     reply_markup=buttons
                 )
@@ -130,7 +126,6 @@ async def send_menu_handler(message: types.Message, is_back_to_menu: bool = Fals
                 message_id=message.message_id,
                 text=caption.format(
                     keys_today=keys_data['keys_today'],
-                    premium_keys_today=keys_data['premium_keys_today']
                 ),
                 reply_markup=buttons
             )
@@ -139,7 +134,6 @@ async def send_menu_handler(message: types.Message, is_back_to_menu: bool = Fals
                 chat_id=chat_id,
                 text=caption.format(
                     keys_today=keys_data['keys_today'],
-                    premium_keys_today=keys_data['premium_keys_today']
                 ),
                 reply_markup=buttons
             )
@@ -231,7 +225,7 @@ async def set_language(callback: types.CallbackQuery, state: FSMContext):
 
         # Forcibly query the language from the database again
         new_language = await get_user_language(session, user_id)
-        logging.info(f"Language after update for user {user_id}: {new_language}")
+        logger.info(f"Language after update for user {user_id}: {new_language}")
 
         # Log user action
         await log_user_action(session, user_id, f"Language changed to {selected_language}")
@@ -288,7 +282,7 @@ async def keys_handler(callback: types.CallbackQuery):
 
             keys_list = []
             for game in GAMES:
-                keys = await get_oldest_keys(session, game)
+                keys = await get_keys(session, game)
                 keys_list.append(keys)
 
             response_text_template = await get_translation(user_id, "messages", 'keys_generated_success')
@@ -317,124 +311,7 @@ async def keys_handler(callback: types.CallbackQuery):
             await send_menu_handler(callback.message)
 
     except Exception as e:
-        logging.error(f"Error processing get_keys: {e}")
-        error_text = await get_translation(user_id, "messages", "error_handler")
-
-        await callback.answer(error_text)
-
-
-# Handling of "get_safety_keys" button pressing
-@router.callback_query(F.data == "keys_premium")
-async def safety_keys_handler(callback: types.CallbackQuery):
-    try:
-        async with (await get_session()) as session:
-            user_id = (
-                callback.from_user.id if callback.from_user.id != BOT_ID else callback.message.chat.id
-            )
-            await callback.answer()
-
-            logging.info(f"User {user_id} press prem keys")
-            user_info = await get_user_status_info(session, user_id)
-
-            if user_info.user_status not in ['premium']:
-                not_prem_message = await get_translation(user_id, "messages", "not_premium_access")
-                photo = await load_image("premium")
-                if photo:
-                    await bot.delete_message(
-                        chat_id=callback.message.chat.id,
-                        message_id=callback.message.message_id
-                    )
-                    await bot.send_photo(
-                        chat_id=callback.message.chat.id,
-                        photo=photo,
-                        caption=not_prem_message,
-                        reply_markup=await instruction_prem_button(session, user_id)
-                    )
-                    return
-                await bot.send_message(
-                    chat_id=callback.message.chat.id,
-                    text=not_prem_message,
-                    reply_markup=await instruction_prem_button(session, user_id)
-                )
-
-            # Checking the limit of requests for safety keys
-            if not await check_user_safety_limits(session, user_id, STATUS_LIMITS):
-                message_to_update = await send_daily_limit_reached_handler(callback, user_id)
-
-                await asyncio.sleep(1.5)
-
-                support_message = await get_translation(user_id, "messages", "support_project_prompt")
-                photo = await load_image("premium")
-                if photo:
-                    await bot.edit_message_media(
-                        chat_id=callback.message.chat.id,
-                        message_id=message_to_update.message_id,
-                        media=types.InputMediaPhoto(media=photo, caption=support_message),
-                        reply_markup=await get_action_buttons(session, user_id)
-                    )
-                else:
-                    await bot.edit_message_text(
-                        chat_id=callback.message.chat.id,
-                        message_id=message_to_update.message_id,
-                        text=support_message,
-                        reply_markup=await get_action_buttons(session, user_id)
-                    )
-                return
-
-            # Checking the interval between requests
-            interval_minutes = STATUS_LIMITS[user_info.user_status]['safety_interval_minutes']
-            minutes, seconds = get_remaining_time(user_info.last_safety_keys_request_time, interval_minutes)
-            if minutes > 59:
-                hours = minutes // 60
-                minutes = minutes % 60
-                wait_message_template = await get_translation(user_id, "messages", "wait_time_with_hours")
-                wait_message = wait_message_template.format(hours=hours, minutes=minutes, sec=seconds)
-            else:
-                wait_message_template = await get_translation(user_id, "messages", "wait_time_without_hours")
-                wait_message = wait_message_template.format(minutes=minutes, sec=seconds)
-
-            if minutes > 0 or seconds > 0:
-                await send_wait_time_handler(callback, user_id, wait_message)
-                return
-
-            await bot.edit_message_reply_markup(
-                chat_id=callback.message.chat.id,
-                message_id=callback.message.message_id,
-                reply_markup=None
-            )
-
-            keys_list = []
-            for game in GAMES:
-                keys = await get_safety_keys(session, game)
-                keys_list.append(keys)
-
-            response_text_template = await get_translation(user_id, "messages", 'premium_keys_generated_success')
-            response_text = f"{response_text_template}\n\n"
-            total_keys_in_request = 0
-
-            for game, keys in zip(GAMES, keys_list):
-                if keys:
-                    total_keys_in_request += len(keys)
-                    response_text += f"<b>{game}</b>:\n"
-                    keys_to_delete = [key[0] for key in keys]
-                    response_text += "\n".join([f"<code>{key}</code>" for key in keys_to_delete]) + "\n\n"
-                    await delete_safety_keys(session, game, keys_to_delete)
-                else:
-                    no_keys_template = await get_translation(user_id, "messages", 'no_keys_available')
-                    response_text += no_keys_template.format(game=game)
-
-            await bot.send_message(
-                chat_id=callback.message.chat.id,
-                text=response_text.strip()
-            )
-
-            if total_keys_in_request > 0:
-                await update_safety_keys_generated(session, user_id, total_keys_in_request)
-
-            await send_menu_handler(callback.message)
-
-    except Exception as e:
-        logging.error(f"Error processing get_keys: {e}")
+        logger.error(f"Error processing get_keys: {e}")
         error_text = await get_translation(user_id, "messages", "error_handler")
 
         await callback.answer(error_text)
@@ -511,7 +388,7 @@ async def banned_user_handler(message: types.Message):
         user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
         chat_id = message.chat.id
 
-        # User action logging
+        # User action logger
         await log_user_action(session, user_id, "Attempted interaction while banned")
 
         photo = await load_image("banned")
@@ -534,7 +411,7 @@ async def settings_handler(callback: types.CallbackQuery):
         )
 
         await log_user_action(session, user_id, "Settings menu opened")
-        settings_message = await get_translation(user_id, "buttons", "settings")
+        settings_message = await get_translation(user_id, "messages", "settings_intro")
         photo = await load_image("settings")
         if photo:
             new_media = types.InputMediaPhoto(media=photo, caption=settings_message)
@@ -589,9 +466,7 @@ async def user_stats_handler(callback: types.CallbackQuery):
         info_caption = stats_translation.format(
             achievement_name=achievement_name,
             keys_today=user_stats['keys_today'],
-            premium_keys_today=user_stats['premium_keys_today'],
             keys_total=user_stats['keys_total'],
-            premium_keys_total=user_stats['premium_keys_total'],
             user_status=user_status,
         )
         keyboard = await get_back_to_main_menu_button(user_id)

@@ -1,15 +1,15 @@
 import asyncio
-import logging
 
 from aiogram import F, Router, types
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
-from config import BOT_ID
-from handlers.handlers import info_handler, send_menu_handler
-from keyboards.back_to_main_kb import get_back_to_main_menu_button
-from keyboards.donate_kb import get_cancel_donation_keyboard, get_payment_keyboard
-from states.form import DonationState
-from utils import get_translation
+
+from bot.bot_config import BOT_ID, logger
+from bot.handlers.handlers import info_handler, send_menu_handler
+from bot.keyboards.back_to_main_kb import get_back_to_main_menu_button
+from bot.keyboards.donate_kb import get_cancel_donation_keyboard, get_payment_keyboard
+from bot.states.form import DonationState
+from bot.utils import get_translation
 
 router = Router()
 
@@ -92,7 +92,7 @@ async def pre_checkout_handler(pre_checkout_query: types.PreCheckoutQuery):
     try:
         await pre_checkout_query.answer(ok=True)
     except TelegramBadRequest as e:
-        logging.error(f"Failed to process pre-checkout: {e}")
+        logger.error(f"Failed to process pre-checkout: {e}")
 
 
 @router.message(F.content_type == types.ContentType.SUCCESSFUL_PAYMENT)
@@ -112,13 +112,14 @@ async def success_payment_handler(message: types.Message, state: FSMContext):
 
 
 @router.callback_query(F.data == "cancel_payment")
-async def cancel_payment_handler(callback: types.CallbackQuery):
+async def cancel_payment_handler(callback: types.CallbackQuery, state: FSMContext):
     user_id = callback.from_user.id if callback.from_user.id != BOT_ID else callback.chat.id
     payment_cancelled_text = await get_translation(user_id, "payment", "donation_cancelled")
 
     # Delete the invoice message
     await callback.message.delete()
     await callback.answer(payment_cancelled_text)
+    await state.clear()
 
 
 @router.message(F.text.startswith("/refund_stars"))
@@ -193,7 +194,7 @@ async def send_invoice_message(callback_or_message, amount: int, state: FSMConte
         # Save the invoice message ID to a state
         await state.update_data(invoice_message_id=invoice_message.message_id)
     except TelegramBadRequest as error:
-        logging.error(f"Failed to send invoice: {error}")
+        logger.error(f"Failed to send invoice: {error}")
 
         await callback_or_message.answer(error_text.format(error_message=error))
 

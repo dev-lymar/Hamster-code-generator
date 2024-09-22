@@ -1,30 +1,30 @@
 import asyncio
-import logging
 
 from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, Message
-from common.static_data import GAMES
-from config import BOT_ID, GROUP_CHAT_ID, bot
-from database.database import (
+
+from bot.bot_config import BOT_ID, GROUP_CHAT_ID, bot, logger
+from bot.db_handler.db_service import (
     get_admin_chat_ids,
     get_keys_count_for_games,
-    get_session,
     get_subscribed_users,
     get_user_details,
     get_users_list_admin_panel,
     log_user_action,
 )
-from keyboards.inline import (
+from bot.keyboards.inline import (
     confirmation_button_notification,
     get_admin_panel_keyboard,
     get_detail_info_in_admin,
     get_main_in_admin,
     notification_menu,
 )
-from keyboards.referral_links_kb import referral_links_keyboard
-from states.form import Form, FormSendToUser
-from utils import get_translation, load_image
+from bot.keyboards.referral_links_kb import referral_links_keyboard
+from bot.states.form import Form, FormSendToUser
+from bot.utils import get_translation, load_image
+from bot.utils.static_data import GAMES
+from db.database import get_session
 
 router = Router()
 
@@ -111,7 +111,7 @@ async def user_detail_admin_panel(message: types.Message, state: FSMContext):
         try:
             user_details = await get_user_details(session, user_detail_id)
         except Exception as e:
-            logging.error(f"Database error occurred: {e}")
+            logger.error(f"Database error occurred: {e}")
             await message.answer(
                 text="<i>Error occurred while fetching user details. Try again later.</i>",  # Add translation ‼️
                 reply_markup=keyboard
@@ -191,7 +191,7 @@ async def send_notification_to_self_handler(callback: types.CallbackQuery):
                     reply_markup=keyboard
                 )
             except Exception as e:
-                logging.error(f"Failed to send photo notification: {e}")
+                logger.error(f"Failed to send photo notification: {e}")
                 error_text = f"Failed to send photo notification: {e}"
                 await bot.send_message(
                     chat_id=callback.message.chat.id,
@@ -271,8 +271,9 @@ async def confirm_send_all_handler(callback: types.CallbackQuery):
                         caption=personalized_text,
                         reply_markup=keyboard
                     )
+                    await asyncio.sleep(0.05)
                 except Exception as e:
-                    logging.error(f"Failed to send photo notification to {chat_id}: {e}")
+                    logger.error(f"Failed to send photo notification to {chat_id}: {e}")
             else:
                 try:
                     await bot.send_message(
@@ -280,8 +281,9 @@ async def confirm_send_all_handler(callback: types.CallbackQuery):
                         text=personalized_text,
                         reply_markup=keyboard
                     )
+                    await asyncio.sleep(0.05)
                 except Exception as e:
-                    logging.error(f"Failed to send text notification to {chat_id}: {e}")
+                    logger.error(f"Failed to send text notification to {chat_id}: {e}")
 
         keyboard_after = await get_admin_panel_keyboard(session, user_id)
 
@@ -379,7 +381,7 @@ async def process_image_and_send_message(message: types.Message, state: FSMConte
         await handle_admin_command_handler(session, message, current_user_id)
 
     # Back to the admin panel
-    await handle_admin_command_handler(message)
+    await handle_admin_command_handler(session, message, user_id)
 
 
 # Forward a message to all admins and optionally to a group chat
@@ -390,7 +392,7 @@ async def forward_message_to_admins(message: Message):
 
     # Forward the message to all admins
     for admin_chat_id in admin_chat_ids:
-        logging.info(f"Forwarding message from {message.chat.username} to admin {admin_chat_id}")
+        logger.info(f"Forwarding message from {message.chat.username} to admin {admin_chat_id}")
         try:
             task = bot.forward_message(
                 chat_id=admin_chat_id,
@@ -399,11 +401,11 @@ async def forward_message_to_admins(message: Message):
             )
             tasks.append(task)
         except Exception as e:
-            logging.error(f"Failed to forward message to admin {admin_chat_id}: {e}")
+            logger.error(f"Failed to forward message to admin {admin_chat_id}: {e}")
 
     # Forward the message to the group chat if GROUP_CHAT_ID is defined
     if GROUP_CHAT_ID:
-        logging.info(f"Forwarding message from {message.chat.username} to group {GROUP_CHAT_ID}")
+        logger.info(f"Forwarding message from {message.chat.username} to group {GROUP_CHAT_ID}")
         try:
             task = bot.forward_message(
                 chat_id=GROUP_CHAT_ID,
@@ -412,7 +414,7 @@ async def forward_message_to_admins(message: Message):
             )
             tasks.append(task)
         except Exception as e:
-            logging.error(f"Failed to forward message to group {GROUP_CHAT_ID}: {e}")
+            logger.error(f"Failed to forward message to group {GROUP_CHAT_ID}: {e}")
 
     results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -429,7 +431,7 @@ async def forward_message_to_admins(message: Message):
                 f"Failed to forward message from {message.chat.username} to group {GROUP_CHAT_ID} "
                 f"due to error: {str(result)[:50]}"
             )
-            logging.error(error_message)
+            logger.error(error_message)
             await send_error_to_admins(admin_chat_ids, error_message)
 
     return message_ids

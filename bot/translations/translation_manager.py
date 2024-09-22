@@ -1,6 +1,7 @@
 import json
-import logging
 import os
+
+from bot.bot_config import logger
 
 
 class TranslationManager:
@@ -22,9 +23,9 @@ class TranslationManager:
                     self.cache[language_code] = translations
                     return translations
             except Exception as e:
-                logging.error(f"Error loading translations for {language_code}: {e}")
+                logger.error(f"Error loading translations for {language_code}: {e}")
         else:
-            logging.warning(f"Translations file not found for {language_code}. Using default empty translations.")
+            logger.warning(f"Translations file not found for {language_code}. Using default empty translations.")
 
         return {}
 
