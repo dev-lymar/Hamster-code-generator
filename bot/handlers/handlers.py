@@ -411,7 +411,7 @@ async def settings_handler(callback: types.CallbackQuery):
         )
 
         await log_user_action(session, user_id, "Settings menu opened")
-        settings_message = await get_translation(user_id, "buttons", "settings")
+        settings_message = await get_translation(user_id, "messages", "settings_intro")
         photo = await load_image("settings")
         if photo:
             new_media = types.InputMediaPhoto(media=photo, caption=settings_message)

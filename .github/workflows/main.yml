@@ -64,8 +64,8 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.7.1
-          name: "Release v1.7.1"
+          tag: v1.7.5
+          name: "Release v1.7.5"
           body: |
-            Added 2 new games | 🏖️
+            Refactored project | 🏖️
           token: ${{ secrets.GITHUB_TOKEN }}
