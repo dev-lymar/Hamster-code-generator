@@ -1,0 +1,39 @@
+# Исключаем папки кэша и временные файлы
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# Исключаем локальные конфигурации и данные для разработки
+.env
+.env.dev
+.env.prod
+.env.example
+.gitignore
+.venv
+.vscode/
+.idea/
+.pytest_cache/
+
+# Исключаем бэкапы базы данных
+backups/*.sql
+
+# Исключаем файлы лога
+logs/
+*.log
+
+# Исключаем кэш pip
+pip-wheel-metadata/
+*.egg-info/
+.eggs/
+
+# Исключаем Docker Compose файлы (если не нужны внутри контейнера)
+docker-compose.yml
+
+# Исключаем различные образы и картинки, если они не требуются для сборки
+img/
+images_data/
+images/
+*.jpeg
+*.png
