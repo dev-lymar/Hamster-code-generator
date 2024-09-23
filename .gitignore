@@ -123,6 +123,9 @@ celerybeat.pid
 
 # Environments
 .env
+.env.dev
+.env.prod
+.env.example
 .venv
 .venv-hasmter
 env/
@@ -176,3 +179,4 @@ proxies.txt
 
 # Images (Temporarily)
 images/
+images_data/

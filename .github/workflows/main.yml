@@ -9,7 +9,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Install requirements
-        run: pip install -r requirements.txt
+        run: pip install -r requirements-dev.txt
       - name: Lint Ruff
         run: ruff check .
       - name: Lint Flake8
