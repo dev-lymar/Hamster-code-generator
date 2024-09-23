@@ -14,21 +14,34 @@ services:
     networks:
       - app-network
 
-  backup:
-    image: postgres:16.3-alpine
+  app:
+    build: .
     env_file:
       - .env
-    environment:
-      POSTGRES_USER: ${DATABASE_USER}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_DB: ${DATABASE_NAME}
-      PGPASSWORD: ${DATABASE_PASSWORD}
     volumes:
-      - postgres_backups:/backups
-    entrypoint: >
-      sh -c 'mkdir -p /backups && echo "0 0 * * * pg_dump -h postgres -U \$POSTGRES_USER \$POSTGRES_DB > /backups/db_backup_\$(date +\%Y-\%m-\%d_%H-%M-%S).sql 2>> /backups/backup.log" > /etc/crontabs/root && crond -f'
+      - .:/assistant
+    working_dir: /assistant
+    command: sh -c "./run_migrations.sh && python3 -m app.main"
+    depends_on:
+      - postgres
+      - redis
     networks:
       - app-network
+
+  bot:
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - .:/assistant
+    working_dir: /assistant
+    command: sh -c "./run_migrations.sh && exec python3 -m bot.main"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - app-network
+
 
   redis:
     image: redis:7.4.0-alpine
@@ -43,12 +56,7 @@ services:
 
 volumes:
   postgres_data:
-  postgres_backups:
-    driver: local
-    driver_opts:
-      type: none
-      device: /home/ubuntu/Hamster-code-generator/backups
-      o: bind
+
 
 networks:
   app-network:
