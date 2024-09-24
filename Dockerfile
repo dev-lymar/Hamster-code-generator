@@ -15,5 +15,3 @@ COPY alembic alembic
 COPY alembic.ini alembic.ini
 COPY db db
 COPY config config
-
-RUN chmod +x /assistant/run_migrations.sh
