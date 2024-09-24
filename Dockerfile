@@ -15,8 +15,5 @@ COPY alembic alembic
 COPY alembic.ini alembic.ini
 COPY db db
 COPY config config
-COPY run_migrations.sh run_migrations.sh
-COPY docker-compose.prod.yml docker-compose.prod.yml
-COPY redis.conf redis.conf
 
 RUN chmod +x /assistant/run_migrations.sh
