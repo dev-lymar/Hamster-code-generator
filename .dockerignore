@@ -47,6 +47,5 @@ images/
 .git
 proxies.txt
 docs/
-redis.conf
 ruff.toml
 setup.cfg
