@@ -40,7 +40,7 @@ services:
       - .:/assistant  # Mount all source files for development
       - ./images_data:/assistant/bot/images
     working_dir: /assistant
-    command: sh -c "./run_migrations.sh && exec watchmedo auto-restart --patterns='*.py' --recursive -- python3 -m bot.main"  # Auto-reboot on changes
+    command: sh -c "./run_migrations.sh && exec python3 -m bot.main"
     depends_on:
       - postgres
       - redis
