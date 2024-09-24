@@ -51,16 +51,6 @@ jobs:
           touch ~/.ssh/known_hosts
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
           cat ~/.ssh/known_hosts
-      - name: Copy files to server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          port: ${{ secrets.PORT }}
-          key: ${{ secrets.SSHKEY }}
-          script: |
-            scp docker-compose.prod.yml redis.conf ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/ubuntu/Hamster-generator/
-
       - name: Execute deployment commands
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -88,10 +78,10 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.8.1
-          name: "Release v1.8.1"
+          tag: v1.8.2
+          name: "Release v1.8.2"
           body: |
-            Dockerhub deploy. New workflow. Message to telegram | 🏖️
+            Dockerhub deploy. New workflow. Message to telegram. Fix deploy | 🏖️
           token: ${{ secrets.GITHUB_TOKEN }}
 
   send_message:
