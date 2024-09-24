@@ -4,10 +4,10 @@ RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/ap
 
 WORKDIR /assistant
 
-COPY requirements.txt /assistant/
+COPY requirements-dev.txt /assistant/
 
 RUN pip install --upgrade pip \
- && pip install -r requirements.txt
+ && pip install -r requirements-dev.txt
 
 COPY app /assistant/app
 COPY bot /assistant/bot
