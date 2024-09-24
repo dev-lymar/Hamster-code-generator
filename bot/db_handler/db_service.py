@@ -97,10 +97,6 @@ async def log_user_action(session: AsyncSession, user_id: int, action: str):
 # Getting the oldest keys for the game
 async def get_keys(session: AsyncSession, game_name: str, limit: int = 4):
     """Retrieving keys from Redis cache, reloading from the database if necessary."""
-    if redis_client is None:
-        logger.error("❌ Redis client is not initialized.")
-        return []
-
     client = await redis_client.get_client()
 
     # Get the current number of keys in cache
@@ -117,7 +113,6 @@ async def get_keys(session: AsyncSession, game_name: str, limit: int = 4):
     # Convert bytes to strings (if keys are stored as bytes)
     cached_keys = [key.decode('utf-8') if isinstance(key, bytes) else key for key in cached_keys]
     if cached_keys:
-        logger.info(f"Retrieved {len(cached_keys)} keys from cache for game: {game_name}")
         return cached_keys
     else:
         logger.error(f"Failed to retrieve keys even after reloading cache for game: {game_name}")
