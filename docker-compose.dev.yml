@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:16.3-alpine
     env_file:
-      - .env
+      - .env.dev
     environment:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
@@ -15,13 +15,15 @@ services:
       - app-network
 
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     env_file:
-      - .env
+      - .env.dev
     volumes:
-      - ./proxies.txt:/assistant/proxies.txt
+      - .:/assistant  # Mount all source files for development
     working_dir: /assistant
-    command: sh -c "./run_migrations.sh && python3 -m app.main"
+    command: sh -c "./run_migrations.sh && watchmedo auto-restart --patterns='*.py' --recursive -- python3 -m app.main"  # Auto-reboot on changes
     depends_on:
       - postgres
       - redis
@@ -29,19 +31,21 @@ services:
       - app-network
 
   bot:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     env_file:
-      - .env
+      - .env.dev
     volumes:
+      - .:/assistant  # Mount all source files for development
       - ./images_data:/assistant/bot/images
     working_dir: /assistant
-    command: sh -c "./run_migrations.sh && exec python3 -m bot.main"
+    command: sh -c "./run_migrations.sh && exec watchmedo auto-restart --patterns='*.py' --recursive -- python3 -m bot.main"  # Auto-reboot on changes
     depends_on:
       - postgres
       - redis
     networks:
       - app-network
-
 
   redis:
     image: redis:7.4.0-alpine
