@@ -48,7 +48,9 @@ jobs:
       - name: Add SSH host key to known_hosts
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -t rsa -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+          touch ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+          cat ~/.ssh/known_hosts
       - name: Copy files to server
         uses: appleboy/ssh-action@v1.0.3
         with:
