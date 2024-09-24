@@ -10,23 +10,18 @@ load_dotenv()
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 
-def create_redis_pool():
-    """Creating and configuring the Redis pool"""
-    try:
-        pool = ConnectionPool.from_url(REDIS_URL)
-        redis_client = Redis(connection_pool=pool)
-        logger.info("✅ Redis client connected successfully")
-        return redis_client
-    except Exception as e:
-        logger.error(f"❌ Failed to connect to Redis: {e}")
-        raise
+class RedisClientManager:
+    def __init__(self, url):
+        self.connection_pool = ConnectionPool.from_url(url)
+        self.redis_client = Redis(connection_pool=self.connection_pool)
+        logger.info("✅ Redis client initialized")
+
+    async def get_client(self):
+        return self.redis_client
+
+    async def close(self):
+        await self.connection_pool.disconnect()
+        logger.info("📁 Redis connection closed successfully")
 
 
-async def close_redis_pool(redis_client):
-    """Closing a Redis pool"""
-    if redis_client:
-        try:
-            await redis_client.aclose()
-            logger.info("📁 Redis connection closed successfully")
-        except Exception as e:
-            logger.error(f"❌ Failed to close Redis connection: {e}")
+redis_manager = RedisClientManager(REDIS_URL)

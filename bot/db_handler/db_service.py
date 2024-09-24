@@ -8,18 +8,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from bot.bot_config import logger
-from config.redis_config import create_redis_pool
+from config.redis_config import redis_manager as redis_client
 from db.database import get_session
 
 from .models import User, UserLog
 
 load_dotenv()
 
-redis_client = create_redis_pool()
-
 
 async def load_keys_to_cache(session: AsyncSession, game_name: str, limit: int = 2000):
     """Loading keys from the database into the Redis cache."""
+    client = await redis_client.get_client()
+
     # Load missing keys from the database
     table_name = game_name.replace(" ", "_").lower()
     query = text(f"SELECT promo_code FROM {table_name} ORDER BY created_at ASC LIMIT :limit")
@@ -27,8 +27,8 @@ async def load_keys_to_cache(session: AsyncSession, game_name: str, limit: int =
     keys = [row[0] for row in result.fetchall()]
 
     if keys:
-        await redis_client.rpush(f"keys:{game_name}", *keys)
-        await redis_client.expire(f"keys:{game_name}", 7200)
+        await client.rpush(f"keys:{game_name}", *keys)
+        await client.expire(f"keys:{game_name}", 7200)
         logger.info(f"✅ {len(keys)} new keys loaded into cache for game: {game_name}")
     else:
         logger.info(f"❌ No new keys found in the database for game: {game_name}")
@@ -97,11 +97,10 @@ async def log_user_action(session: AsyncSession, user_id: int, action: str):
 # Getting the oldest keys for the game
 async def get_keys(session: AsyncSession, game_name: str, limit: int = 4):
     """Retrieving keys from Redis cache, reloading from the database if necessary."""
-    if game_name.lower() == "fluff crusade":
-        limit = 8
+    client = await redis_client.get_client()
 
     # Get the current number of keys in cache
-    cached_keys_count = await redis_client.llen(f"keys:{game_name}")
+    cached_keys_count = await client.llen(f"keys:{game_name}")
 
     # Reload if the number of cached keys falls below the threshold
     if cached_keys_count <= 0:
@@ -109,12 +108,11 @@ async def get_keys(session: AsyncSession, game_name: str, limit: int = 4):
         await load_keys_to_cache(session, game_name, 2000)
 
     # Retrieve keys without deleting them, to delete them later via delete_keys
-    cached_keys = await redis_client.lrange(f"keys:{game_name}", 0, limit - 1)
+    cached_keys = await client.lrange(f"keys:{game_name}", 0, limit - 1)
 
     # Convert bytes to strings (if keys are stored as bytes)
     cached_keys = [key.decode('utf-8') if isinstance(key, bytes) else key for key in cached_keys]
     if cached_keys:
-        logger.info(f"Retrieved {len(cached_keys)} keys from cache for game: {game_name}")
         return cached_keys
     else:
         logger.error(f"Failed to retrieve keys even after reloading cache for game: {game_name}")
@@ -124,7 +122,7 @@ async def get_keys(session: AsyncSession, game_name: str, limit: int = 4):
 # Deleting used keys
 async def delete_keys(session: AsyncSession, game_name: str, keys: list):
     """Deleting keys from the database and cache"""
-
+    client = await redis_client.get_client()
     # Deleting keys from the database
     table_name = game_name.replace(" ", "_").lower()
     query = text(f"DELETE FROM {table_name} WHERE promo_code = ANY(:keys)")
@@ -133,8 +131,7 @@ async def delete_keys(session: AsyncSession, game_name: str, keys: list):
 
     # Deleting keys from the cache
     for key in keys:
-        await redis_client.lrem(f"keys:{game_name}", 0, key)
-    logger.info(f"Deleted {len(keys)} keys from both cache and database for game: {game_name}")
+        await client.lrem(f"keys:{game_name}", 0, key)
 
 
 # Update key count and time of the last request

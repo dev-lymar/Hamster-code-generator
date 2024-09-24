@@ -2,6 +2,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot.utils import get_translation
+from bot.utils.referals import REFERRAL_LINKS
 
 from .back_to_main_kb import get_back_to_main_menu_button
 
@@ -11,6 +12,8 @@ async def get_action_buttons(session, user_id):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
             text=await get_translation(user_id, "buttons", "referral_links"), callback_data="referral_links")],
+        [InlineKeyboardButton(
+            text=await get_translation(user_id, "buttons", "get_drop"), url=REFERRAL_LINKS.get('🪙 Bybit CoinSweeper'))],
         [InlineKeyboardButton(
             text=await get_translation(user_id, "buttons", "get_regular_keys"), callback_data="keys_regular")],
         [InlineKeyboardButton(
@@ -77,6 +80,7 @@ async def notification_menu(session, user_id):
         "blum": "Blum",
         "binancemoon": "Binance Moonbix",
         "tonstation": "Ton Station",
+        "bybitcoin": "Bybit Coin",
     }
 
     inline_keyboard = []
@@ -85,11 +89,11 @@ async def notification_menu(session, user_id):
     for key, name in notifications.items():
         inline_keyboard.append([
             InlineKeyboardButton(
-                text=f"📩 {name} себе",
+                text=f"📩 {name} myself",
                 callback_data=f"send_self_{key}"
             ),
             InlineKeyboardButton(
-                text=f"📤 {name} всем",
+                text=f"📤 {name} all",
                 callback_data=f"send_all_{key}"
             )
         ])

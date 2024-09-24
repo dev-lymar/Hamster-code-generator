@@ -6,15 +6,15 @@ from aiogram.fsm.storage.redis import RedisStorage
 from bot.bot_config import bot, logger
 from bot.handlers import register_handlers
 from bot.middlewares.ban_check_middleware import BanCheckMiddleware
-from config.redis_config import close_redis_pool, create_redis_pool
+from config.redis_config import redis_manager
 
 
 async def main():
-    redis_client = await create_redis_pool()
+    client = await redis_manager.get_client()
     try:
         logger.info("✅ | Starting the bot and initialising the Redis")
 
-        dp = Dispatcher(storage=RedisStorage(redis_client, state_ttl=600))
+        dp = Dispatcher(storage=RedisStorage(client, state_ttl=600))
 
         dp.update.middleware(BanCheckMiddleware())
         register_handlers(dp)
@@ -24,7 +24,7 @@ async def main():
 
     finally:
         logger.info("📁 Closing the database and Redis connections")
-        await close_redis_pool(redis_client)
+        await redis_manager.close()
 
 if __name__ == '__main__':
     try:

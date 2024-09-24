@@ -1,0 +1,51 @@
+# Exclude cache folders and temporary files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# Exclude local configurations and development data
+.env
+.env.dev
+.env.prod
+.env.example
+.gitignore
+.venv
+.vscode/
+.idea/
+.pytest_cache/
+
+# Eliminate database backups
+backups/*.sql
+
+# Exclude log files
+logs/
+*.log
+
+# Excluding the pip cache
+pip-wheel-metadata/
+*.egg-info/
+.eggs/
+
+# Exclude Docker Compose files (if not needed inside the container)
+docker-compose.yml
+docker-compose.dev.yml
+docker-compose.prod.yml
+
+# Exclude various images and pictures if they are not required for assembly
+img/
+images_data/
+images/
+*.jpeg
+*.png
+
+# Exclude other files
+.DS_Store
+.python-version
+.ruff_cache
+.git
+proxies.txt
+docs/
+ruff.toml
+setup.cfg
