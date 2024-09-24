@@ -56,7 +56,7 @@ jobs:
             cd /home/ubuntu/Hamster-generator
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/hamster_bot:v1.8.0
             sudo docker-compose down
-            sudo docker-compose -f docker-compose.prod.yml up -d
+            sudo docker-compose -f /home/ubuntu/Hamster-generator/docker-compose.prod.yml up -d
 
 
   create-release:
