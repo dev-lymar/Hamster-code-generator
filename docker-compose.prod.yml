@@ -1,8 +1,6 @@
 services:
   postgres:
     image: postgres:16.3-alpine
-    env_file:
-      - .env.prod
     environment:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
@@ -14,29 +12,35 @@ services:
     networks:
       - app-network
 
+  migrate:
+    image: lymarvolodymyr/hamster_bot:${IMAGE_TAG}
+    command: alembic upgrade head
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
   app:
-    build: .
-    env_file:
-      - .env.prod
+    image: lymarvolodymyr/hamster_bot:${IMAGE_TAG}
     volumes:
       - ./proxies.txt:/assistant/proxies.txt
     working_dir: /assistant
-    command: sh -c "./run_migrations.sh && python3 -m app.main"
+    command: sh -c "python3 -m app.main"
     depends_on:
+      - migrate
       - postgres
       - redis
     networks:
       - app-network
 
   bot:
-    build: .
-    env_file:
-      - .env.prod
+    image: lymarvolodymyr/hamster_bot:${IMAGE_TAG}
     volumes:
       - ./images_data:/assistant/bot/images
     working_dir: /assistant
-    command: sh -c "./run_migrations.sh && exec python3 -m bot.main"
+    command: sh -c "exec python3 -m bot.main"
     depends_on:
+      - migrate
       - postgres
       - redis
     networks:
