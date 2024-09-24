@@ -132,7 +132,6 @@ async def delete_keys(session: AsyncSession, game_name: str, keys: list):
     # Deleting keys from the cache
     for key in keys:
         await client.lrem(f"keys:{game_name}", 0, key)
-    logger.info(f"Deleted {len(keys)} keys from both cache and database for game: {game_name}")
 
 
 # Update key count and time of the last request

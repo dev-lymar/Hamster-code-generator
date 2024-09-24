@@ -1,7 +1,7 @@
 REFERRAL_LINKS = {
     'Cats 🐈‍⬛': 't.me/catsgang_bot/join?startapp=Lv39AXNhcBvwK6ZWcoGpD',
     '🅧 X Empire': 't.me/empirebot/game?startapp=hero452792586',
-    '🪙 Bybit CoinSweeper': 'https://t.me/BybitCoinsweeper_Bot?startapp=referredBy=452792586',
+    '🪙 Bybit CoinSweeper': 'https://t.me/BybitCoinsweeper_Bot?start=referredBy=452792586',
     'Binance Moonbix 🟠': 't.me/Binance_Moonbix_bot/start?startapp=ref_452792586&startApp=ref_452792586',
     '🥠 Hrum': 't.me/hrummebot/game?startapp=ref452792586',
     '🏠 CITY Holder': 't.me/cityholder/game?startapp=452792586',
