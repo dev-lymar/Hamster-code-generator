@@ -36,10 +36,11 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/hamster_bot:${{ github.sha }}
+          tags: ${{ secrets.DOCKER_USERNAME }}/hamster_bot:v1.8.3
 
   deploy:
     runs-on: ubuntu-latest
+    needs: build_and_push_to_dockerhub
     steps:
       - uses: actions/checkout@v2
       - name: Copy repository contents via scp
@@ -75,10 +76,10 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.8.2
-          name: "Release v1.8.2"
+          tag: v1.8.3
+          name: "Release v1.8.3"
           body: |
-            Dockerhub deploy. New workflow. Message to telegram. Fix deploy | 🏖️
+            Dockerhub deploy. New workflow. Message to telegram. Final release | 🏖️
           token: ${{ secrets.GITHUB_TOKEN }}
 
   send_message:
