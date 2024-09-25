@@ -36,21 +36,23 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/hamster_bot:${{ github.sha }}
+          tags: ${{ secrets.DOCKER_USERNAME }}/hamster_bot:v1.8.3
 
   deploy:
     runs-on: ubuntu-latest
     needs: build_and_push_to_dockerhub
-    if: github.ref == 'refs/heads/main'
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-      - name: Add SSH host key to known_hosts
-        run: |
-          mkdir -p ~/.ssh
-          touch ~/.ssh/known_hosts
-          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
-          cat ~/.ssh/known_hosts
+      - uses: actions/checkout@v2
+      - name: Copy repository contents via scp
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          port: ${{ secrets.PORT }}
+          key: ${{ secrets.SSHKEY }}
+          source: "redis.conf,docker-compose.prod.yml"
+          target: "/home/${{ secrets.USERNAME }}/Hamster-generator"
+
       - name: Execute deployment commands
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -60,11 +62,7 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           script: |
             cd /home/ubuntu/Hamster-generator
-            sudo docker-compose down
-            
-            export IMAGE_TAG=${{ github.sha }}
-            
-            docker-compose -f docker-compose.prod.yml --env-file .env.prod up -d
+            ls -la
 
 
   create-release:
@@ -78,10 +76,10 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.8.2
-          name: "Release v1.8.2"
+          tag: v1.8.3
+          name: "Release v1.8.3"
           body: |
-            Dockerhub deploy. New workflow. Message to telegram. Fix deploy | 🏖️
+            Dockerhub deploy. New workflow. Message to telegram. Final release | 🏖️
           token: ${{ secrets.GITHUB_TOKEN }}
 
   send_message:
