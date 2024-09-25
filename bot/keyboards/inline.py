@@ -13,7 +13,13 @@ async def get_action_buttons(session, user_id):
         [InlineKeyboardButton(
             text=await get_translation(user_id, "buttons", "referral_links"), callback_data="referral_links")],
         [InlineKeyboardButton(
-            text=await get_translation(user_id, "buttons", "get_drop"), url=REFERRAL_LINKS.get('🪙 Bybit CoinSweeper'))],
+            text="🪙 Bybit CoinSweeper", url=REFERRAL_LINKS.get('🪙 Bybit CoinSweeper')),
+            InlineKeyboardButton(
+                text="🏠 CITY Holder", url=REFERRAL_LINKS.get('🏠 CITY Holder'))],
+        [InlineKeyboardButton(
+            text="Binance Moonbix 🟠", url=REFERRAL_LINKS.get('Binance Moonbix 🟠')),
+            InlineKeyboardButton(
+                text="🥠 Hrum", url=REFERRAL_LINKS.get('🥠 Hrum'))],
         [InlineKeyboardButton(
             text=await get_translation(user_id, "buttons", "get_regular_keys"), callback_data="keys_regular")],
         [InlineKeyboardButton(
