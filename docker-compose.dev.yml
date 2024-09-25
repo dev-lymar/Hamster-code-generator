@@ -1,10 +1,10 @@
 services:
   app:
     build:
-      context: ../
-      dockerfile: ./docker/Dockerfile.dev
+      context: .
+      dockerfile: Dockerfile.dev
     env_file:
-      - ../.env.dev
+      - .env.dev
     volumes:
       - .:/hamster
     command: python3 -m app.main
@@ -16,13 +16,13 @@ services:
 
   bot:
     build:
-      context: ../
-      dockerfile: ./docker/Dockerfile.dev
+      context: .
+      dockerfile: Dockerfile.dev
     env_file:
-      - ../.env.dev
+      - .env.dev
     volumes:
-      - ../:/hamster
-      - ../images_data:/hamster/bot/images
+      - .:/hamster
+      - ./images_data:/hamster/bot/images
     command: python3 -m bot.main
     depends_on:
       - postgres
