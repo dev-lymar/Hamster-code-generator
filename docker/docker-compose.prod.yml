@@ -2,7 +2,7 @@ services:
   migrate:
     image: lymarvolodymyr/hamster_bot:${IMAGE_TAG}
     env_file:
-      - ../.env.prod
+      - .env.prod
     command: alembic upgrade head
     depends_on:
       - postgres
@@ -12,7 +12,7 @@ services:
   app:
     image: lymarvolodymyr/hamster_bot:${IMAGE_TAG}
     env_file:
-      - ../.env.prod
+      - .env.prod
     command: python3 -m app.main
     volumes:
       - ./proxies.txt:/hamster/proxies.txt
@@ -27,7 +27,7 @@ services:
   bot:
     image: lymarvolodymyr/hamster_bot:${IMAGE_TAG}
     env_file:
-      - ../.env.prod
+      - .env.prod
     command: python3 -m bot.main
     volumes:
       - ./images_data:/hamster/bot/images
