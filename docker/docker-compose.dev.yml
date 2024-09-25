@@ -1,0 +1,31 @@
+services:
+  app:
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile.dev
+    env_file:
+      - ../.env.dev
+    volumes:
+      - .:/hamster
+    command: python3 -m app.main
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - app-network
+
+  bot:
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile.dev
+    env_file:
+      - ../.env.dev
+    volumes:
+      - ../:/hamster
+      - ../images_data:/hamster/bot/images
+    command: python3 -m bot.main
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - app-network
