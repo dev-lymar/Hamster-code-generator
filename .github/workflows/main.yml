@@ -61,7 +61,7 @@ jobs:
           port: ${{ secrets.PORT }}
           key: ${{ secrets.SSHKEY }}
           script: |
-            cd /home/ubuntu/Hamster-generator
+            cd /home/${{ secrets.USERNAME }}/Hamster-generator
             
             sed -i 's/IMAGE_TAG=.*/IMAGE_TAG=v1.8.6/' .env.prod
             
