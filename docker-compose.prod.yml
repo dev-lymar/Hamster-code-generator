@@ -13,7 +13,7 @@ services:
     image: lymarvolodymyr/hamster_bot:${IMAGE_TAG}
     env_file:
       - .env.prod
-    command: python3 -m app.main
+    command: sh -c "exec python3 -m app.main"
     volumes:
       - ./proxies.txt:/hamster/proxies.txt
       - ./logs/app:/hamster/logs/app
@@ -28,7 +28,7 @@ services:
     image: lymarvolodymyr/hamster_bot:${IMAGE_TAG}
     env_file:
       - .env.prod
-    command: python3 -m bot.main
+    command: sh -c "exec python3 -m bot.main"
     volumes:
       - ./images_data:/hamster/bot/images
       - ./logs/bot:/hamster/logs/bot
