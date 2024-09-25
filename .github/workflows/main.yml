@@ -50,7 +50,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           port: ${{ secrets.PORT }}
           key: ${{ secrets.SSHKEY }}
-          source: "redis.conf,Makefile,docker/docker-compose.yml,docker/docker-compose.prod.yml"
+          source: "redis.conf,Makefile,docker-compose.yml,docker-compose.prod.yml"
           target: "/home/${{ secrets.USERNAME }}/Hamster-generator"
 
       - name: Execute deployment commands
