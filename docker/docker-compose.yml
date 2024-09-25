@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:16.3-alpine
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7.4.0-alpine
+    hostname: redis
+    ports:
+      - "6379:6379"
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+  images_data:
+
+networks:
+  app-network:
+    driver: bridge

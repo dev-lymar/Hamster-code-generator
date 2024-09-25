@@ -1,0 +1,40 @@
+services:
+  migrate:
+    image: lymarvolodymyr/hamster_bot:${IMAGE_TAG}
+    env_file:
+      - ../.env.prod
+    command: alembic upgrade head
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  app:
+    image: lymarvolodymyr/hamster_bot:${IMAGE_TAG}
+    env_file:
+      - ../.env.prod
+    command: python3 -m app.main
+    volumes:
+      - ./proxies.txt:/hamster/proxies.txt
+      - ./logs/app:/hamster/logs/app
+    depends_on:
+      - migrate
+      - postgres
+      - redis
+    networks:
+      - app-network
+
+  bot:
+    image: lymarvolodymyr/hamster_bot:${IMAGE_TAG}
+    env_file:
+      - ../.env.prod
+    command: python3 -m bot.main
+    volumes:
+      - ./images_data:/hamster/bot/images
+      - ./logs/bot:/hamster/logs/bot
+    depends_on:
+      - migrate
+      - postgres
+      - redis
+    networks:
+      - app-network

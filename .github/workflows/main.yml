@@ -36,7 +36,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/hamster_bot:v1.8.3
+          tags: ${{ secrets.DOCKER_USERNAME }}/hamster_bot:v1.8.5
 
   deploy:
     runs-on: ubuntu-latest
@@ -50,7 +50,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           port: ${{ secrets.PORT }}
           key: ${{ secrets.SSHKEY }}
-          source: "redis.conf,docker-compose.prod.yml"
+          source: "redis.conf,Makefile,docker/docker-compose.yml,docker/docker-compose.prod.yml"
           target: "/home/${{ secrets.USERNAME }}/Hamster-generator"
 
       - name: Execute deployment commands
@@ -62,8 +62,11 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           script: |
             cd /home/ubuntu/Hamster-generator
-            ls -la
-
+            
+            sed -i 's/IMAGE_TAG=.*/IMAGE_TAG=v1.8.5/' .env.prod
+            
+            make prod-down
+            make prod-up
 
   create-release:
     runs-on: ubuntu-latest
@@ -76,10 +79,10 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.8.3
-          name: "Release v1.8.3"
+          tag: v1.8.5
+          name: "Release v1.8.5"
           body: |
-            Dockerhub deploy. New workflow. Message to telegram. Final release | 🏖️
+            Final release | 🏖️
           token: ${{ secrets.GITHUB_TOKEN }}
 
   send_message:

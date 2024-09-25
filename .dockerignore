@@ -29,9 +29,9 @@ pip-wheel-metadata/
 .eggs/
 
 # Exclude Docker Compose files (if not needed inside the container)
-docker-compose.yml
-docker-compose.dev.yml
-docker-compose.prod.yml
+docker/docker-compose.yml
+docker/docker-compose.dev.yml
+docker/docker-compose.prod.yml
 
 # Exclude various images and pictures if they are not required for assembly
 img/
