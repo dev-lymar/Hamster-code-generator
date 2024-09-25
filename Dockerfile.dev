@@ -4,9 +4,9 @@ RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/ap
 
 WORKDIR /hamster
 
-COPY ../requirements-dev.txt requirements-dev.txt
+COPY requirements-dev.txt requirements-dev.txt
 
 RUN pip install --upgrade pip \
  && pip install -r requirements-dev.txt
 
-COPY .. .
+COPY . .
