@@ -16,13 +16,14 @@ async def get_action_buttons(user_id: int) -> InlineKeyboardMarkup:
     )
 
     builder.row(
-        InlineKeyboardButton(text="Binance Moonbix 🟠", url=REFERRAL_LINKS.get('Binance Moonbix 🟠')),
+        InlineKeyboardButton(text="☑️ TON Station", url=REFERRAL_LINKS.get('☑️ TON Station')),
+        InlineKeyboardButton(text="Cats 🐈‍⬛", url=REFERRAL_LINKS.get('Cats 🐈‍⬛')),
+        InlineKeyboardButton(text="🏠 CITY Holder", url=REFERRAL_LINKS.get('🏠 CITY Holder')),
         InlineKeyboardButton(text="🥠 Hrum", url=REFERRAL_LINKS.get('🥠 Hrum')),
         InlineKeyboardButton(text="🪙 Bybit CoinSweeper", url=REFERRAL_LINKS.get('🪙 Bybit CoinSweeper')),
-        InlineKeyboardButton(text="🏠 CITY Holder", url=REFERRAL_LINKS.get('🏠 CITY Holder')),
+        InlineKeyboardButton(text="Binance Moonbix 🟠", url=REFERRAL_LINKS.get('Binance Moonbix 🟠')),
         width=2
     )
-    builder.row(InlineKeyboardButton(text="Cats 🐈‍⬛", url=REFERRAL_LINKS.get('Cats 🐈‍⬛')))
     builder.row(InlineKeyboardButton(
             text=await get_translation(user_id, "buttons", "get_regular_keys"), callback_data="keys_regular")
     )
