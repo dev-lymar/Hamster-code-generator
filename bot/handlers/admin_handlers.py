@@ -13,11 +13,11 @@ from bot.db_handler.db_service import (
     get_users_list_admin_panel,
     log_user_action,
 )
-from bot.keyboards.inline import (
+from bot.keyboards.admin_kb import (
     confirmation_button_notification,
     get_admin_panel_keyboard,
     get_detail_info_in_admin,
-    get_main_in_admin,
+    get_main_admin,
     notification_menu,
 )
 from bot.keyboards.referral_links_kb import referral_links_keyboard
@@ -34,13 +34,13 @@ message_user_mapping = {}
 
 
 # Admin panel handler
-async def handle_admin_command_handler(session, message, user_id):
+async def handle_admin_command_handler(message, user_id):
     admin_text = await get_translation(user_id, "admin", "panel_description")
 
     await bot.send_message(
         chat_id=message.chat.id,
         text=admin_text,
-        reply_markup=await get_admin_panel_keyboard(session, user_id)
+        reply_markup=await get_admin_panel_keyboard(user_id)
     )
 
 
@@ -54,7 +54,7 @@ async def keys_admin_panel_handler(callback: types.CallbackQuery):
             chat_id=callback.message.chat.id,
             message_id=callback.message.message_id,
             text=keys_count_message,
-            reply_markup=await get_main_in_admin(session, user_id)
+            reply_markup=await get_main_admin(user_id)
         )
 
 
@@ -66,8 +66,8 @@ async def users_admin_panel_handler(callback: types.CallbackQuery):
 
         message_text = await get_users_list_admin_panel(session, GAMES)
 
-        back_keyboard = await get_main_in_admin(session, user_id)
-        detail_info_keyboard = await get_detail_info_in_admin(session, user_id)
+        back_keyboard = await get_main_admin(user_id)
+        detail_info_keyboard = await get_detail_info_in_admin(user_id)
         combined_keyboard = InlineKeyboardMarkup(
             inline_keyboard=detail_info_keyboard.inline_keyboard + back_keyboard.inline_keyboard
         )
@@ -99,7 +99,7 @@ async def user_detail_admin_panel(message: types.Message, state: FSMContext):
 
     async with await get_session() as session:
         user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
-        keyboard = await get_main_in_admin(session, user_id)
+        keyboard = await get_main_admin(user_id)
 
         try:
             user_detail_id = int(user_detail_id)
@@ -130,37 +130,31 @@ async def user_detail_admin_panel(message: types.Message, state: FSMContext):
 # Back to main menu(for admin)
 @router.callback_query(F.data == "back_to_admin_main")
 async def back_to_admin_main_menu_handler(callback: types.CallbackQuery):
-    async with await get_session() as session:
-        user_id = (
-            callback.from_user.id if callback.from_user.id != BOT_ID else callback.message.chat.id
-        )
+    user_id = (
+        callback.from_user.id if callback.from_user.id != BOT_ID else callback.message.chat.id
+    )
 
-        admin_text = await get_translation(user_id, "admin", "panel_description")
-        keyboard = await get_admin_panel_keyboard(session, user_id)
+    admin_text = await get_translation(user_id, "admin", "panel_description")
+    keyboard = await get_admin_panel_keyboard(user_id)
 
-        await bot.edit_message_text(
-            chat_id=callback.message.chat.id,
-            message_id=callback.message.message_id,
-            text=admin_text,
-            reply_markup=keyboard
-        )
+    await bot.edit_message_text(
+        chat_id=callback.message.chat.id,
+        message_id=callback.message.message_id,
+        text=admin_text,
+        reply_markup=keyboard
+    )
 
 
 @router.callback_query(F.data == "notifications_admin_panel")
 async def notification_menu_handler(callback: types.CallbackQuery):
-    async with await get_session() as session:
-        user_id = (
-            callback.from_user.id if callback.from_user.id != BOT_ID else callback.message.chat.id
-        )
+    keyboard = await notification_menu()
 
-        keyboard = await notification_menu(session, user_id)
-
-        await bot.edit_message_text(
-            chat_id=callback.message.chat.id,
-            message_id=callback.message.message_id,
-            text="🚨 Watch out! The panel for sending notifications to users 📤",  # Add translation ‼️
-            reply_markup=keyboard
-        )
+    await bot.edit_message_text(
+        chat_id=callback.message.chat.id,
+        message_id=callback.message.message_id,
+        text="🚨 Watch out! The panel for sending notifications to users 📤",  # Add translation ‼️
+        reply_markup=keyboard
+    )
 
 
 @router.callback_query(F.data.startswith('send_self_'))
@@ -200,7 +194,7 @@ async def send_notification_to_self_handler(callback: types.CallbackQuery):
 
         await asyncio.sleep(7)
 
-        keyboard_after = await notification_menu(session, user_id)
+        keyboard_after = await notification_menu()
 
         await bot.delete_message(
             chat_id=callback.message.chat.id,
@@ -224,7 +218,7 @@ async def confirm_send_all_notifications_handler(callback: types.CallbackQuery):
 
         await log_user_action(session, user_id, "Confirmation send notification")
 
-        keyboard = await confirmation_button_notification(session, user_id, notif_key)
+        keyboard = await confirmation_button_notification(notif_key)
 
         await bot.edit_message_text(
             chat_id=callback.message.chat.id,
@@ -285,7 +279,7 @@ async def confirm_send_all_handler(callback: types.CallbackQuery):
                 except Exception as e:
                     logger.error(f"Failed to send text notification to {chat_id}: {e}")
 
-        keyboard_after = await get_admin_panel_keyboard(session, user_id)
+        keyboard_after = await get_admin_panel_keyboard(user_id)
 
         await bot.send_message(
             chat_id=callback.message.chat.id,
@@ -314,8 +308,7 @@ async def get_user_id_for_message(message: types.Message, state: FSMContext):
         await state.clear()
 
         user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
-        async with await get_session() as session:
-            await handle_admin_command_handler(session, message, user_id)
+        await handle_admin_command_handler(message, user_id)
         return
 
     try:
@@ -338,8 +331,7 @@ async def get_message_text(message: types.Message, state: FSMContext):
         await state.clear()
 
         user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
-        async with await get_session() as session:
-            await handle_admin_command_handler(session, message, user_id)
+        await handle_admin_command_handler(message, user_id)
         return
 
     await state.update_data(message_text=message_text)  # Save the message text to a state
@@ -375,13 +367,11 @@ async def process_image_and_send_message(message: types.Message, state: FSMConte
     # Resetting state
     await state.clear()
 
-    async with await get_session() as session:
-        current_user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
-
-        await handle_admin_command_handler(session, message, current_user_id)
+    current_user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
+    await handle_admin_command_handler(message, current_user_id)
 
     # Back to the admin panel
-    await handle_admin_command_handler(session, message, user_id)
+    await handle_admin_command_handler(message, user_id)
 
 
 # Forward a message to all admins and optionally to a group chat

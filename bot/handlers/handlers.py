@@ -71,7 +71,7 @@ async def welcome_command_handler(session, message, user_id, chat_id, user):
                     chat_id=chat_id,
                     photo=photo,
                     caption=welcome_text,
-                    reply_markup=await get_action_buttons(session, user_id)
+                    reply_markup=await get_action_buttons(user_id)
                 )
                 return
             except Exception as e:
@@ -80,7 +80,7 @@ async def welcome_command_handler(session, message, user_id, chat_id, user):
             await bot.send_message(
                 chat_id=chat_id,
                 text=welcome_text,
-                reply_markup=await get_action_buttons(session, user_id)
+                reply_markup=await get_action_buttons(user_id)
             )
     except Exception as e:
         logger.error(f"Error in welcome_command_handler: {e}")
@@ -95,7 +95,7 @@ async def send_menu_handler(message: types.Message, is_back_to_menu: bool = Fals
         chat_id = message.chat.id
 
         # Use the function to get the buttons
-        buttons = await get_action_buttons(session, user_id)
+        buttons = await get_action_buttons(user_id)
         caption = await get_translation(user_id, "messages", "choose_action")
         keys_data = await get_keys_count_main_menu(session, GAMES)
 
@@ -319,67 +319,65 @@ async def keys_handler(callback: types.CallbackQuery):
 
 # Function for sending a message when the daily limit is reached
 async def send_daily_limit_reached_handler(callback: types.CallbackQuery, user_id: int):
-    async with await get_session() as session:
-        limit_message = await get_translation(user_id, "messages", "daily_limit_exceeded")
+    limit_message = await get_translation(user_id, "messages", "daily_limit_exceeded")
 
-        photo = await load_image("premium")
-        if photo:
-            await bot.delete_message(
-                chat_id=callback.message.chat.id,
-                message_id=callback.message.message_id
-            )
-            return await bot.send_photo(
-                chat_id=callback.message.chat.id,
-                photo=photo,
-                caption=limit_message,
-                reply_markup=await get_action_buttons(session, user_id)
-            )
-        return await bot.send_message(
-            chat_id=callback.message.chat.id,
-            text=limit_message,
-            reply_markup=await get_action_buttons(session, user_id)
-        )
-
-
-# Function for sending a message to tell you to wait and updating the image
-async def send_wait_time_handler(callback: types.CallbackQuery, user_id: int, wait_message: str):
-    async with await get_session() as session:
-        chat_id = callback.message.chat.id
-        message_id = callback.message.message_id
-        photo = await load_image("premium")
-        if photo:
-            new_media = types.InputMediaPhoto(media=photo, caption=wait_message)
-
-            if callback.message.photo:
-                # Updating the image and signature in a post
-                await bot.edit_message_media(
-                    chat_id=chat_id,
-                    message_id=message_id,
-                    media=new_media,
-                    reply_markup=await get_action_buttons(session, user_id)
-                )
-                return
-            else:
-                await bot.delete_message(
-                    chat_id=callback.message.chat.id,
-                    message_id=callback.message.message_id
-                )
-                await bot.send_photo(
-                    chat_id=callback.message.chat.id,
-                    photo=photo,
-                    caption=wait_message,
-                    reply_markup=await get_action_buttons(session, user_id)
-                )
-        # If image directory is missing or empty
+    photo = await load_image("premium")
+    if photo:
         await bot.delete_message(
             chat_id=callback.message.chat.id,
             message_id=callback.message.message_id
         )
-        await bot.send_message(
-            chat_id=chat_id,
-            text=wait_message,
-            reply_markup=await get_action_buttons(session, user_id)
+        return await bot.send_photo(
+            chat_id=callback.message.chat.id,
+            photo=photo,
+            caption=limit_message,
+            reply_markup=await get_action_buttons(user_id)
         )
+    return await bot.send_message(
+        chat_id=callback.message.chat.id,
+        text=limit_message,
+        reply_markup=await get_action_buttons(user_id)
+    )
+
+
+# Function for sending a message to tell you to wait and updating the image
+async def send_wait_time_handler(callback: types.CallbackQuery, user_id: int, wait_message: str):
+    chat_id = callback.message.chat.id
+    message_id = callback.message.message_id
+    photo = await load_image("premium")
+    if photo:
+        new_media = types.InputMediaPhoto(media=photo, caption=wait_message)
+
+        if callback.message.photo:
+            # Updating the image and signature in a post
+            await bot.edit_message_media(
+                chat_id=chat_id,
+                message_id=message_id,
+                media=new_media,
+                reply_markup=await get_action_buttons(user_id)
+            )
+            return
+        else:
+            await bot.delete_message(
+                chat_id=callback.message.chat.id,
+                message_id=callback.message.message_id
+            )
+            await bot.send_photo(
+                chat_id=callback.message.chat.id,
+                photo=photo,
+                caption=wait_message,
+                reply_markup=await get_action_buttons(user_id)
+            )
+    # If image directory is missing or empty
+    await bot.delete_message(
+        chat_id=callback.message.chat.id,
+        message_id=callback.message.message_id
+    )
+    await bot.send_message(
+        chat_id=chat_id,
+        text=wait_message,
+        reply_markup=await get_action_buttons(user_id)
+    )
 
 
 # Handling banned users
@@ -420,7 +418,7 @@ async def settings_handler(callback: types.CallbackQuery):
                     chat_id=callback.message.chat.id,
                     message_id=callback.message.message_id,
                     media=new_media,
-                    reply_markup=await get_settings_menu(session, user_id)
+                    reply_markup=await get_settings_menu(user_id)
                 )
             else:
                 await bot.delete_message(
@@ -431,7 +429,7 @@ async def settings_handler(callback: types.CallbackQuery):
                     chat_id=callback.message.chat.id,
                     photo=photo,
                     caption=settings_message,
-                    reply_markup=await get_settings_menu(session, user_id)
+                    reply_markup=await get_settings_menu(user_id)
                 )
             return
         if callback.message.text:
@@ -439,7 +437,7 @@ async def settings_handler(callback: types.CallbackQuery):
                 chat_id=callback.message.chat.id,
                 message_id=callback.message.message_id,
                 text=settings_message,
-                reply_markup=await get_settings_menu(session, user_id)
+                reply_markup=await get_settings_menu(user_id)
             )
 
 
