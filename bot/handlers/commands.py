@@ -33,11 +33,10 @@ async def command_change_lang(message: Message, state: FSMContext):
 
 @router.message(Command('admin'), AdminFilter())
 async def command_admin(message: Message):
-    async with await get_session() as session:
-        user = message.from_user
-        user_id = user.id if user.id != BOT_ID else message.chat.id
+    user = message.from_user
+    user_id = user.id if user.id != BOT_ID else message.chat.id
 
-        await handle_admin_command_handler(session, message, user_id)
+    await handle_admin_command_handler(message, user_id)
 
 
 def register_commands_handler(dp):

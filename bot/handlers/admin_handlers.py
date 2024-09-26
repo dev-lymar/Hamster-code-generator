@@ -176,35 +176,37 @@ async def send_notification_to_self_handler(callback: types.CallbackQuery):
         photo = await load_image("notification", specific_image=f"{notif_key}.png")
         keyboard = await referral_links_keyboard(user_id)
 
-        if photo:
-            try:
-                test_message = await bot.send_photo(
-                    chat_id=callback.message.chat.id,
-                    photo=photo,
-                    caption=notification_text,
-                    reply_markup=keyboard
-                )
-            except Exception as e:
-                logger.error(f"Failed to send photo notification: {e}")
-                error_text = f"Failed to send photo notification: {e}"
-                await bot.send_message(
-                    chat_id=callback.message.chat.id,
-                    text=error_text
-                )
+        try:
+            test_message = await bot.send_photo(
+                chat_id=callback.message.chat.id,
+                photo=photo,
+                caption=notification_text,
+                reply_markup=keyboard
+            )
+        except Exception as e:
+            logger.error(f"Failed to send photo notification: {e}")
+            error_text = f"Failed to send photo notification: {e}"
+            test_message = await bot.send_message(
+                chat_id=callback.message.chat.id,
+                text=error_text
+            )
 
         await asyncio.sleep(7)
 
         keyboard_after = await notification_menu()
 
-        await bot.delete_message(
-            chat_id=callback.message.chat.id,
-            message_id=test_message.message_id
-        )
-        await bot.send_message(
-            chat_id=callback.message.chat.id,
-            text="🚨 Watch out! The panel for sending notifications to users 📤",
-            reply_markup=keyboard_after
-        )
+        if test_message:
+            await bot.delete_message(
+                chat_id=callback.message.chat.id,
+                message_id=test_message.message_id
+            )
+            await bot.send_message(
+                chat_id=callback.message.chat.id,
+                text="🚨 Watch out! The panel for sending notifications to users 📤",
+                reply_markup=keyboard_after
+            )
+        else:
+            logger.warning("Photo notification was not sent, so no message to delete.")
 
 
 @router.callback_query(F.data.startswith('send_all_'))
@@ -223,7 +225,7 @@ async def confirm_send_all_notifications_handler(callback: types.CallbackQuery):
         await bot.edit_message_text(
             chat_id=callback.message.chat.id,
             message_id=callback.message.message_id,
-            text="‼️ <i>Send a notification to <b>ALL</b> users ?</i> ‼️",  # Add translation ‼️
+            text="‼️ <i>Send a notification to <b>ALL</b> users ?</i> ‼️",
             reply_markup=keyboard
         )
 
