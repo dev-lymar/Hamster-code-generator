@@ -5,7 +5,7 @@ from bot.utils.referals import REFERRAL_LINKS
 from .back_to_main_kb import get_back_to_main_menu_button
 
 
-async def referral_links_keyboard(user_id):
+async def referral_links_keyboard(user_id: int) -> InlineKeyboardMarkup:
     main_menu_back = await get_back_to_main_menu_button(user_id)
     buttons = []
     for game_name, game_url in REFERRAL_LINKS.items():
