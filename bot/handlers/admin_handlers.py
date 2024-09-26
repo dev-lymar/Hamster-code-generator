@@ -369,9 +369,6 @@ async def process_image_and_send_message(message: types.Message, state: FSMConte
     current_user_id: int = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
     await handle_admin_command_handler(message, current_user_id)
 
-    # Back to the admin panel
-    await handle_admin_command_handler(message, user_id)
-
 
 # Forward a message to all admins and optionally to a group chat
 async def forward_message_to_admins(message: Message) -> Dict[int, int]:

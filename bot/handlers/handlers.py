@@ -87,6 +87,11 @@ async def welcome_command_handler(
                 text=welcome_text,
                 reply_markup=await get_action_buttons(user_id)
             )
+        else:
+            await message.answer(
+                text=welcome_text,
+                reply_markup=await get_action_buttons(user_id)
+            )
     except Exception as e:
         logger.error(f"Error in welcome_command_handler: {e}")
 
@@ -149,12 +154,15 @@ async def referral_links_handler(callback: types.CallbackQuery) -> None:
     user_id: int = callback.from_user.id if callback.from_user.id != BOT_ID else callback.chat.id
 
     photo: Optional[InputFile] = await load_image("premium")
+
+    caption_ref_link: str = await get_translation(user_id, "messages", "referral_links_intro")
+    chat_id: int = callback.message.chat.id
+    message_id: int = callback.message.message_id
+    keyboard: InlineKeyboardMarkup = await referral_links_keyboard(user_id)
+    await callback.answer()
+
     if photo:
-        caption_ref_link: str = await get_translation(user_id, "messages", "referral_links_intro")
         new_media: InputMediaPhoto = types.InputMediaPhoto(media=photo, caption=caption_ref_link)
-        chat_id: int = callback.message.chat.id
-        message_id: int = callback.message.message_id
-        keyboard: InlineKeyboardMarkup = await referral_links_keyboard(user_id)
 
         if callback.message.photo:
             await bot.edit_message_media(
@@ -174,6 +182,12 @@ async def referral_links_handler(callback: types.CallbackQuery) -> None:
                 caption=caption_ref_link,
                 reply_markup=keyboard
             )
+    else:
+        await bot.send_message(
+            chat_id=chat_id,
+            text=caption_ref_link,
+            reply_markup=keyboard
+        )
 
 
 async def change_language_logic_handler(message: types.Message, user_id: int, state: FSMContext) -> None:
