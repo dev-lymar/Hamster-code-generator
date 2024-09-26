@@ -58,7 +58,7 @@ async def load_image(subfolder: str, specific_image: str = None) -> FSInputFile 
     return None
 
 
-def get_remaining_time(last_request_time, interval_minutes):
+def get_remaining_time(last_request_time: datetime, interval_minutes: int) -> tuple[int, int]:
     if last_request_time is None:
         return 0, 0
 

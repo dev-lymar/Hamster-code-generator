@@ -25,7 +25,7 @@ def calculate_achievement(total_keys: int, days_in_bot: int) -> str:
     return ACHIEVEMENTS[1]  # Default
 
 
-def calculate_days_in_bot(registration_date):
+def calculate_days_in_bot(registration_date: datetime) -> int:
     current_time = datetime.now(timezone.utc)
     return (current_time - registration_date).days
 
