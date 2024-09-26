@@ -1,5 +1,9 @@
+from typing import Any, Dict, List, Optional
+
 from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
+from aiogram.types import InlineKeyboardMarkup, InputFile, InputMediaPhoto
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from bot.bot_config import BOT_ID, bot, logger
 from bot.db_handler.db_service import (
@@ -35,10 +39,11 @@ router = Router()
 
 
 # Command handler /start
-async def welcome_command_handler(session, message, user_id, chat_id, user):
+async def welcome_command_handler(
+        session: AsyncSession, message: types.Message, user_id: int, chat_id: int, user: types.User) -> None:
     try:
         # Define the user language, if it is not supported - set English
-        user_language_code = user.language_code if user.language_code in SUPPORTED_LANGUAGES else 'en'
+        user_language_code: str = user.language_code if user.language_code in SUPPORTED_LANGUAGES else 'en'
 
         user_data = {
             'chat_id': chat_id,
@@ -61,10 +66,10 @@ async def welcome_command_handler(session, message, user_id, chat_id, user):
         if user_record.language_code != user_data['language_code']:
             await update_user_language(session, user_id, user_data['language_code'])
 
-        translation = await get_translation(user_id, "common", "welcome")
-        welcome_text = translation.format(first_name=user.first_name)
+        translation: str = await get_translation(user_id, "common", "welcome")
+        welcome_text: str = translation.format(first_name=user.first_name)
 
-        photo = await load_image("welcome")
+        photo: Optional[InputFile] = await load_image("welcome")
         if photo:
             try:
                 await bot.send_photo(
@@ -89,17 +94,17 @@ async def welcome_command_handler(session, message, user_id, chat_id, user):
 
 
 # Function to send keys menu after generating keys
-async def send_menu_handler(message: types.Message, is_back_to_menu: bool = False):
+async def send_menu_handler(message: types.Message, is_back_to_menu: bool = False) -> None:
     async with await get_session() as session:
-        user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
-        chat_id = message.chat.id
+        user_id: int = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
+        chat_id: int = message.chat.id
 
         # Use the function to get the buttons
-        buttons = await get_action_buttons(user_id)
-        caption = await get_translation(user_id, "messages", "choose_action")
-        keys_data = await get_keys_count_main_menu(session, GAMES)
+        buttons: InlineKeyboardMarkup = await get_action_buttons(user_id)
+        caption: str = await get_translation(user_id, "messages", "choose_action")
+        keys_data: Dict = await get_keys_count_main_menu(session, GAMES)
 
-        photo = await load_image("key_generated")
+        photo: Optional[InputFile] = await load_image("key_generated")
         if photo:
             if is_back_to_menu and message.photo:
                 await bot.edit_message_media(
@@ -140,16 +145,16 @@ async def send_menu_handler(message: types.Message, is_back_to_menu: bool = Fals
 
 
 @router.callback_query(F.data == "referral_links")
-async def referral_links_handler(callback: types.CallbackQuery):
-    user_id = callback.from_user.id if callback.from_user.id != BOT_ID else callback.chat.id
+async def referral_links_handler(callback: types.CallbackQuery) -> None:
+    user_id: int = callback.from_user.id if callback.from_user.id != BOT_ID else callback.chat.id
 
-    photo = await load_image("premium")
+    photo: Optional[InputFile] = await load_image("premium")
     if photo:
-        caption_ref_link = await get_translation(user_id, "messages", "referral_links_intro")
-        new_media = types.InputMediaPhoto(media=photo, caption=caption_ref_link)
-        chat_id = callback.message.chat.id
-        message_id = callback.message.message_id
-        keyboard = await referral_links_keyboard(user_id)
+        caption_ref_link: str = await get_translation(user_id, "messages", "referral_links_intro")
+        new_media: InputMediaPhoto = types.InputMediaPhoto(media=photo, caption=caption_ref_link)
+        chat_id: int = callback.message.chat.id
+        message_id: int = callback.message.message_id
+        keyboard: InlineKeyboardMarkup = await referral_links_keyboard(user_id)
 
         if callback.message.photo:
             await bot.edit_message_media(
@@ -171,16 +176,16 @@ async def referral_links_handler(callback: types.CallbackQuery):
             )
 
 
-async def change_language_logic_handler(message: types.Message, user_id: int, state: FSMContext):
+async def change_language_logic_handler(message: types.Message, user_id: int, state: FSMContext) -> None:
     async with await get_session() as session:
 
         # Log user action
         await log_user_action(session, user_id, "/change_lang command used")
 
-        available_languages = get_available_languages()
+        available_languages: Dict = get_available_languages()
 
         # Creating a keyboard using a separate function
-        keyboard_markup = create_language_keyboard(available_languages)
+        keyboard_markup: InlineKeyboardMarkup = create_language_keyboard(available_languages)
 
         # Sending a message with the keypad
         lang_message = await bot.send_message(
@@ -196,10 +201,10 @@ async def change_language_logic_handler(message: types.Message, user_id: int, st
 
 
 @router.callback_query(F.data == "settings_choose_language")
-async def language_button_handler(callback: types.CallbackQuery, state: FSMContext):
+async def language_button_handler(callback: types.CallbackQuery, state: FSMContext) -> None:
     await callback.answer()
     async with await get_session() as _:
-        user_id = (
+        user_id: int = (
             callback.from_user.id if callback.from_user.id != BOT_ID else callback.message.chat.id
         )
         await change_language_logic_handler(callback.message, user_id, state)
@@ -207,13 +212,13 @@ async def language_button_handler(callback: types.CallbackQuery, state: FSMConte
 
 # Language selection processing
 @router.callback_query(F.data.in_(get_available_languages().keys()))
-async def set_language(callback: types.CallbackQuery, state: FSMContext):
+async def set_language(callback: types.CallbackQuery, state: FSMContext) -> None:
     async with await get_session() as session:
-        user_id = (
+        user_id: int = (
             callback.from_user.id if callback.from_user.id != BOT_ID else callback.message.chat.id
         )
 
-        selected_language = callback.data
+        selected_language: str = callback.data
 
         # Updating the language in the database
         await update_user_language(session, user_id, selected_language)
@@ -224,14 +229,14 @@ async def set_language(callback: types.CallbackQuery, state: FSMContext):
         await set_user_commands(bot, user_id)
 
         # Forcibly query the language from the database again
-        new_language = await get_user_language(session, user_id)
+        new_language: str = await get_user_language(session, user_id)
         logger.info(f"Language after update for user {user_id}: {new_language}")
 
         # Log user action
         await log_user_action(session, user_id, f"Language changed to {selected_language}")
 
         # Deleting the language selection message and the user's command message
-        data = await state.get_data()
+        data: Dict = await state.get_data()
         if "lang_message_id" in data:
             await bot.delete_message(chat_id=callback.message.chat.id, message_id=data["lang_message_id"])
         if "prev_message_id" in data:
@@ -250,10 +255,10 @@ async def set_language(callback: types.CallbackQuery, state: FSMContext):
 
 # Handling of "get_keys" button pressing
 @router.callback_query(F.data == "keys_regular")
-async def keys_handler(callback: types.CallbackQuery):
+async def keys_handler(callback: types.CallbackQuery) -> None:
     try:
         async with (await get_session()) as session:
-            user_id = (
+            user_id: int = (
                 callback.from_user.id if callback.from_user.id != BOT_ID else callback.message.chat.id
             )
             await callback.answer()
@@ -266,10 +271,10 @@ async def keys_handler(callback: types.CallbackQuery):
                 return
 
             # Checking the interval between requests
-            interval_minutes = STATUS_LIMITS[user_info.user_status]['interval_minutes']
+            interval_minutes: int = STATUS_LIMITS[user_info.user_status]['interval_minutes']
             minutes, seconds = get_remaining_time(user_info.last_request_time, interval_minutes)
             if minutes > 0 or seconds > 0:
-                wait_message_template = await get_translation(user_id, "messages", "wait_time_without_hours")
+                wait_message_template: str = await get_translation(user_id, "messages", "wait_time_without_hours")
                 wait_message = wait_message_template.format(minutes=minutes, sec=seconds)
                 await send_wait_time_handler(callback, user_id, wait_message)
                 return
@@ -280,24 +285,24 @@ async def keys_handler(callback: types.CallbackQuery):
                 reply_markup=None
             )
 
-            keys_list = []
+            keys_list: List[Dict[str, str]] = []
             for game in GAMES:
-                keys = await get_keys(session, game)
+                keys: Dict[str, str] = await get_keys(session, game)
                 keys_list.append(keys)
 
-            response_text_template = await get_translation(user_id, "messages", 'keys_generated_success')
-            response_text = f"{response_text_template}\n\n"
-            total_keys_in_request = 0
+            response_text_template: str = await get_translation(user_id, "messages", 'keys_generated_success')
+            response_text: str = f"{response_text_template}\n\n"
+            total_keys_in_request: int = 0
 
             for game, keys in zip(GAMES, keys_list):
                 if keys:
                     total_keys_in_request += len(keys)
                     response_text += f"<b>{game}</b>:\n"
-                    keys_to_delete = [key for key in keys]
+                    keys_to_delete: List[str] = [key for key in keys]
                     response_text += "\n".join([f"<code>{key}</code>" for key in keys_to_delete]) + "\n\n"
                     await delete_keys(session, game, keys_to_delete)
                 else:
-                    no_keys_template = await get_translation(user_id, "messages", 'no_keys_available')
+                    no_keys_template: str = await get_translation(user_id, "messages", 'no_keys_available')
                     response_text += no_keys_template.format(game=game)
 
             await bot.send_message(
@@ -312,16 +317,15 @@ async def keys_handler(callback: types.CallbackQuery):
 
     except Exception as e:
         logger.error(f"Error processing get_keys: {e}")
-        error_text = await get_translation(user_id, "messages", "error_handler")
-
+        error_text: str = await get_translation(user_id, "messages", "error_handler")
         await callback.answer(error_text)
 
 
 # Function for sending a message when the daily limit is reached
-async def send_daily_limit_reached_handler(callback: types.CallbackQuery, user_id: int):
-    limit_message = await get_translation(user_id, "messages", "daily_limit_exceeded")
+async def send_daily_limit_reached_handler(callback: types.CallbackQuery, user_id: int) -> None:
+    limit_message: str = await get_translation(user_id, "messages", "daily_limit_exceeded")
 
-    photo = await load_image("premium")
+    photo: Optional[InputFile] = await load_image("premium")
     if photo:
         await bot.delete_message(
             chat_id=callback.message.chat.id,
@@ -341,12 +345,12 @@ async def send_daily_limit_reached_handler(callback: types.CallbackQuery, user_i
 
 
 # Function for sending a message to tell you to wait and updating the image
-async def send_wait_time_handler(callback: types.CallbackQuery, user_id: int, wait_message: str):
-    chat_id = callback.message.chat.id
-    message_id = callback.message.message_id
-    photo = await load_image("premium")
+async def send_wait_time_handler(callback: types.CallbackQuery, user_id: int, wait_message: str) -> None:
+    chat_id: int = callback.message.chat.id
+    message_id: int = callback.message.message_id
+    photo: Optional[InputFile] = await load_image("premium")
     if photo:
-        new_media = types.InputMediaPhoto(media=photo, caption=wait_message)
+        new_media: InputMediaPhoto = types.InputMediaPhoto(media=photo, caption=wait_message)
 
         if callback.message.photo:
             # Updating the image and signature in a post
@@ -381,15 +385,15 @@ async def send_wait_time_handler(callback: types.CallbackQuery, user_id: int, wa
 
 
 # Handling banned users
-async def banned_user_handler(message: types.Message):
+async def banned_user_handler(message: types.Message) -> None:
     async with await get_session() as session:
-        user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
-        chat_id = message.chat.id
+        user_id: int = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
+        chat_id: int = message.chat.id
 
         # User action logger
         await log_user_action(session, user_id, "Attempted interaction while banned")
 
-        photo = await load_image("banned")
+        photo: Optional[InputFile] = await load_image("banned")
         if photo:
             await bot.send_photo(
                 chat_id,
@@ -402,17 +406,17 @@ async def banned_user_handler(message: types.Message):
 
 # Settings button
 @router.callback_query(F.data == "settings_menu")
-async def settings_handler(callback: types.CallbackQuery):
+async def settings_handler(callback: types.CallbackQuery) -> None:
     async with await get_session() as session:
-        user_id = (
+        user_id: int = (
             callback.from_user.id if callback.from_user.id != BOT_ID else callback.message.chat.id
         )
 
         await log_user_action(session, user_id, "Settings menu opened")
-        settings_message = await get_translation(user_id, "messages", "settings_intro")
-        photo = await load_image("settings")
+        settings_message: str = await get_translation(user_id, "messages", "settings_intro")
+        photo: Optional[InputFile] = await load_image("settings")
         if photo:
-            new_media = types.InputMediaPhoto(media=photo, caption=settings_message)
+            new_media: InputMediaPhoto = types.InputMediaPhoto(media=photo, caption=settings_message)
             if callback.message.photo:
                 await bot.edit_message_media(
                     chat_id=callback.message.chat.id,
@@ -443,9 +447,9 @@ async def settings_handler(callback: types.CallbackQuery):
 
 # User statistic
 @router.callback_query(F.data == "user_stats")
-async def user_stats_handler(callback: types.CallbackQuery):
+async def user_stats_handler(callback: types.CallbackQuery) -> None:
     async with await get_session() as session:
-        user_id = callback.from_user.id if callback.from_user.id != BOT_ID else callback.chat.id
+        user_id: int = callback.from_user.id if callback.from_user.id != BOT_ID else callback.chat.id
 
         await log_user_action(session, user_id, "User checked stats")
 
@@ -453,13 +457,13 @@ async def user_stats_handler(callback: types.CallbackQuery):
         if not user_data:
             await callback.answer("User not found!")
 
-        user_stats = await generate_user_stats(user_data)
+        user_stats: Dict[str, Any] = await generate_user_stats(user_data)
 
-        chat_id = callback.message.chat.id
-        message_id = callback.message.message_id
-        stats_translation = await get_translation(user_id, "messages", "user_stats")
-        user_status = await get_translation(user_id, "statuses", f"{user_stats['user_status']}")
-        achievement_name = await get_translation(user_id, "achievements", f"{user_stats['achievement_name']}")
+        chat_id: int = callback.message.chat.id
+        message_id: int = callback.message.message_id
+        stats_translation: str = await get_translation(user_id, "messages", "user_stats")
+        user_status: str = await get_translation(user_id, "statuses", f"{user_stats['user_status']}")
+        achievement_name: str = await get_translation(user_id, "achievements", f"{user_stats['achievement_name']}")
 
         info_caption = stats_translation.format(
             achievement_name=achievement_name,
@@ -467,7 +471,7 @@ async def user_stats_handler(callback: types.CallbackQuery):
             keys_total=user_stats['keys_total'],
             user_status=user_status,
         )
-        keyboard = await get_back_to_main_menu_button(user_id)
+        keyboard: InlineKeyboardMarkup = await get_back_to_main_menu_button(user_id)
 
         if callback.message.photo:
             await bot.edit_message_caption(
@@ -486,19 +490,19 @@ async def user_stats_handler(callback: types.CallbackQuery):
 
 
 @router.callback_query(F.data == "user_info")
-async def info_handler(callback: types.CallbackQuery):
+async def info_handler(callback: types.CallbackQuery) -> None:
     async with await get_session() as session:
-        user_id = (
+        user_id: int = (
             callback.from_user.id if callback.from_user.id != BOT_ID else callback.message.chat.id
         )
 
         await log_user_action(session, user_id, "Info opened")
         await callback.answer()
 
-        chat_id = callback.message.chat.id
-        message_id = callback.message.message_id
-        info_caption = await get_translation(user_id, "messages", "info_description")
-        keyboard = await get_donation_keyboard(user_id)
+        chat_id: int = callback.message.chat.id
+        message_id: int = callback.message.message_id
+        info_caption: str = await get_translation(user_id, "messages", "info_description")
+        keyboard: InlineKeyboardMarkup = await get_donation_keyboard(user_id)
 
         if callback.message.photo:
             await bot.edit_message_caption(
@@ -518,10 +522,10 @@ async def info_handler(callback: types.CallbackQuery):
 
 # Back to main menu(for settings)
 @router.callback_query(F.data == "main_menu_back")
-async def back_to_main_menu_handler(callback: types.CallbackQuery):
+async def back_to_main_menu_handler(callback: types.CallbackQuery) -> None:
     await callback.answer()
     await send_menu_handler(callback.message, is_back_to_menu=True)
 
 
-def register_all_handlers(dp):
+def register_all_handlers(dp) -> None:
     dp.include_router(router)
