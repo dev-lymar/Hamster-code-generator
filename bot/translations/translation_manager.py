@@ -1,5 +1,6 @@
 import json
 import os
+from typing import Dict, List
 
 from bot.bot_config import logger
 
@@ -9,7 +10,7 @@ class TranslationManager:
         self.translations_dir = translations_dir
         self.cache = {}
 
-    def load_translations(self, language_code: str) -> dict[str, dict[str, str]]:
+    def load_translations(self, language_code: str) -> Dict[str, Dict[str, str]]:
         """Loading translations by language code with caching"""
         if language_code in self.cache:
             return self.cache[language_code]
@@ -34,6 +35,6 @@ class TranslationManager:
         translations = self.load_translations(language_code)
         return translations.get(category, {}).get(key, key)
 
-    def get_available_languages(self) -> list[str]:
+    def get_available_languages(self) -> List[str]:
         """Getting a list of available languages from files"""
         return [filename.split('.')[0] for filename in os.listdir(self.translations_dir) if filename.endswith('.json')]
