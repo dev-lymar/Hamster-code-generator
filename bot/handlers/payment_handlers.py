@@ -1,8 +1,10 @@
 import asyncio
+from typing import Dict
 
 from aiogram import F, Router, types
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
+from aiogram.types import InlineKeyboardMarkup
 
 from bot.bot_config import BOT_ID, logger
 from bot.handlers.handlers import info_handler, send_menu_handler
@@ -15,10 +17,10 @@ router = Router()
 
 
 @router.callback_query(F.data == "donate_custom")
-async def donate_custom_handler(callback: types.CallbackQuery, state: FSMContext):
-    user_id = callback.from_user.id if callback.from_user.id != BOT_ID else callback.chat.id
-    message_text = await get_translation(user_id, "buttons", "custom_donate_amount")
-    keyboard = await get_cancel_donation_keyboard(user_id)
+async def donate_custom_handler(callback: types.CallbackQuery, state: FSMContext) -> None:
+    user_id: int = callback.from_user.id if callback.from_user.id != BOT_ID else callback.chat.id
+    message_text: str = await get_translation(user_id, "buttons", "custom_donate_amount")
+    keyboard: InlineKeyboardMarkup = await get_cancel_donation_keyboard(user_id)
 
     # Send a message asking for the amount and memorise its ID
     message = await callback.message.answer(
@@ -33,22 +35,22 @@ async def donate_custom_handler(callback: types.CallbackQuery, state: FSMContext
 
 
 @router.callback_query(F.data == "cancel_custom_donation", DonationState.amount_entry)
-async def cancel_custom_donation_handler(callback: types.CallbackQuery, state: FSMContext):
+async def cancel_custom_donation_handler(callback: types.CallbackQuery, state: FSMContext) -> None:
     await info_handler(callback)
 
     await state.clear()
 
 
 @router.message(DonationState.amount_entry)
-async def process_custom_amount(message: types.Message, state: FSMContext):
-    user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
-    invalid_amount_text = await get_translation(user_id, "payment", "invalid_donation_amount")
-    invalid_input_text = await get_translation(user_id, "payment", "invalid_donation_input")
-    refund_error_text = await get_translation(user_id, "payment", "refund_error")
-    keyboard = await get_cancel_donation_keyboard(user_id)
+async def process_custom_amount(message: types.Message, state: FSMContext) -> None:
+    user_id: int = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
+    invalid_amount_text: str = await get_translation(user_id, "payment", "invalid_donation_amount")
+    invalid_input_text: str = await get_translation(user_id, "payment", "invalid_donation_input")
+    refund_error_text: str = await get_translation(user_id, "payment", "refund_error")
+    keyboard: InlineKeyboardMarkup = await get_cancel_donation_keyboard(user_id)
 
     try:
-        amount = int(message.text)
+        amount: int = int(message.text)
         if not (1 <= amount <= 2500):
             await message.delete()
             await message.answer(
@@ -66,7 +68,7 @@ async def process_custom_amount(message: types.Message, state: FSMContext):
         return
 
     await message.delete()
-    data = await state.get_data()
+    data: Dict = await state.get_data()
     message_to_delete = data.get('message_to_delete')
     if message_to_delete:
         try:
@@ -81,14 +83,14 @@ async def process_custom_amount(message: types.Message, state: FSMContext):
 
 
 @router.callback_query(F.data.startswith("donate_"))
-async def donate_callback_handler(callback: types.CallbackQuery, state: FSMContext):
-    amount = int(callback.data.split("_")[1])
+async def donate_callback_handler(callback: types.CallbackQuery, state: FSMContext) -> None:
+    amount: int = int(callback.data.split("_")[1])
     await send_invoice_message(callback.message, amount, state)
     await callback.answer()
 
 
 @router.pre_checkout_query()
-async def pre_checkout_handler(pre_checkout_query: types.PreCheckoutQuery):
+async def pre_checkout_handler(pre_checkout_query: types.PreCheckoutQuery) -> None:
     try:
         await pre_checkout_query.answer(ok=True)
     except TelegramBadRequest as e:
@@ -96,13 +98,13 @@ async def pre_checkout_handler(pre_checkout_query: types.PreCheckoutQuery):
 
 
 @router.message(F.content_type == types.ContentType.SUCCESSFUL_PAYMENT)
-async def success_payment_handler(message: types.Message, state: FSMContext):
-    user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
-    invoice_success_text = await get_translation(user_id, "payment", "donation_success")
+async def success_payment_handler(message: types.Message, state: FSMContext) -> None:
+    user_id: int = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
+    invoice_success_text: str = await get_translation(user_id, "payment", "donation_success")
 
     # Get the invoice message ID from the state
-    data = await state.get_data()
-    invoice_message_id = data.get('invoice_message_id')
+    data: Dict = await state.get_data()
+    invoice_message_id: int = data.get('invoice_message_id')
     if invoice_message_id:
         await message.bot.delete_message(chat_id=message.chat.id, message_id=invoice_message_id)
 
@@ -112,9 +114,9 @@ async def success_payment_handler(message: types.Message, state: FSMContext):
 
 
 @router.callback_query(F.data == "cancel_payment")
-async def cancel_payment_handler(callback: types.CallbackQuery, state: FSMContext):
-    user_id = callback.from_user.id if callback.from_user.id != BOT_ID else callback.chat.id
-    payment_cancelled_text = await get_translation(user_id, "payment", "donation_cancelled")
+async def cancel_payment_handler(callback: types.CallbackQuery, state: FSMContext) -> None:
+    user_id: int = callback.from_user.id if callback.from_user.id != BOT_ID else callback.chat.id
+    payment_cancelled_text: str = await get_translation(user_id, "payment", "donation_cancelled")
 
     # Delete the invoice message
     await callback.message.delete()
@@ -123,16 +125,16 @@ async def cancel_payment_handler(callback: types.CallbackQuery, state: FSMContex
 
 
 @router.message(F.text.startswith("/refund_stars"))
-async def refund_stars_command_handler(message: types.Message, state: FSMContext):
-    user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
-    refund_prompt_text = await get_translation(user_id, "payment", "refund_prompt")
-    refund_success_text = await get_translation(user_id, "payment", "refund_success")
-    refund_transaction_not_found_text = await get_translation(user_id, "payment", "refund_transaction_not_found")
-    refund_already_processed_text = await get_translation(user_id, "payment", "refund_already_processed")
-    refund_error_text = await get_translation(user_id, "payment", "refund_error")
+async def refund_stars_command_handler(message: types.Message, state: FSMContext) -> None:
+    user_id: int = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
+    refund_prompt_text: str = await get_translation(user_id, "payment", "refund_prompt")
+    refund_success_text: str = await get_translation(user_id, "payment", "refund_success")
+    refund_transaction_not_found_text: str = await get_translation(user_id, "payment", "refund_transaction_not_found")
+    refund_already_processed_text: str = await get_translation(user_id, "payment", "refund_already_processed")
+    refund_error_text: str = await get_translation(user_id, "payment", "refund_error")
 
     # Get the transaction number from the command
-    transaction_id = message.text.split(" ")[1] if len(message.text.split()) > 1 else None
+    transaction_id: str = message.text.split(" ")[1] if len(message.text.split()) > 1 else None
 
     if not transaction_id:
         await message.answer(refund_prompt_text)
@@ -163,22 +165,22 @@ async def refund_stars_command_handler(message: types.Message, state: FSMContext
 
 
 @router.message(F.text == "/paysupport")
-async def paysupport_handler(message: types.Message):
-    user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
+async def paysupport_handler(message: types.Message) -> None:
+    user_id: int = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
     await message.delete()
-    paysupport_prompt_text = await get_translation(user_id, "payment", "support_donation_prompt")
-    keyboard = await get_back_to_main_menu_button(user_id)
+    paysupport_prompt_text: str = await get_translation(user_id, "payment", "support_donation_prompt")
+    keyboard: InlineKeyboardMarkup = await get_back_to_main_menu_button(user_id)
 
     await message.answer(text=paysupport_prompt_text, reply_markup=keyboard)
 
 
-async def send_invoice_message(callback_or_message, amount: int, state: FSMContext):
-    user_id = callback_or_message.from_user.id if callback_or_message.from_user.id != BOT_ID \
+async def send_invoice_message(callback_or_message, amount: int, state: FSMContext) -> None:
+    user_id: int = callback_or_message.from_user.id if callback_or_message.from_user.id != BOT_ID \
         else callback_or_message.chat.id
-    keyboard = await get_payment_keyboard(user_id)
-    invoice_title_text = await get_translation(user_id, "payment", "donation_invoice_title")
-    invoice_description_text = await get_translation(user_id, "payment", "donation_invoice_description")
-    error_text = await get_translation(user_id, "payment", "refund_error")
+    keyboard: InlineKeyboardMarkup = await get_payment_keyboard(user_id)
+    invoice_title_text: str = await get_translation(user_id, "payment", "donation_invoice_title")
+    invoice_description_text: str = await get_translation(user_id, "payment", "donation_invoice_description")
+    error_text: str = await get_translation(user_id, "payment", "refund_error")
 
     prices = [types.LabeledPrice(label="XTR", amount=amount)]
     try:
@@ -199,5 +201,5 @@ async def send_invoice_message(callback_or_message, amount: int, state: FSMConte
         await callback_or_message.answer(error_text.format(error_message=error))
 
 
-def register_payment_handlers(dp):
+def register_payment_handlers(dp) -> None:
     dp.include_router(router)

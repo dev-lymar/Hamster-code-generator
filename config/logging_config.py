@@ -1,11 +1,12 @@
 import logging
 import logging.handlers
 import os
+from typing import Optional
 
 import coloredlogs
 
 
-def logging_setup(log_name: str, log_file: str):
+def logging_setup(log_name: str, log_file: str) -> Optional[logging.Logger]:
     """
     Configures logging for a component (app or bot).
     log_name: The name of the logger (e.g. ‘app’ or ‘bot’).

@@ -28,10 +28,6 @@ class User(Base):
     last_reset_date = Column(Date, default=datetime.utcnow().date)
     last_request_time = Column(DateTime(timezone=True))
     total_keys_generated = Column(Integer, default=0)
-    daily_safety_keys_requests_count = Column(Integer, default=0)
-    last_reset_date_safety_keys = Column(Date, default=datetime.utcnow().date)
-    last_safety_keys_request_time = Column(DateTime(timezone=True))
-    total_safety_keys_generated = Column(Integer, default=0)
     notes = Column(Text)
 
 

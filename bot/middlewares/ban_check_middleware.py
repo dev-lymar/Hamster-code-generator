@@ -20,7 +20,7 @@ class BanCheckMiddleware(BaseMiddleware):
                     return
 
         # Check if the event is a command
-        elif isinstance(event.message, types.Message) and event.message.text.startswith('/'):
+        elif isinstance(event.message, types.Message) and event.message.text and event.message.text.startswith('/'):
             user_id = event.message.from_user.id
 
             # Ban check

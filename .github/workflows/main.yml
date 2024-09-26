@@ -36,7 +36,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/hamster_bot:v1.8.6
+          tags: ${{ secrets.DOCKER_USERNAME }}/hamster_bot:v1.8.7
 
   deploy:
     runs-on: ubuntu-latest
@@ -61,9 +61,9 @@ jobs:
           port: ${{ secrets.PORT }}
           key: ${{ secrets.SSHKEY }}
           script: |
-            cd /home/ubuntu/Hamster-generator
+            cd /home/${{ secrets.USERNAME }}/Hamster-generator
             
-            sed -i 's/IMAGE_TAG=.*/IMAGE_TAG=v1.8.6/' .env.prod
+            sed -i 's/IMAGE_TAG=.*/IMAGE_TAG=v1.8.7/' .env.prod
             
             make prod-down
             make prod-up
@@ -79,10 +79,10 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          tag: v1.8.6
-          name: "Release v1.8.6"
+          tag: v1.8.7
+          name: "Release v1.8.7"
           body: |
-            Final release | 🏖️
+            Added annotations. Fixed bugs | 🏖️
           token: ${{ secrets.GITHUB_TOKEN }}
 
   send_message:
