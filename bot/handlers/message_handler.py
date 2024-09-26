@@ -11,9 +11,9 @@ router = Router()
 
 # Handler of other messages
 @router.message(F.text)
-async def handle_message(message: types.Message):
+async def handle_message(message: types.Message) -> None:
     try:
-        user_id = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
+        user_id: int = message.from_user.id if message.from_user.id != BOT_ID else message.chat.id
 
         # Check if message is a command
         if message.text.startswith("/"):
@@ -25,7 +25,7 @@ async def handle_message(message: types.Message):
             # Check: if the sender of the message is an admin, the message will be sent directly to the user
             if (await is_admin(user_id) and message.reply_to_message and
                     message.reply_to_message.message_id in message_user_mapping):
-                original_user_id = message_user_mapping[message.reply_to_message.message_id]
+                original_user_id: int = message_user_mapping[message.reply_to_message.message_id]
                 logger.info(f"Admin is replying to user {original_user_id}. Forwarding message.")
                 await bot.send_message(chat_id=original_user_id, text=message.text)
                 return
@@ -57,5 +57,5 @@ async def handle_message(message: types.Message):
         logger.exception(f"An unexpected error occurred: {e}")
 
 
-def register_message_handler(dp):
+def register_message_handler(dp) -> None:
     dp.include_router(router)
