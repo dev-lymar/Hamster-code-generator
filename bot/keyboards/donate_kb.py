@@ -35,7 +35,7 @@ async def get_donation_keyboard(user_id: int):
     return builder.as_markup()
 
 
-async def get_cancel_donation_keyboard(user_id):
+async def get_cancel_donation_keyboard(user_id: int):
     builder = InlineKeyboardBuilder()
     cancel_button_text = await get_translation(user_id, "buttons", "cancel_donation")
 
