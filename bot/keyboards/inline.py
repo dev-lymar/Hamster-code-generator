@@ -14,6 +14,7 @@ async def get_action_buttons(user_id: int) -> InlineKeyboardMarkup:
     builder.row(InlineKeyboardButton(
             text=await get_translation(user_id, "buttons", "referral_links"), callback_data="referral_links")
     )
+    builder.row(InlineKeyboardButton(text="🎰 GAMECENTER", url=REFERRAL_LINKS.get('🎰 GAMECENTER')))
 
     builder.row(
         InlineKeyboardButton(text="☑️ TON Station", url=REFERRAL_LINKS.get('☑️ TON Station')),

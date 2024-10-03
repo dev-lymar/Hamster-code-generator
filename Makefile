@@ -17,7 +17,7 @@ run_dev_bot_docker:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml --env-file .env.dev up bot
 
 prod-up:
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod up -d
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod up postgres redis bot -d
 
 prod-down:
 	docker-compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.prod down
